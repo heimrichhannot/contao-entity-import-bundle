@@ -1,0 +1,9 @@
+services:
+  _defaults:
+    autowire: true
+
+  huh.entityimport.listener.dc.import:
+    class: HeimrichHannot\EntityImportBundle\EventListener\DataContainer\ImportListener
+    arguments:
+      - '%kernel.bundles%'
+    public: true
