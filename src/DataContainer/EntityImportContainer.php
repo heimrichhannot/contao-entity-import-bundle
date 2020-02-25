@@ -1,23 +1,44 @@
 <?php
-/**
+
+/*
  * Copyright (c) 2020 Heimrich & Hannot GmbH
  *
  * @license LGPL-3.0-or-later
  */
 
-namespace HeimrichHannot\EntityImportBundle\EventListener\DataContainer;
+namespace HeimrichHannot\EntityImportBundle\DataContainer;
 
 use Contao\Backend;
 
-class ImportListener extends Backend
+class EntityImportContainer extends Backend
 {
+    const TYPE_DATABASE = 'db';
+    const TYPE_FILE = 'file';
+
+    const SOURCE_TYPE_HTTP = 'http';
+    const SOURCE_TYPE_CONTAO_FILE_SYSTEM = 'contao_file_system';
+    const SOURCE_TYPE_ABSOLUTE_PATH = 'absolute_path';
+
+    const FILETYPE_CSV = 'csv';
+    const FILETYPE_JSON = 'json';
 
     protected $activeBundles;
 
-    public function __construct(array $activeBundles)
+    public function __construct()
     {
-        $this->activeBundles = $activeBundles;
+        $this->activeBundles = $this->getContainer()->getParameter('kernel.bundles');
+
         parent::__construct();
+    }
+
+    public function onSaveFileSRC($value, $dc)
+    {
+        return $value;
+    }
+
+    public function onLoadFileSRC($value, $dc)
+    {
+        return $value;
     }
 
 //    public function getContaoCategories(DataContainer $dc)
@@ -76,8 +97,8 @@ class ImportListener extends Backend
 //
 //        $objArchives = HeimrichHannot\Typort\Database::getInstance()->prepare(
 //            'SELECT p.title, p.uid, COUNT(n.uid) AS total FROM ' . $dc->activeRecord->type . ' n
-//			INNER JOIN pages p ON p.uid = n.pid
-//			WHERE n.deleted=0 AND p.deleted = 0 GROUP BY n.pid ORDER BY n.pid'
+    //			INNER JOIN pages p ON p.uid = n.pid
+    //			WHERE n.deleted=0 AND p.deleted = 0 GROUP BY n.pid ORDER BY n.pid'
 //        )->execute();
 //
 //        if ($objArchives === null)
@@ -93,27 +114,21 @@ class ImportListener extends Backend
 //        return $arrArchives;
 //    }
 
-
     public function addDate($row, $label)
     {
-
-        if ($row['start'] || $row['end'])
-        {
+        if ($row['start'] || $row['end']) {
             $label .= '&nbsp;<strong>[';
 
-            if ($row['start'])
-            {
-                $label .= $GLOBALS['TL_LANG']['tl_entity_import']['start'][0] . ': ' . \Date::parse($GLOBALS['TL_CONFIG']['datimFormat'], $row['start']);
+            if ($row['start']) {
+                $label .= $GLOBALS['TL_LANG']['tl_entity_import']['start'][0].': '.\Date::parse($GLOBALS['TL_CONFIG']['datimFormat'], $row['start']);
 
-                if ($row['end'])
-                {
+                if ($row['end']) {
                     $label .= '&nbsp;-&nbsp;';
                 }
             }
 
-            if ($row['end'])
-            {
-                $label .= $GLOBALS['TL_LANG']['tl_entity_import']['end'][0] . ': ' . \Date::parse($GLOBALS['TL_CONFIG']['datimFormat'], $row['end']);
+            if ($row['end']) {
+                $label .= $GLOBALS['TL_LANG']['tl_entity_import']['end'][0].': '.\Date::parse($GLOBALS['TL_CONFIG']['datimFormat'], $row['end']);
             }
 
             $label .= ']</strong>';
@@ -121,5 +136,4 @@ class ImportListener extends Backend
 
         return $label;
     }
-
 }

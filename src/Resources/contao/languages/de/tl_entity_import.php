@@ -5,9 +5,20 @@
  */
 $GLOBALS['TL_LANG']['tl_entity_import']['title']        = ['Titel', 'Geben Sie hier den Titel des Imports ein.'];
 $GLOBALS['TL_LANG']['tl_entity_import']['type']         = ['Typ', 'Wählen Sie hier den Typ des Imports aus.'];
-$GLOBALS['TL_LANG']['tl_entity_import']['type'][\HeimrichHannot\EntityImportBundle\Importer\ImporterSourceInterface::ENTITY_IMPORT_CONFIG_TYPE_DATABASE]
+$GLOBALS['TL_LANG']['tl_entity_import']['fileType']     = ['Typ', 'Wählen Sie hier den Typ der Datei aus.'];
+$GLOBALS['TL_LANG']['tl_entity_import']['sourceType']   = ['Quelle', 'Wählen Sie hier die Art der Dateiquelle aus.'];
+$GLOBALS['TL_LANG']['tl_entity_import']['sourceType'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportContainer::SOURCE_TYPE_HTTP]
+                                                        = 'HTTP';
+$GLOBALS['TL_LANG']['tl_entity_import']['sourceType'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportContainer::SOURCE_TYPE_CONTAO_FILE_SYSTEM]
+                                                        = 'Contao Dateiverwaltung';
+$GLOBALS['TL_LANG']['tl_entity_import']['sourceType'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportContainer::SOURCE_TYPE_ABSOLUTE_PATH]
+                                                        = 'Absoluter Pfad';
+$GLOBALS['TL_LANG']['tl_entity_import']['sourceUrl']    = ['Url', 'Geben Sie hier die URL zur Datei ein.'];
+$GLOBALS['TL_LANG']['tl_entity_import']['filePath']     = ['Absoluter Dateipfad', 'Geben Sie hier einen absoluten Dateipfad auf dem Server ein.'];
+$GLOBALS['TL_LANG']['tl_entity_import']['fileSRC']      = ['Datei wählen oder hochladen', 'Wählen Sie hier eine vorhandene Datei, oder laden Sie eine neue Datei hoch.'];
+$GLOBALS['TL_LANG']['tl_entity_import']['type'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportContainer::TYPE_DATABASE]
                                                         = 'Datenbank';
-$GLOBALS['TL_LANG']['tl_entity_import']['type'][\HeimrichHannot\EntityImportBundle\Importer\ImporterSourceInterface::ENTITY_IMPORT_CONFIG_TYPE_FILE]
+$GLOBALS['TL_LANG']['tl_entity_import']['type'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportContainer::TYPE_FILE]
                                                         = 'Datei';
 $GLOBALS['TL_LANG']['tl_entity_import']['dbDriver']     = ['Treiber', 'Wählen Sie hier den Datenbanktreiber aus.'];
 $GLOBALS['TL_LANG']['tl_entity_import']['dbHost']       = ['Host', 'Geben Sie hier die Adresse des Datenbankhosts ein.'];
@@ -26,6 +37,7 @@ $GLOBALS['TL_LANG']['tl_entity_import']['externalUrl']  = ['Url', 'Tragen Sie hi
 $GLOBALS['TL_LANG']['tl_entity_import']['title_legend']     = 'Titel';
 $GLOBALS['TL_LANG']['tl_entity_import']['db_legend']        = 'Datenbankeinstellungen';
 $GLOBALS['TL_LANG']['tl_entity_import']['external_legend']  = 'Externe Quelle';
+$GLOBALS['TL_LANG']['tl_entity_import']['file_legend']      = 'Datei';
 
 /**
  * Buttons

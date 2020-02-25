@@ -1,3 +1,11 @@
 services:
   _defaults:
     autowire: true
+
+  huh.entity_import.model.entity_import_model:
+    class: HeimrichHannot\EntityImportBundle\Model\EntityImportModel
+    public: true
+
+  huh.entity_import.model.entity_import_config_model:
+    class: HeimrichHannot\EntityImportBundle\Model\EntityImportConfigModel
+    public: true

@@ -3,3 +3,10 @@ services:
     public: true
     autowire: true
 
+  huh.entity_import.data_container.entity_import_container:
+    class: HeimrichHannot\EntityImportBundle\DataContainer\EntityImportContainer
+    public: true
+
+  huh.entity_import.data_container.entity_import_config_container:
+    class: HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer
+    public: true

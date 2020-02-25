@@ -1,8 +1,5 @@
 <?php
 
-/**
- * Table tl_extension
- */
 $GLOBALS['TL_DCA']['tl_entity_import'] = [
 
     // Config
@@ -28,7 +25,7 @@ $GLOBALS['TL_DCA']['tl_entity_import'] = [
         'label'             => [
             'fields'         => ['title', 'type'],
             'format'         => '%s <span style="color:#b3b3b3; padding-left:3px;">[%s]</span>',
-            'label_callback' => ['huh.entityimport.listener.dc.import', 'addDate'],
+            'label_callback' => [\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportContainer::class, 'addDate', true],
         ],
         'global_operations' => [
             'all' => [
@@ -39,11 +36,11 @@ $GLOBALS['TL_DCA']['tl_entity_import'] = [
             ],
         ],
         'operations'        => [
-            'edit'       => [
-                'label' => &$GLOBALS['TL_LANG']['tl_entity_import']['edit'],
-                'href'  => 'table=tl_entity_import_config',
-                'icon'  => 'edit.gif',
-            ],
+//            'edit'       => [
+//                'label' => &$GLOBALS['TL_LANG']['tl_entity_import']['edit'],
+//                'href'  => 'table=tl_entity_import_config',
+//                'icon'  => 'edit.gif',
+//            ],
             'editheader' => [
                 'label' => &$GLOBALS['TL_LANG']['tl_entity_import']['editheader'],
                 'href'  => 'act=edit',
@@ -64,29 +61,33 @@ $GLOBALS['TL_DCA']['tl_entity_import'] = [
                 'label' => &$GLOBALS['TL_LANG']['tl_entity_import']['show'],
                 'href'  => 'act=show',
                 'icon'  => 'show.gif',
-            ]
+            ],
         ],
     ],
 
     // Palettes
     'palettes'    => [
-        '__selector__' => ['type'],
+        '__selector__' => ['type', 'sourceType', 'fileType'],
         'default'      => '{title_legend},title,type;',
-        'db'           => '{title_legend},title,type;{db_legend},dbDriver,dbHost,dbUser,dbPass,dbDatabase,dbPconnect,dbCharset,dbPort,dbSocket',
-        'file'         => '{title_legend},title,type;{file_legend},file,externalUrl'
+        HeimrichHannot\EntityImportBundle\DataContainer\EntityImportContainer::TYPE_DATABASE    => '{title_legend},title,type;{db_legend},dbDriver,dbHost,dbUser,dbPass,dbDatabase,dbPconnect,dbCharset,dbPort,dbSocket',
+        HeimrichHannot\EntityImportBundle\DataContainer\EntityImportContainer::TYPE_FILE        => '{title_legend},title,type;{file_legend},sourceType'
     ],
 
     // Subpalettes
-    'subpalettes' => [],
+    'subpalettes' => [
+        'sourceType_http' => 'sourceUrl,fileType',
+        'sourceType_contao_file_system' => 'fileSRC,',
+        'sourceType_absolute_path' => 'filePath',
+    ],
     // Fields
     'fields'      => [
-        'id'         => [
+        'id'          => [
             'sql' => "int(10) unsigned NOT NULL auto_increment",
         ],
-        'tstamp'     => [
+        'tstamp'      => [
             'sql' => "int(10) unsigned NOT NULL default '0'",
         ],
-        'title'      => [
+        'title'       => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import']['title'],
             'search'    => true,
             'exclude'   => true,
@@ -94,20 +95,20 @@ $GLOBALS['TL_DCA']['tl_entity_import'] = [
             'eval'      => ['mandatory' => true, 'maxlength' => 128, 'tl_class' => 'w50'],
             'sql'       => "varchar(128) NOT NULL default ''",
         ],
-        'type'       => [
+        'type'        => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import']['type'],
             'exclude'   => true,
             'filter'    => true,
             'inputType' => 'select',
             'options'   => [
-                \HeimrichHannot\EntityImportBundle\Importer\ImporterSourceInterface::ENTITY_IMPORT_CONFIG_TYPE_DATABASE,
-                \HeimrichHannot\EntityImportBundle\Importer\ImporterSourceInterface::ENTITY_IMPORT_CONFIG_TYPE_FILE
+                \HeimrichHannot\EntityImportBundle\DataContainer\EntityImportContainer::TYPE_DATABASE,
+                \HeimrichHannot\EntityImportBundle\DataContainer\EntityImportContainer::TYPE_FILE,
             ],
             'reference' => &$GLOBALS['TL_LANG']['tl_entity_import']['type'],
             'eval'      => ['submitOnChange' => true, 'includeBlankOption' => true, 'tl_class' => 'w50'],
             'sql'       => "varchar(255) NOT NULL default ''",
         ],
-        'dbDriver'   => [
+        'dbDriver'    => [
             'exclude'   => true,
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import']['dbDriver'],
             'inputType' => 'select',
@@ -116,7 +117,7 @@ $GLOBALS['TL_DCA']['tl_entity_import'] = [
             'eval'      => ['mandatory' => true, 'tl_class' => 'w50'],
             'sql'       => "varchar(12) NOT NULL default ''",
         ],
-        'dbHost'     => [
+        'dbHost'      => [
             'exclude'   => true,
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import']['dbHost'],
             'inputType' => 'text',
@@ -124,7 +125,7 @@ $GLOBALS['TL_DCA']['tl_entity_import'] = [
             'eval'      => ['mandatory' => true, 'maxlength' => 64, 'tl_class' => 'w50'],
             'sql'       => "varchar(64) NOT NULL default ''",
         ],
-        'dbUser'     => [
+        'dbUser'      => [
             'exclude'   => true,
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import']['dbUser'],
             'inputType' => 'text',
@@ -132,21 +133,21 @@ $GLOBALS['TL_DCA']['tl_entity_import'] = [
             'eval'      => ['mandatory' => true, 'maxlength' => 64, 'tl_class' => 'w50'],
             'sql'       => "varchar(64) NOT NULL default ''",
         ],
-        'dbPass'     => [
+        'dbPass'      => [
             'exclude'   => true,
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import']['dbPass'],
             'inputType' => 'text',
             'eval'      => ['maxlength' => 64, 'tl_class' => 'w50'],
             'sql'       => "varchar(64) NOT NULL default ''",
         ],
-        'dbDatabase' => [
+        'dbDatabase'  => [
             'exclude'   => true,
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import']['dbDatabase'],
             'inputType' => 'text',
             'eval'      => ['mandatory' => true, 'maxlength' => 64, 'tl_class' => 'w50'],
             'sql'       => "varchar(64) NOT NULL default ''",
         ],
-        'dbPconnect' => [
+        'dbPconnect'  => [
             'exclude'   => true,
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import']['dbPconnect'],
             'inputType' => 'select',
@@ -155,7 +156,7 @@ $GLOBALS['TL_DCA']['tl_entity_import'] = [
             'eval'      => ['tl_class' => 'w50'],
             'sql'       => "varchar(5) NOT NULL default ''",
         ],
-        'dbCharset'  => [
+        'dbCharset'   => [
             'exclude'   => true,
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import']['dbCharset'],
             'inputType' => 'text',
@@ -163,7 +164,7 @@ $GLOBALS['TL_DCA']['tl_entity_import'] = [
             'eval'      => ['mandatory' => true, 'maxlength' => 32, 'tl_class' => 'w50'],
             'sql'       => "varchar(32) NOT NULL default ''",
         ],
-        'dbPort'     => [
+        'dbPort'      => [
             'exclude'   => true,
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import']['dbPort'],
             'inputType' => 'text',
@@ -171,7 +172,7 @@ $GLOBALS['TL_DCA']['tl_entity_import'] = [
             'eval'      => ['maxlength' => 5, 'tl_class' => 'w50', 'rgxp' => 'digit'],
             'sql'       => "int(5) unsigned NOT NULL default '0'",
         ],
-        'dbSocket'   => [
+        'dbSocket'    => [
             'exclude'   => true,
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import']['dbSocket'],
             'inputType' => 'text',
@@ -179,11 +180,65 @@ $GLOBALS['TL_DCA']['tl_entity_import'] = [
             'sql'       => "varchar(64) NOT NULL default ''",
         ],
         'externalUrl' => [
-            'exclude' => true,
+            'exclude'   => true,
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import']['externalUrl'],
             'inputType' => 'text',
             'eval'      => ['tl_class' => 'w50', 'rgxp' => 'url'],
             'sql'       => "varchar(64) NOT NULL default ''",
+        ],
+        'sourceType' => [
+            'label' => &$GLOBALS['TL_LANG']['tl_entity_import']['sourceType'],
+            'exclude' => true,
+            'filter' => true,
+            'inputType' => 'select',
+            'options' => [
+                \HeimrichHannot\EntityImportBundle\DataContainer\EntityImportContainer::SOURCE_TYPE_HTTP,
+                \HeimrichHannot\EntityImportBundle\DataContainer\EntityImportContainer::SOURCE_TYPE_CONTAO_FILE_SYSTEM,
+                \HeimrichHannot\EntityImportBundle\DataContainer\EntityImportContainer::SOURCE_TYPE_ABSOLUTE_PATH
+            ],
+            'reference' => &$GLOBALS['TL_LANG']['tl_entity_import']['sourceType'],
+            'eval' => ['submitOnChange' => true, 'includeBlankOption' => true, 'tl_class' => 'w50'],
+            'sql'       => "varchar(255) NOT NULL default ''",
+        ],
+        'fileType'    => [
+            'label'     => &$GLOBALS['TL_LANG']['tl_entity_import']['fileType'],
+            'exclude'   => true,
+            'filter'    => true,
+            'inputType' => 'select',
+            'options'   => [
+                 \HeimrichHannot\EntityImportBundle\DataContainer\EntityImportContainer::FILETYPE_CSV,
+                 \HeimrichHannot\EntityImportBundle\DataContainer\EntityImportContainer::FILETYPE_JSON
+            ],
+            'reference' => &$GLOBALS['TL_LANG']['tl_entity_import']['fileType'],
+            'eval'      => ['submitOnChange' => true, 'includeBlankOption' => true, 'tl_class' => 'w50'],
+            'sql'       => "varchar(255) NOT NULL default ''"
+        ],
+        'filePath'    => [
+            'label'     => &$GLOBALS['TL_LANG']['tl_entity_import']['filePath'],
+            'exclude'   => true,
+            'filter'    => true,
+            'inputType' => 'text',
+            'reference' => &$GLOBALS['TL_LANG']['tl_entity_import']['filePath'],
+            'eval'      => ['submitOnChange' => true, 'includeBlankOption' => true, 'tl_class' => 'w50'],
+            'sql'       => "varchar(255) NOT NULL default ''",
+        ],
+        'sourceUrl'    => [
+            'label'     => &$GLOBALS['TL_LANG']['tl_entity_import']['sourceUrl'],
+            'exclude'   => true,
+            'filter'    => true,
+            'inputType' => 'text',
+            'reference' => &$GLOBALS['TL_LANG']['tl_entity_import']['sourceUrl'],
+            'eval'      => ['submitOnChange' => true, 'includeBlankOption' => true, 'tl_class' => 'clr w50'],
+            'sql'       => "varchar(255) NOT NULL default ''",
+        ],
+        'fileSRC' => [
+            'label'                   => &$GLOBALS['TL_LANG']['tl_entity_import']['fileSRC'],
+            'exclude'                 => true,
+            'inputType'               => 'fileTree',
+            'eval'                    => ['submitOnChange' => true, 'filesOnly'=>true, 'fieldType'=>'radio', 'mandatory'=>false, 'tl_class'=>'clr'],
+            'save_callback'         => [[\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportContainer::class, 'onSaveFileSRC', true]],
+            'load_callback'         => [[\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportContainer::class, 'onLoadFileSRC', true]],
+            'sql'                     => "binary(16) NULL"
         ]
     ],
 ];
