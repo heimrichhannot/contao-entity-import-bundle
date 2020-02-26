@@ -6,7 +6,7 @@ $GLOBALS['TL_DCA']['tl_entity_import'] = [
     'config'      => [
         'dataContainer'    => 'Table',
         'enableVersioning' => true,
-        'ctable'           => ['tl_entity_import_config'],
+//        'ctable'           => ['tl_entity_import_config'],
         'sql'              => [
             'keys' => [
                 'id' => 'primary',
@@ -76,7 +76,7 @@ $GLOBALS['TL_DCA']['tl_entity_import'] = [
     // Subpalettes
     'subpalettes' => [
         'sourceType_http' => 'sourceUrl,fileType',
-        'sourceType_contao_file_system' => 'fileSRC,',
+        'sourceType_contao_file_system' => 'fileSRC,JSONFileContent',
         'sourceType_absolute_path' => 'filePath',
     ],
     // Fields
@@ -236,9 +236,23 @@ $GLOBALS['TL_DCA']['tl_entity_import'] = [
             'exclude'                 => true,
             'inputType'               => 'fileTree',
             'eval'                    => ['submitOnChange' => true, 'filesOnly'=>true, 'fieldType'=>'radio', 'mandatory'=>false, 'tl_class'=>'clr'],
-            'save_callback'         => [[\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportContainer::class, 'onSaveFileSRC', true]],
-            'load_callback'         => [[\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportContainer::class, 'onLoadFileSRC', true]],
+            'save_callback'           => [[\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportContainer::class, 'onSaveFileSRC', true]],
+            'load_callback'           => [[\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportContainer::class, 'onLoadFileSRC', true]],
+            'options_callback'        => [\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportContainer::class, 'onOptionsFileSRC', true],
             'sql'                     => "binary(16) NULL"
+        ],
+        'JSONFileContent' => [
+            'label' => &$GLOBALS['TL_LANG']['tl_entity_import']['JSONFileContent'],
+            'exclude' => true,
+            'inputType' => 'textarea',
+            'eval' => [
+                'allowHtml' => true,
+                'class' => 'monospace',
+                'rte' => 'ace|json',
+                'helpwizard' => false
+            ],
+            'load_callback' => [[\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportContainer::class, 'onLoadJSONFileContent', true]],
+            'sql' => "blob NULL"
         ]
     ],
 ];

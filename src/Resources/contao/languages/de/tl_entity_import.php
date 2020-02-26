@@ -6,6 +6,7 @@
 $GLOBALS['TL_LANG']['tl_entity_import']['title']        = ['Titel', 'Geben Sie hier den Titel des Imports ein.'];
 $GLOBALS['TL_LANG']['tl_entity_import']['type']         = ['Typ', 'Wählen Sie hier den Typ des Imports aus.'];
 $GLOBALS['TL_LANG']['tl_entity_import']['fileType']     = ['Typ', 'Wählen Sie hier den Typ der Datei aus.'];
+$GLOBALS['TL_LANG']['tl_entity_import']['JSONFileContent']     = ['JSON Ansicht ', 'Hier wird das erste Objekt der ausgewählten JSON Datei dargestellt.'];
 $GLOBALS['TL_LANG']['tl_entity_import']['sourceType']   = ['Quelle', 'Wählen Sie hier die Art der Dateiquelle aus.'];
 $GLOBALS['TL_LANG']['tl_entity_import']['sourceType'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportContainer::SOURCE_TYPE_HTTP]
                                                         = 'HTTP';
