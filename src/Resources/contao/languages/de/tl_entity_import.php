@@ -6,7 +6,22 @@
 $GLOBALS['TL_LANG']['tl_entity_import']['title']        = ['Titel', 'Geben Sie hier den Titel des Imports ein.'];
 $GLOBALS['TL_LANG']['tl_entity_import']['type']         = ['Typ', 'Wählen Sie hier den Typ des Imports aus.'];
 $GLOBALS['TL_LANG']['tl_entity_import']['fileType']     = ['Typ', 'Wählen Sie hier den Typ der Datei aus.'];
-$GLOBALS['TL_LANG']['tl_entity_import']['JSONFileContent']     = ['JSON Ansicht ', 'Hier wird das erste Objekt der ausgewählten JSON Datei dargestellt.'];
+
+$GLOBALS['TL_LANG']['tl_entity_import']['csvHeaderRow']     = ['Kopfdatensatz', 'Der erste Datensatz enthält die Spaltennamen'];
+$GLOBALS['TL_LANG']['tl_entity_import']['csvFieldSeparator']     = ['Feld-Trennzeichen', 'Geben Sie hier das Feld-Trennzeichen ein.'];;
+$GLOBALS['TL_LANG']['tl_entity_import']['csvTextSeparator']     = ['Text-Trennzeichen', 'Geben Sie hier das Text-Trennzeichen ein.'];
+$GLOBALS['TL_LANG']['tl_entity_import']['csvArraySeparator']     = [
+    'Array-Trennzeichen',
+    'Geben Sie hier das Trennzeichen für die Umwandlung von trennzeichen-separierten Feldwerten ein. Wenn das entsprechende Häkchen in der Felderabbildung gesetzt ist, werden Werte wie "1;4;5" zu einem serialisierten Array transformiert.',
+];
+$GLOBALS['TL_LANG']['tl_entity_import']['csvFieldMapping']     = ['Felderabblidung', ''];
+$GLOBALS['TL_LANG']['tl_entity_import']['csvFieldMapping']['name']     = ['Name', 'Name des Wertes für die weitere Verarbeitung.'];
+$GLOBALS['TL_LANG']['tl_entity_import']['csvFieldMapping']['value']     = ['Spaltennummer', 'Die Nummer der Spalte die den Wert enthält. Für die erste Spalte in der Datei geben Sie bspw. 1 ein.'];
+
+$GLOBALS['TL_LANG']['tl_entity_import']['jsonFileContent']     = ['JSON Ansicht ', 'Hier wird das erste Objekt der ausgewählten JSON Datei dargestellt.'];
+$GLOBALS['TL_LANG']['tl_entity_import']['jsonFieldMapping']     = ['Felderabblidung', ''];
+$GLOBALS['TL_LANG']['tl_entity_import']['jsonFieldMapping']['name']     = ['Name', 'Hier den Namen des Wertes aus dem JSON eingeben.'];
+$GLOBALS['TL_LANG']['tl_entity_import']['jsonFieldMapping']['value']     = ['Wert', 'Hier Punktgetrennt den Ort des Wertes im JSON angeben. Beispiel: user.name.firstname'];
 $GLOBALS['TL_LANG']['tl_entity_import']['sourceType']   = ['Quelle', 'Wählen Sie hier die Art der Dateiquelle aus.'];
 $GLOBALS['TL_LANG']['tl_entity_import']['sourceType'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportContainer::SOURCE_TYPE_HTTP]
                                                         = 'HTTP';
