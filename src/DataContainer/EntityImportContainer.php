@@ -8,11 +8,12 @@
 
 namespace HeimrichHannot\EntityImportBundle\DataContainer;
 
-use Contao\Backend;
 use Contao\Database;
-use Contao\File;
+use Contao\StringUtil;
+use Contao\System;
+use HeimrichHannot\UtilsBundle\File\FileUtil;
 
-class EntityImportContainer extends Backend
+class EntityImportContainer
 {
     const TYPE_DATABASE = 'db';
     const TYPE_FILE = 'file';
@@ -26,12 +27,17 @@ class EntityImportContainer extends Backend
 
     protected $activeBundles;
     protected $database;
+    protected $cache;
+    /**
+     * @var FileUtil
+     */
+    private $fileUtil;
 
-    public function __construct()
+    public function __construct(FileUtil $fileUtil)
     {
-        $this->activeBundles = $this->getContainer()->getParameter('kernel.bundles');
+        $this->activeBundles = System::getContainer()->getParameter('kernel.bundles');
         $this->database = Database::getInstance();
-        parent::__construct();
+        $this->fileUtil = $fileUtil;
     }
 
     public function onLoadFileSRC($value, $dc)
@@ -45,20 +51,25 @@ class EntityImportContainer extends Backend
         return $value;
     }
 
-    public function onOptionsFileSRC($dc)
-    {
-        $file = \FilesModel::findByUuid($dc->value);
-
-        if ($file) {
-            $this->processInputFile($file, null, $dc->id);
-        }
-
-        return $dc;
-    }
-
     public function onLoadFileContent($value, $dc)
     {
-        return json_encode(unserialize($value), JSON_PRETTY_PRINT);
+        $row = $dc->activeRecord->row();
+
+        if (null !== $row['fileSRC']) {
+            switch ($row['sourceType']) {
+                case static::SOURCE_TYPE_CONTAO_FILE_SYSTEM:
+                    $value = $this->processInputFile(StringUtil::binToUuid($row['fileSRC']), $row['fileType'], $dc->id);
+                    break;
+                case static::SOURCE_TYPE_ABSOLUTE_PATH:
+                    break;
+                case static::SOURCE_TYPE_HTTP:
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        return $value; //json_encode($value, JSON_PRETTY_PRINT);
     }
 
     public function onSaveHttpFileType($value, $dc)
@@ -66,21 +77,24 @@ class EntityImportContainer extends Backend
         $data = $dc->activeRecord->row();
         $url = $data['sourceUrl'];
 
-        $file = '';
+//            $file = new File('files/upload/'.uniqid().".".$value);
+//            $file->write(file_get_contents($url));
+//            $file->close();
+
         try {
-            $file = new File('files/upload/'.uniqid().$value);
-            $file->write(file_get_contents($url));
-            $file->close();
+//            $cacheItem = $this->cache->getItem('dsjfijsdfo');
         } catch (\Exception $e) {
             /* TODO: write Exception */
         }
 
-        $this->processInputFile($file, $value, $dc->id);
+//        if(!is_null($file)){
+//            $this->processInputFile($file, $value, $dc->id);
+//        }
 
         return $value;
     }
 
-    private function processInputFile($file, $type, $id)
+    private function processInputFile($fileUuid, $type, $id)
     {
         /* TODO: Restriktionen für Dateigrößen definieren */
         //$fileSize = filesize($file->path);
@@ -88,27 +102,24 @@ class EntityImportContainer extends Backend
         if (null !== $type) {
             $fileType = $type;
         } else {
-            $fileType = $file->extension;
+            $fileType = $this->fileUtil->getFileExtension($this->fileUtil->getPathFromUuid($fileUuid));
         }
+
+        $path = $this->fileUtil->getPathFromUuid($fileUuid);
 
         switch ($fileType) {
             case static::FILETYPE_CSV:
-                $csvFile = fopen($file->path, 'r');
-                $csvLine = fgetcsv($csvFile, 0, ',', '"', ';');
-                $blob = serialize($csvLine);
+                $csvFile = fopen($path, 'r');
+                $fileContent = fgetcsv($csvFile, 0, ',', '"', ';');
                 break;
             case static::FILETYPE_JSON:
-                $jsonString = file_get_contents($file->path);
-                $fileContent = json_decode($jsonString, true);
-                $blob = serialize($fileContent[0]);
+                $fileContent = file_get_contents($path);
                 break;
             default:
-                $blob = null;
+                $fileContent = '';
                 break;
         }
 
-        $this->database->prepare('UPDATE tl_entity_import SET fileContent=? WHERE id=?')->execute($blob, $id);
-
-        return true;
+        return $fileContent;
     }
 }

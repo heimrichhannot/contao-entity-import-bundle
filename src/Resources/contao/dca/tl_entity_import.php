@@ -228,7 +228,6 @@ $GLOBALS['TL_DCA']['tl_entity_import'] = [
             ],
             'reference' => &$GLOBALS['TL_LANG']['tl_entity_import']['fileType'],
             'eval'      => ['submitOnChange' => true, 'includeBlankOption' => true, 'tl_class' => 'w50'],
-            'save_callback' => [[\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportContainer::class, 'onSaveHttpFileType', true]],
             'sql'       => "varchar(255) NOT NULL default ''",
         ],
         'filePath'          => [
@@ -253,9 +252,7 @@ $GLOBALS['TL_DCA']['tl_entity_import'] = [
             'label'            => &$GLOBALS['TL_LANG']['tl_entity_import']['fileSRC'],
             'exclude'          => true,
             'inputType'        => 'fileTree',
-            'eval'             => ['alwaysSave' => true, 'filesOnly' => true, 'fieldType' => 'radio', 'mandatory' => false, 'tl_class' => 'clr'],
-            'options_callback' => [\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportContainer::class, 'onOptionsFileSRC', true],
-            'load_callback'    => [[\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportContainer::class, 'onLoadFileSRC', true]],
+            'eval'             => ['filesOnly' => true, 'fieldType' => 'radio', 'mandatory' => false, 'tl_class' => 'clr', 'submitOnChange' => true],
             'sql'              => "binary(16) NULL",
         ],
         'fileContent'   => [

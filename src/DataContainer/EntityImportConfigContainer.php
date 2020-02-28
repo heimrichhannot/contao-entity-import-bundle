@@ -8,11 +8,10 @@
 
 namespace HeimrichHannot\EntityImportBundle\DataContainer;
 
-use Contao\Backend;
 use Contao\Input;
 use HeimrichHannot\EntityImportBundle\Model\EntityImportConfigModel;
 
-class EntityImportConfigContainer extends Backend
+class EntityImportConfigContainer
 {
     public static function initPalette()
     {
