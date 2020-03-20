@@ -10,4 +10,19 @@ namespace HeimrichHannot\EntityImportBundle\Source;
 
 abstract class FileSource implements SourceInterface
 {
+    /**
+     * @var string
+     */
+    protected $filePath;
+
+    /**
+     * @var array
+     */
+    protected $fileMapping;
+
+    public function __construct(string $filePath, array $fileMapping)
+    {
+        $this->filePath = $filePath;
+        $this->fileMapping = $fileMapping;
+    }
 }

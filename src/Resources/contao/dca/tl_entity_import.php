@@ -6,7 +6,6 @@ $GLOBALS['TL_DCA']['tl_entity_import'] = [
     'config'      => [
         'dataContainer'    => 'Table',
         'enableVersioning' => true,
-        //        'ctable'           => ['tl_entity_import_config'],
         'sql'              => [
             'keys' => [
                 'id' => 'primary',
@@ -78,10 +77,10 @@ $GLOBALS['TL_DCA']['tl_entity_import'] = [
         'sourceType_http'               => 'sourceUrl,httpFileType',
         'sourceType_contao_file_system' => 'fileType',
         'sourceType_absolute_path'      => 'filePath',
-        'fileType_csv'                  => 'fileSRC,fileContent,csvHeaderRow,csvFieldSeparator,csvTextSeparator,csvArraySeparator,csvFieldMapping',
-        'fileType_json'                 => 'fileSRC,fileContent,jsonFieldMapping',
-        'httpFileType_csv'              => 'fileContent',
-        'httpFileType_json'             => 'fileContent',
+        'fileType_csv'                  => 'fileSRC,fileContentCsv,csvHeaderRow,csvFieldSeparator,csvTextSeparator,csvArraySeparator,csvFieldMapping',
+        'fileType_json'                 => 'fileSRC,fileContentJson,jsonFieldMapping',
+        'httpFileType_csv'              => 'fileContentCsv',
+        'httpFileType_json'             => 'fileContentJson',
     ],
     // Fields
     'fields'      => [
@@ -255,8 +254,21 @@ $GLOBALS['TL_DCA']['tl_entity_import'] = [
             'eval'             => ['filesOnly' => true, 'fieldType' => 'radio', 'mandatory' => false, 'tl_class' => 'clr', 'submitOnChange' => true],
             'sql'              => "binary(16) NULL",
         ],
-        'fileContent'   => [
-            'label'         => &$GLOBALS['TL_LANG']['tl_entity_import']['jsonFileContent'],
+        'fileContentCsv'    => [
+            'label'         => &$GLOBALS['TL_LANG']['tl_entity_import']['fileContentCsv'],
+            'exclude'       => true,
+            'inputType'     => 'textarea',
+            'eval'          => [
+                'allowHtml'  => true,
+                'class'      => 'monospace',
+                'rte'        => 'ace|csv',
+                'helpwizard' => false,
+            ],
+            'load_callback' => [[\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportContainer::class, 'onLoadFileContent', true]],
+            'sql'           => "blob NULL",
+        ],
+        'fileContentJson'   => [
+            'label'         => &$GLOBALS['TL_LANG']['tl_entity_import']['fileContentJson'],
             'exclude'       => true,
             'inputType'     => 'textarea',
             'eval'          => [

@@ -15,8 +15,23 @@ class CSVFileSource extends FileSource
         // TODO: Implement getData() method.
     }
 
-    public function applyMapping($data)
+    public function applyMapping($data): void
     {
         // TODO: Implement applyMapping() method.
+    }
+
+    public function getSource($path): string
+    {
+        // TODO: Implement getSource() method.
+    }
+
+    public function getMapping(): array
+    {
+        // TODO: Implement getMapping() method.
+    }
+
+    public function getFile(): string
+    {
+        // TODO: Implement getFile() method.
     }
 }

@@ -110,7 +110,8 @@ class EntityImportContainer
         switch ($fileType) {
             case static::FILETYPE_CSV:
                 $csvFile = fopen($path, 'r');
-                $fileContent = fgetcsv($csvFile, 0, ',', '"', ';');
+                $fileContentArray = fgetcsv($csvFile, 0, ',', '"', ';');
+                $fileContent = implode(',', $fileContentArray);
                 break;
             case static::FILETYPE_JSON:
                 $fileContent = file_get_contents($path);
