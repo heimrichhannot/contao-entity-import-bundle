@@ -94,6 +94,11 @@ class EntityImportContainer
         return $value;
     }
 
+    public function getAllTargetTables($dc)
+    {
+        return array_values($this->database->listTables(null, true));
+    }
+
     private function processInputFile($fileUuid, $type, $id)
     {
         /* TODO: Restriktionen für Dateigrößen definieren */

@@ -34,15 +34,16 @@ class JSONFileSource extends FileSource
 
     public function applyMapping(): array
     {
-        // TODO: apply delimiter for big datasets, with progression bar (split data into pieces, this should be configurable in the backend)
+        // TODO: apply delimiter for large datasets, with progression bar (split data into pieces, this should be configurable in the backend)
 
         $fileData = $this->getData();
         $data = [];
         if (null !== $fileData) {
-            foreach ($fileData as $dataElement) {
+            foreach ($fileData as $index => $dataElement) {
                 foreach ($this->fileMapping as $mappingElement) {
                     $arrElementMapping = explode('.', $mappingElement['value']);
-                    $data[$mappingElement['name']] = $this->getValueFromMapping($dataElement, $arrElementMapping);
+
+                    $data[$index][$mappingElement['name']] = $this->getValueFromMapping($dataElement, $arrElementMapping);
                 }
             }
         }

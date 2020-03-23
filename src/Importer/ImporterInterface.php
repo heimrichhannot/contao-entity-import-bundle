@@ -12,12 +12,7 @@ use HeimrichHannot\EntityImportBundle\Source\SourceInterface;
 
 interface ImporterInterface
 {
-    public function applySourceMapping(SourceInterface $source): array;
+    public function getDataFromSource(SourceInterface $source): array;
 
-    /**
-     * @param bool $dry
-     *
-     * @return mixed
-     */
     public function run($dry = false);
 }

@@ -8,6 +8,7 @@ $arrLang = &$GLOBALS['TL_LANG']['tl_entity_import'];
 $arrLang['title']        = ['Titel', 'Geben Sie hier den Titel des Imports ein.'];
 $arrLang['type']         = ['Typ', 'Wählen Sie hier den Typ des Imports aus.'];
 $arrLang['fileType']     = ['Typ', 'Wählen Sie hier den Typ der Datei aus.'];
+$arrLang['targetTable']  = ['Zieltabelle', 'Wählen Sie hier die Tabelle, in die importiert werden soll.'];
 
 $arrLang['csvHeaderRow']     = ['Kopfdatensatz', 'Der erste Datensatz enthält die Spaltennamen'];
 $arrLang['csvFieldSeparator']     = ['Feld-Trennzeichen', 'Geben Sie hier das Feld-Trennzeichen ein.'];;
@@ -24,7 +25,7 @@ $arrLang['fileContentJson']     = ['JSON Ansicht ', 'Hier wird das erste Objekt 
 $arrLang['fileContentCsv']      = ['CSV Ansicht ', 'Hier wird die erste Spalte des CSV-Dokuments dargestellt.'];
 $arrLang['jsonFieldMapping']     = ['Felderabblidung', ''];
 $arrLang['jsonFieldMapping']['name']     = ['Name', 'Hier den Namen des Wertes aus dem JSON eingeben.'];
-$arrLang['jsonFieldMapping']['value']     = ['Wert', 'Hier Punktgetrennt den Ort des Wertes im JSON angeben. Beispiel: user.name.firstname'];
+$arrLang['jsonFieldMapping']['value']     = ['Wert', 'Hier Punktgetrennt den Ort des Wertes im JSON angeben. Mit Komma können mehrere Werte zu einem verschmolzen werden. Beispiel: user.name.firstname,user.name.lastname'];
 $arrLang['sourceType']   = ['Quelle', 'Wählen Sie hier die Art der Dateiquelle aus.'];
 $arrLang['sourceType'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportContainer::SOURCE_TYPE_HTTP]
                                                         = 'HTTP';
