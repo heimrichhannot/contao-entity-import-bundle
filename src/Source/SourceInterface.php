@@ -16,5 +16,5 @@ interface SourceInterface
 
     public function getData(): array;
 
-    public function applyMapping($data): void;
+    public function applyMapping(): array;
 }
