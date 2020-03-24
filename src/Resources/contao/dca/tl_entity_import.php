@@ -77,8 +77,8 @@ $GLOBALS['TL_DCA']['tl_entity_import'] = [
         'sourceType_http'               => 'sourceUrl,httpFileType',
         'sourceType_contao_file_system' => 'fileType',
         'sourceType_absolute_path'      => 'filePath',
-        'fileType_csv'                  => 'fileSRC,targetTable,fileContentCsv,csvHeaderRow,csvFieldSeparator,csvTextSeparator,csvArraySeparator,csvFieldMapping',
-        'fileType_json'                 => 'fileSRC,targetTable,fileContentJson,jsonFieldMapping',
+        'fileType_csv'                  => 'targetTable,fileSRC,fileContentCsv,csvHeaderRow,csvFieldSeparator,csvTextSeparator,csvArraySeparator,csvFieldMapping',
+        'fileType_json'                 => 'targetTable,fileSRC,fileContentJson,jsonFieldMapping',
         'httpFileType_csv'              => 'fileContentCsv',
         'httpFileType_json'             => 'fileContentJson',
     ],
@@ -221,7 +221,7 @@ $GLOBALS['TL_DCA']['tl_entity_import'] = [
             'search'           => true,
             'exclude'          => true,
             'inputType'        => 'select',
-            'eval'             => ['mandatory' => true, 'submitOnChange' => true, 'tl_class' => 'w50 clr', 'chosen' => true],
+            'eval'             => ['mandatory' => true, 'submitOnChange' => true, 'tl_class' => 'w50', 'chosen' => true],
             'options_callback' => [\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportContainer::class, 'getAllTargetTables'],
             'sql'              => "varchar(255) NOT NULL default ''",
         ],
@@ -260,7 +260,7 @@ $GLOBALS['TL_DCA']['tl_entity_import'] = [
             'label'            => &$GLOBALS['TL_LANG']['tl_entity_import']['fileSRC'],
             'exclude'          => true,
             'inputType'        => 'fileTree',
-            'eval'             => ['filesOnly' => true, 'fieldType' => 'radio', 'mandatory' => false, 'tl_class' => 'clr', 'submitOnChange' => true],
+            'eval'             => ['filesOnly' => true, 'fieldType' => 'radio', 'mandatory' => false, 'tl_class' => 'w50', 'submitOnChange' => true],
             'sql'              => "binary(16) NULL",
         ],
         'fileContentCsv'    => [
@@ -294,21 +294,24 @@ $GLOBALS['TL_DCA']['tl_entity_import'] = [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import']['jsonFieldMapping'],
             'inputType' => 'multiColumnEditor',
             'eval'      => [
-                'tl_class' => 'w100',
                 'multiColumnEditor' => [
                     'sortable' => true,
                     'fields'   => [
                         'name'  => [
                             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import']['jsonFieldMapping']['name'],
                             'inputType' => 'text',
-                            'tl_class'  => 'w50 clr'
+                            'eval' => [
+                                'tl_class' => 'w50'
+                            ]
                         ],
                         'value' => [
                             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import']['jsonFieldMapping']['value'],
                             'inputType' => 'text',
-                            'tl_class'  => 'w50 clr'
+                            'eval' => [
+                                'tl_class' => 'w50'
+                            ]
                         ],
-                    ],
+                    ]
                 ],
             ],
             'sql'       => "blob NULL",
