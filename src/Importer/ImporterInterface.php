@@ -8,11 +8,9 @@
 
 namespace HeimrichHannot\EntityImportBundle\Importer;
 
-use HeimrichHannot\EntityImportBundle\Source\SourceInterface;
-
 interface ImporterInterface
 {
-    public function getDataFromSource(SourceInterface $source): array;
+    public function getDataFromSource(): array;
 
-    public function run($dry = false);
+    public function run(bool $dry = false, bool $mergeTable = false): bool;
 }

@@ -12,55 +12,67 @@ use Contao\Database;
 use HeimrichHannot\EntityImportBundle\Event\AfterImportEvent;
 use HeimrichHannot\EntityImportBundle\Event\BeforeImportEvent;
 use HeimrichHannot\EntityImportBundle\Source\SourceInterface;
+use HeimrichHannot\UtilsBundle\Database\DatabaseUtil;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class Importer implements ImporterInterface
 {
+    /**
+     * @var SourceInterface
+     */
     protected $source;
     protected $dryRun;
+    protected $mergeTable;
+
+    /**
+     * @var Database
+     */
+    protected $database;
 
     /**
      * @var EventDispatcher
      */
     private $eventDispatcher;
-    private $database;
     private $targetTable;
+    /**
+     * @var DatabaseUtil
+     */
+    private $databaseUtil;
 
     /**
      * Importer constructor.
      *
-     * @param $source SourceInterface
-     * @param $database Database
+     * @param $databaseUtil DatabaseUtil
      * @param $targetTable string
      * @param $eventDispatcher EventDispatcher
      */
-    public function __construct(SourceInterface $source, Database $database, string $targetTable, EventDispatcher $eventDispatcher)
+    public function __construct(EventDispatcher $eventDispatcher, DatabaseUtil $databaseUtil)
     {
-        $this->source = $source;
-        $this->database = $database;
-        $this->targetTable = $targetTable;
         $this->eventDispatcher = $eventDispatcher;
+        $this->databaseUtil = $databaseUtil;
     }
 
-    public function getDataFromSource(SourceInterface $source): array
+    public function init(SourceInterface $source, string $targetTable)
     {
-        return $this->source->applyMapping();
+        $this->database = Database::getInstance();
+        $this->source = $source;
+        $this->targetTable = $targetTable;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function run($dry = false)
+    public function run(bool $dry = false, bool $mergeTable = false): bool
     {
         $this->dryRun = $dry;
-        $items = $this->getDataFromSource($this->source);
+        $this->mergeTable = $mergeTable;
+        $items = $this->getDataFromSource();
 
         $this->eventDispatcher->dispatch(BeforeImportEvent::NAME, new BeforeImportEvent());
 
         if ($this->database->tableExists($this->targetTable)) {
             foreach ($items as $item) {
-                $query = $this->prepareQuery($item);
-                $this->database->prepare($query)->execute();
+                $this->databaseUtil->insert($this->targetTable, $item);
             }
         }
 
@@ -69,8 +81,8 @@ class Importer implements ImporterInterface
         return true;
     }
 
-    public function prepareQuery(array $data): string
+    public function getDataFromSource(): array
     {
-        return 'INSERT INTO '.$this->targetTable.' ('.implode(',', array_keys($data)).') VALUES ('.implode(',', array_map(function ($val) { return "'".str_replace("'", "''", $val)."'"; }, array_values($data))).')';
+        return $this->source->applyMapping();
     }
 }

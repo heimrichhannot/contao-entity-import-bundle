@@ -3,5 +3,5 @@ services:
     public: true
     autowire: true
 
-  HeimrichHannot\EntityImportBundle\DataContainer\EntityImportContainer: ~
-  HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer: ~
+  HeimrichHannot\EntityImportBundle\DataContainer\:
+    resource: '../../DataContainer/*'

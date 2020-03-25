@@ -10,8 +10,6 @@ namespace HeimrichHannot\EntityImportBundle\Source;
 
 interface SourceInterface
 {
-    public function getFile(): string;
-
     public function getMapping(): array;
 
     public function getData(): array;

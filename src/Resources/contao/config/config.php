@@ -4,7 +4,7 @@
  * Backend modules
  */
 $GLOBALS['BE_MOD']['system']['entityImport'] = [
-    'tables' => ['tl_entity_import'],
+    'tables' => [HeimrichHannot\EntityImportBundle\Model\EntityImportSourceModel::getTable(), \HeimrichHannot\EntityImportBundle\Model\EntityImportHandlerModel::getTable()],
     'icon'   => '',
 ];
 
@@ -13,5 +13,5 @@ $GLOBALS['BE_MOD']['system']['entityImport'] = [
 /**
  * Models
  */
-//$GLOBALS['TL_MODELS'][HeimrichHannot\EntityImportBundle\Model\EntityImportConfigModel::getTable()] = 'HeimrichHannot\EntityImportBundle\Model\EntityImportConfigModel';
-$GLOBALS['TL_MODELS'][HeimrichHannot\EntityImportBundle\Model\EntityImportModel::getTable()] = 'HeimrichHannot\EntityImportBundle\Model\EntityImportModel';
+$GLOBALS['TL_MODELS'][HeimrichHannot\EntityImportBundle\Model\EntityImportSourceModel::getTable()] = 'HeimrichHannot\EntityImportBundle\Model\EntityImportSourceModel';
+$GLOBALS['TL_MODELS'][HeimrichHannot\EntityImportBundle\Model\EntityImportHandlerModel::getTable()] = 'HeimrichHannot\EntityImportBundle\Model\EntityImportHandlerModel';

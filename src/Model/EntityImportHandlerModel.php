@@ -10,7 +10,7 @@ namespace HeimrichHannot\EntityImportBundle\Model;
 
 use Contao\Model;
 
-class EntityImportConfigModel extends Model
+class EntityImportHandlerModel extends Model
 {
-    protected static $strTable = 'tl_entity_import_config';
+    protected static $strTable = 'tl_entity_import_handler';
 }

@@ -8,7 +8,9 @@
 
 namespace HeimrichHannot\EntityImportBundle\Source;
 
-abstract class FileSource implements SourceInterface
+use HeimrichHannot\EntityImportBundle\Model\EntityImportSourceModel;
+
+abstract class FileSource extends Source
 {
     /**
      * @var string
@@ -16,13 +18,19 @@ abstract class FileSource implements SourceInterface
     protected $filePath;
 
     /**
-     * @var array
+     * @var EntityImportSourceModel
      */
-    protected $fileMapping;
+    protected $sourceModel;
 
-    public function __construct(string $filePath, array $fileMapping)
+    public function __construct(string $filePath)
     {
+        parent::__construct($this->sourceModel);
+
         $this->filePath = $filePath;
-        $this->fileMapping = $fileMapping;
+    }
+
+    public function getFilePath(): string
+    {
+        return $this->filePath;
     }
 }

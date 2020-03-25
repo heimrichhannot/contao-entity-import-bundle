@@ -8,12 +8,11 @@
 
 namespace HeimrichHannot\EntityImportBundle\DataContainer;
 
-use Contao\Database;
 use Contao\StringUtil;
 use Contao\System;
 use HeimrichHannot\UtilsBundle\File\FileUtil;
 
-class EntityImportContainer
+class EntityImportSourceContainer
 {
     const TYPE_DATABASE = 'db';
     const TYPE_FILE = 'file';
@@ -36,7 +35,6 @@ class EntityImportContainer
     public function __construct(FileUtil $fileUtil)
     {
         $this->activeBundles = System::getContainer()->getParameter('kernel.bundles');
-        $this->database = Database::getInstance();
         $this->fileUtil = $fileUtil;
     }
 
@@ -92,11 +90,6 @@ class EntityImportContainer
 //        }
 
         return $value;
-    }
-
-    public function getAllTargetTables($dc)
-    {
-        return array_values($this->database->listTables(null, true));
     }
 
     private function processInputFile($fileUuid, $type, $id)
