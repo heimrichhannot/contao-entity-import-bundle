@@ -16,6 +16,8 @@ $arrLang['csvArraySeparator']     = [
     'Array-Trennzeichen',
     'Geben Sie hier das Trennzeichen für die Umwandlung von trennzeichen-separierten Feldwerten ein. Wenn das entsprechende Häkchen in der Felderabbildung gesetzt ist, werden Werte wie "1;4;5" zu einem serialisierten Array transformiert.',
 ];
+
+$arrLang['pathToDataArray'] = ['Pfad zu den Daten', 'Hier den Pfad angeben wo sich das Datenarray befindet'];
 $arrLang['fieldMapping']     = ['Felderabblidung', ''];
 $arrLang['fieldMapping']['name']     = ['Name', 'Name des Wertes für die weitere Verarbeitung.'];
 $arrLang['fieldMapping']['value']     = ['Wert', 'Bei JSON punktgetrennt den Ort des Werts eingeben, bei CSV die Nummer des Spalte'];

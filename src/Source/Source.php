@@ -8,7 +8,6 @@
 
 namespace HeimrichHannot\EntityImportBundle\Source;
 
-use Contao\Model;
 use HeimrichHannot\EntityImportBundle\Model\EntityImportSourceModel;
 
 abstract class Source implements SourceInterface
@@ -23,10 +22,10 @@ abstract class Source implements SourceInterface
      */
     protected $sourceModel;
 
-    public function __construct(Model $sourceModel)
+    public function __construct(EntityImportSourceModel $sourceModel)
     {
-        $this->fieldMapping = $sourceModel->fieldMapping;
         $this->sourceModel = $sourceModel;
+        $this->fieldMapping = $sourceModel->fieldMapping;
     }
 
     public function getMapping(): array
@@ -34,11 +33,9 @@ abstract class Source implements SourceInterface
         return $this->fieldMapping;
     }
 
-    public function applyMapping(): array
+    public function getMappedData(): array
     {
-        // TODO: apply delimiter for large datasets, with progression bar (split data into pieces, this should be configurable in the backend)
-
-        $fileData = $this->getData();
+        $fileData = $this->getData($this->sourceModel->pathToDataArray);
         $data = [];
         if (null !== $fileData) {
             foreach ($fileData as $index => $dataElement) {

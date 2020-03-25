@@ -37,7 +37,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
         'operations'        => [
             'edit'       => [
                 'label' => &$GLOBALS['TL_LANG']['tl_entity_import_source']['edit'],
-                'href'  => 'table=tl_entity_import_handler',
+                'href'  => 'table=tl_entity_import_config',
                 'icon'  => 'edit.gif',
             ],
             'editheader' => [
@@ -78,7 +78,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
         'sourceType_contao_file_system' => 'fileType',
         'sourceType_absolute_path'      => 'filePath',
         'fileType_csv'                  => 'fileSRC,fileContentCsv,csvHeaderRow,csvFieldSeparator,csvTextSeparator,csvArraySeparator,fieldMapping',
-        'fileType_json'                 => 'fileSRC,fileContentJson,fieldMapping',
+        'fileType_json'                 => 'fileSRC,fileContentJson,pathToDataArray,fieldMapping',
         'httpFileType_csv'              => 'fileContentCsv',
         'httpFileType_json'             => 'fileContentJson',
     ],
@@ -281,10 +281,19 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'load_callback' => [[\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::class, 'onLoadFileContent']],
             'sql'           => "blob NULL",
         ],
+        'pathToDataArray' => [
+            'label'                   => &$GLOBALS['TL_LANG']['tl_entity_import_source']['pathToDataArray'],
+            'exclude'                 => true,
+            'search'                  => true,
+            'inputType'               => 'text',
+            'eval'                    => ['maxlength' => 255, 'tl_class' => 'w50', 'mandatory' => true],
+            'sql'                     => "varchar(255) NOT NULL default ''"
+        ],
         'fieldMapping'      => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['fieldMapping'],
             'inputType' => 'multiColumnEditor',
             'eval'      => [
+                'tl_class' => 'clr',
                 'multiColumnEditor' => [
                     'sortable' => true,
                     'fields'   => [

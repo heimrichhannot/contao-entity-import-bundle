@@ -12,7 +12,7 @@ interface SourceInterface
 {
     public function getMapping(): array;
 
-    public function getData(): array;
+    public function getData(string $path): array;
 
-    public function applyMapping(): array;
+    public function getMappedData(): array;
 }

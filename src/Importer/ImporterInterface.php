@@ -12,5 +12,5 @@ interface ImporterInterface
 {
     public function getDataFromSource(): array;
 
-    public function run(bool $dry = false, bool $mergeTable = false): bool;
+    public function run(): bool;
 }
