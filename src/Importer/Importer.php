@@ -34,7 +34,7 @@ class Importer implements ImporterInterface
     /**
      * @var bool
      */
-    protected $dryRun;
+    protected $dryRun = false;
 
     /**
      * @var bool
@@ -113,6 +113,11 @@ class Importer implements ImporterInterface
         $this->eventDispatcher->dispatch(AfterImportEvent::NAME, new AfterImportEvent());
 
         return true;
+    }
+
+    public function setDryRun(bool $dry)
+    {
+        $this->dryRun = $dry;
     }
 
     public function getDataFromSource(): array

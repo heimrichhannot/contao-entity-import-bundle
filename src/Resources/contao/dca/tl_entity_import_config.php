@@ -54,16 +54,22 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
                 'href'  => 'act=show',
                 'icon'  => 'show.gif',
             ],
+            'dryRun'     => [
+                'label' => &$GLOBALS['TL_LANG']['tl_entity_import_config']['dryRun'],
+                'href'  => 'key=dryRun',
+                'icon'  => 'regular.svg',
+            ],
             'import'     => [
                 'label' => &$GLOBALS['TL_LANG']['tl_entity_import_config']['import'],
                 'href'  => 'key=import',
                 'icon'  => 'ok.svg',
+                'attributes' => 'onclick="if (!confirm(\'' . $GLOBALS['TL_LANG']['tl_entity_import_config']['importConfirm'] . '\')) return false; Backend.getScrollOffset();"',
             ],
         ],
     ],
     'palettes'    => [
         '__selector__' => ['mergeTable'],
-        'default'      => '{title_legend},title,targetTable,dryRun,mergeTable;',
+        'default'      => '{title_legend},title,targetTable,mergeTable;',
     ],
     'subpalettes' => [
         'mergeTable' => 'mergeIdentifierFields',
@@ -96,13 +102,6 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'eval'             => ['mandatory' => true, 'submitOnChange' => true, 'tl_class' => 'w50', 'chosen' => true],
             'options_callback' => [\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::class, 'getAllTargetTables'],
             'sql'              => "varchar(255) NOT NULL default ''",
-        ],
-        'dryRun'                => [
-            'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['dryRun'],
-            'exclude'   => true,
-            'inputType' => 'checkbox',
-            'eval'      => ['tl_class' => 'w50'],
-            'sql'       => "char(1) NOT NULL default ''",
         ],
         'mergeTable'            => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['mergeTable'],

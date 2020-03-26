@@ -15,6 +15,7 @@ use Contao\System;
 use HeimrichHannot\EntityImportBundle\Importer\Importer;
 use HeimrichHannot\EntityImportBundle\Model\EntityImportConfigModel;
 use HeimrichHannot\EntityImportBundle\Model\EntityImportSourceModel;
+use HeimrichHannot\EntityImportBundle\Source\CSVFileSource;
 use HeimrichHannot\EntityImportBundle\Source\JSONFileSource;
 use HeimrichHannot\RequestBundle\Component\HttpFoundation\Request;
 use HeimrichHannot\UtilsBundle\Database\DatabaseUtil;
@@ -84,6 +85,25 @@ class EntityImportConfigContainer
 //        init()
 //            run()
 
+        $importer = $this->initImporter();
+
+        $importer->run();
+    }
+
+    public function dryRun()
+    {
+        $importer = $this->initImporter();
+        $importer->setDryRun(true);
+        $importer->run();
+    }
+
+    public function listItems($row)
+    {
+        return '<div class="tl_content_left">'.$row['title'].' <span style="color:#999;padding-left:3px">['.Date::parse(Config::get('datimFormat'), $row['date']).']</span></div>';
+    }
+
+    protected function initImporter()
+    {
         $sourceId = Database::getInstance()->getParentRecords($this->request->getGet('id'), $this->request->getGet('table'));
 
         $source = EntityImportSourceModel::findOneBy('id', $sourceId);
@@ -93,9 +113,10 @@ class EntityImportConfigContainer
                 $concreteSource = new JSONFileSource($source);
                 break;
             case EntityImportSourceContainer::FILETYPE_CSV:
-
+                $concreteSource = new CSVFileSource($source);
                 break;
             default:
+                new Exception('This Filetype is not supported.');
                 break;
         }
 
@@ -108,13 +129,7 @@ class EntityImportConfigContainer
         }
 
         $importer->init($concreteSource, $config);
-        $importer->run();
 
-        return true;
-    }
-
-    public function listItems($row)
-    {
-        return '<div class="tl_content_left">'.$row['title'].' <span style="color:#999;padding-left:3px">['.Date::parse(Config::get('datimFormat'), $row['date']).']</span></div>';
+        return $importer;
     }
 }

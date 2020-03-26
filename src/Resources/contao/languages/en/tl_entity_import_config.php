@@ -23,6 +23,9 @@ $GLOBALS['TL_LANG']['tl_entity_import_config']['delete'] = ['Delete config', 'De
  * Misc
  */
 $GLOBALS['TL_LANG']['tl_entity_import_config']['createNewContentElement'] = 'Create new tl_content entry';
+$GLOBALS['TL_LANG']['tl_entity_import_config']['importConfirm'] = 'Are you sure You want to Import with this settings?';
+
+
 
 /**
  * Messages
