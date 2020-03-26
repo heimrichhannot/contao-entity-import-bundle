@@ -96,10 +96,10 @@ class Importer implements ImporterInterface
     {
         try {
             if (!$this->isInitialized) {
-                throw new \Exception('Importer is not initialized.');
+                throw new \Exception($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['notInitialized']);
             }
         } catch (\Exception $e) {
-            Message::addError('Error: %s', $e->getMessage());
+            Message::addError($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['notInitialized'], $e->getMessage());
         }
 
         //System::getContainer()->get('huh.utils.model')->callModelMethod('tl', 'findBySpecialSomething', 1, 2, 3, 4)
@@ -128,7 +128,7 @@ class Importer implements ImporterInterface
     protected function executeImport($items)
     {
         if (!$this->database->tableExists($this->targetTable)) {
-            new Exception('Target table does not exist.');
+            new Exception($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['tableDoNotExist']);
         }
 
         try {
@@ -138,16 +138,16 @@ class Importer implements ImporterInterface
             foreach ($items as $item) {
                 $columnsNotExisting = array_diff(array_keys($item), $targetTableColumns);
                 if (!empty($columnsNotExisting)) {
-                    throw new Exception('Fields of target and source differ');
+                    throw new Exception($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['tableFieldsDiffer']);
                 }
 
                 ++$count;
 
                 if (!$this->dryRun) {
                     if ($this->mergeTable) {
-                        $mergeIdentifier = $this->configModel->mergeIdentifierFields;
+                        $mergeIdentifier = unserialize($this->configModel->mergeIdentifierFields)[0];
                         if (empty($mergeIdentifier)) {
-                            throw new Exception('No unique identifier fields set.');
+                            throw new Exception($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['noIdentifierFields']);
                         }
                         $this->databaseUtil->update($this->targetTable, $item, $mergeIdentifier['target'].'=?', [$mergeIdentifier['source']]);
                     } else {
@@ -157,12 +157,12 @@ class Importer implements ImporterInterface
             }
 
             if ($count > 0) {
-                Message::addConfirmation(sprintf('Successfully inserted %s records', $count));
+                Message::addConfirmation(sprintf($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['successfulImport'], $count));
             } else {
-                Message::addInfo(sprintf('Nothing to import'));
+                Message::addInfo(sprintf($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['emptyFile']));
             }
         } catch (\Exception $e) {
-            Message::addError(sprintf('Error inserted %s records. Error: %s', $count, $e->getMessage()));
+            Message::addError(sprintf($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['errorImport'], $count, $e->getMessage()));
         }
     }
 }

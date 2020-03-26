@@ -35,20 +35,12 @@ abstract class Source implements SourceInterface
 
     public function getMappedData(): array
     {
-        $fileData = $this->getData($this->sourceModel->pathToDataArray);
+        $fileData = $this->getData();
         $data = [];
         $arrMapping = unserialize($this->fieldMapping);
         if (null !== $fileData) {
             foreach ($fileData as $index => $arrElement) {
-                $dataElement = $this->getMappedValues($arrElement, $arrMapping);
-
-                $data[$index] = $dataElement;
-
-                /*foreach ($this->fieldMapping as $mappingElement) {
-                    $arrElementMapping = explode('.', $mappingElement['value']);
-
-                    $data[$index][$mappingElement['name']] = $this->getValueFromMapping($dataElement, $arrElementMapping);
-                }*/
+                $data[$index] = $this->getMappedValues($arrElement, $arrMapping);
             }
         }
 

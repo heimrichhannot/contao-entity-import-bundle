@@ -38,3 +38,15 @@ $arrLang['mergeIdentifierFields'] = [
 
 $arrLang['mergeIdentifierFields']['source'] = ['Quellfeld', 'Wählen Sie hier das Quellfeld aus der externen Quelle aus.'];
 $arrLang['mergeIdentifierFields']['target'] = ['Zielfeld', 'Wählen Sie hier das Zielfeld in das Importiert wird.'];
+
+/**
+ * Errors
+ */
+$arrLang['error']['notInitialized'] = 'Importer ist noch nicht initialisiert.';
+$arrLang['error']['error'] = 'Fehler: %s';
+$arrLang['error']['tableDoNotExist'] = 'Die Zieltabelle existiert nicht.';
+$arrLang['error']['tableFieldsDiffer'] = 'Die Felder vom Ziel und Quelle unterscheiden sich.';
+$arrLang['error']['noIdentifierFields'] = 'Identifikatorfelder nicht gesetzt.';
+$arrLang['error']['successfulImport'] = 'Erfolgreicher Import von %s Einträgen';
+$arrLang['error']['emptyFile'] = 'Daten zum Importieren nicht vorhanden.';
+$arrLang['error']['errorImport'] = 'Fehlerhafter Import von %s Einträgen. Fehler: %s';

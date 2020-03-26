@@ -251,7 +251,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['fileSRC'],
             'exclude'   => true,
             'inputType' => 'fileTree',
-            'eval'      => ['filesOnly' => true, 'fieldType' => 'radio', 'mandatory' => true, 'tl_class' => 'w50', 'submitOnChange' => true],
+            'eval'      => ['filesOnly' => true, 'fieldType' => 'radio', 'mandatory' => true, 'tl_class' => 'w50 clr', 'submitOnChange' => true],
             'sql'       => "binary(16) NULL",
         ],
         'fileContentCsv'    => [
@@ -263,6 +263,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
                 'class'      => 'monospace',
                 'rte'        => 'ace|csv',
                 'helpwizard' => false,
+                'tl_class'   => 'long clr'
             ],
             'load_callback' => [[\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::class, 'onLoadFileContent']],
             'sql'           => "blob NULL",
@@ -276,7 +277,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
                 'class'      => 'monospace',
                 'rte'        => 'ace|json',
                 'helpwizard' => false,
-                'tl_class'   => 'w100 clr',
+                'tl_class'   => 'long clr',
             ],
             'load_callback' => [[\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::class, 'onLoadFileContent']],
             'sql'           => "blob NULL",
@@ -292,6 +293,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
         'fieldMapping'      => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['fieldMapping'],
             'inputType' => 'multiColumnEditor',
+            'load_callback' => [[\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::class, 'onLoadFieldMapping']],
             'eval'      => [
                 'tl_class' => 'clr',
                 'multiColumnEditor' => [
@@ -300,6 +302,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
                         'name'  => [
                             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['fieldMapping']['name'],
                             'inputType' => 'text',
+                            'load_callback' => [[\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::class, 'onLoadFieldMappingName']],
                             'eval'      => [
                                 'groupStyle' => 'width: 48%',
                             ],
@@ -307,6 +310,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
                         'value' => [
                             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['fieldMapping']['value'],
                             'inputType' => 'text',
+                            'load_callback' => [[\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::class, 'onLoadFieldMappingValue']],
                             'eval'      => [
                                 'groupStyle' => 'width: 48%',
                             ],

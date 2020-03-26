@@ -80,13 +80,7 @@ class EntityImportConfigContainer
 
     public function import()
     {
-//        $this->request->getGet('id') -> config -> pid -> source
-//        new JSONFileSource()
-//        init()
-//            run()
-
         $importer = $this->initImporter();
-
         $importer->run();
     }
 
@@ -104,9 +98,7 @@ class EntityImportConfigContainer
 
     protected function initImporter()
     {
-        $sourceId = Database::getInstance()->getParentRecords($this->request->getGet('id'), $this->request->getGet('table'));
-
-        $source = EntityImportSourceModel::findOneBy('id', $sourceId);
+        $source = EntityImportConfigModel::findOneBy('id', $this->request->getGet('id'))->getRelated('pid');
 
         switch ($source->fileType) {
             case EntityImportSourceContainer::FILETYPE_JSON:

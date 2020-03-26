@@ -10,11 +10,11 @@ namespace HeimrichHannot\EntityImportBundle\Source;
 
 class JSONFileSource extends FileSource
 {
-    public function getData(string $path): array
+    public function getData(): array
     {
         $fileContent = file_get_contents($this->filePath);
 
-        $arrPath = explode('.', $path);
+        $arrPath = explode('.', $this->sourceModel->pathToDataArray);
 
         $arrData = json_decode($fileContent, true);
 

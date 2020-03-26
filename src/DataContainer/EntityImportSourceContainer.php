@@ -70,33 +70,13 @@ class EntityImportSourceContainer
         return $value; //json_encode($value, JSON_PRETTY_PRINT);
     }
 
-    public function onSaveHttpFileType($value, $dc)
+    public function onLoadFieldMapping($value, $dc)
     {
-        $data = $dc->activeRecord->row();
-        $url = $data['sourceUrl'];
-
-//            $file = new File('files/upload/'.uniqid().".".$value);
-//            $file->write(file_get_contents($url));
-//            $file->close();
-
-        try {
-//            $cacheItem = $this->cache->getItem('dsjfijsdfo');
-        } catch (\Exception $e) {
-            /* TODO: write Exception */
-        }
-
-//        if(!is_null($file)){
-//            $this->processInputFile($file, $value, $dc->id);
-//        }
-
-        return $value;
+        $arrValue = unserialize($value);
     }
 
     private function processInputFile($fileUuid, $type, $id)
     {
-        /* TODO: Restriktionen für Dateigrößen definieren */
-        //$fileSize = filesize($file->path);
-
         if (null !== $type) {
             $fileType = $type;
         } else {

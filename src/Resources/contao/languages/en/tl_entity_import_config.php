@@ -32,3 +32,15 @@ $GLOBALS['TL_LANG']['tl_entity_import_config']['importConfirm'] = 'Are you sure 
  */
 $GLOBALS['TL_LANG']['tl_entity_import_config']['confirm']      = 'The records have been imported successfully.';
 $GLOBALS['TL_LANG']['tl_entity_import_config']['importerInfo'] = 'Using the class "%s" for importing the records.';
+
+/**
+ * Errors
+ */
+$arrLang['error']['notInitialized'] = 'Importer is not yet initialized.';
+$arrLang['error']['error'] = 'Error: %s';
+$arrLang['error']['tableDoNotExist'] = 'Target table does not exist.';
+$arrLang['error']['tableFieldsDiffer'] = 'Fields of target and source differ';
+$arrLang['error']['noIdentifierFields'] = 'No unique identifier fields set.';
+$arrLang['error']['successfulImport'] = 'Successfully imported %s records';
+$arrLang['error']['emptyFile'] = 'Nothing to import';
+$arrLang['error']['errorImport'] = 'Error inserted %s records. Error: %s';

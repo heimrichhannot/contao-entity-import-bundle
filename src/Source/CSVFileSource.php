@@ -12,21 +12,25 @@ class CSVFileSource extends FileSource
 {
     public function getData(): array
     {
-        // TODO: Implement getData() method.
-    }
+        $sourceModel = $this->sourceModel;
 
-    public function getSource($path): string
-    {
-        // TODO: Implement getSource() method.
-    }
+        /*        if ($strSourceFile = Files::getPathFromUuid($this->sourceFile))
+                {
+                    $objCsv = new CsvReader($strSourceFile);
+                    $objCsv->setDelimiter($this->delimiter);
+                    $objCsv->setEnclosure($this->enclosure);
+                    $objCsv->rewind();
+                    $objCsv->next();
+        
+                    while ($arrCurrent = $objCsv->current())
+                    {
+                        $this->arrItems[] = $arrCurrent;
+                        $objCsv->next();
+                    }
+                }*/
 
-    public function getMapping(): array
-    {
-        // TODO: Implement getMapping() method.
-    }
+        $arrData = [];
 
-    public function getFile(): string
-    {
-        // TODO: Implement getFile() method.
+        return $arrData;
     }
 }
