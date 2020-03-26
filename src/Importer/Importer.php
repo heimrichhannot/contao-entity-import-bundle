@@ -83,6 +83,7 @@ class Importer implements ImporterInterface
         $this->database = Database::getInstance();
         $this->source = $source;
         $this->configModel = $configModel;
+        $this->targetTable = $configModel->targetTable;
         $this->mergeTable = ($configModel->mergeTable ? $configModel->mergeTable : false);
 
         $this->isInitialized = true;
@@ -93,8 +94,12 @@ class Importer implements ImporterInterface
      */
     public function run(): bool
     {
-        if (!$this->isInitialized) {
-            throw new \Exception('Not initialized, yet.');
+        try {
+            if (!$this->isInitialized) {
+                throw new \Exception('Importer is not initialized.');
+            }
+        } catch (\Exception $e) {
+            Message::addError('Error: %s', $e->getMessage());
         }
 
         //System::getContainer()->get('huh.utils.model')->callModelMethod('tl', 'findBySpecialSomething', 1, 2, 3, 4)
@@ -117,41 +122,42 @@ class Importer implements ImporterInterface
 
     protected function executeImport($items)
     {
-        if ($this->database->tableExists($this->targetTable)) {
-            try {
-                $count = 0;
-                $targetTableColumns = $this->database->getFieldNames($this->targetTable);
+        if (!$this->database->tableExists($this->targetTable)) {
+            new Exception('Target table does not exist.');
+        }
 
-                foreach ($items as $item) {
-                    // check if all columns exist
-                    $columnsNotExisting = array_diff(array_keys($item), $targetTableColumns);
-                    if (!empty($columnsNotExisting)) {
-                        throw new Exception('Fields of target and source differ');
-                    }
+        try {
+            $count = 0;
+            $targetTableColumns = $this->database->getFieldNames($this->targetTable);
 
-                    ++$count;
+            foreach ($items as $item) {
+                $columnsNotExisting = array_diff(array_keys($item), $targetTableColumns);
+                if (!empty($columnsNotExisting)) {
+                    throw new Exception('Fields of target and source differ');
+                }
 
-                    if (!$this->dryRun) {
-                        if ($this->mergeTable) {
-                            $mergeIdentifier = $this->configModel->mergeIdentifierFields;
-                            if (empty($mergeIdentifier)) {
-                                throw new Exception('No unique identifier fields set.');
-                            }
-                            $this->databaseUtil->update($this->targetTable, $item, $mergeIdentifier['target'].'=?', [$mergeIdentifier['source']]);
-                        } else {
-                            $this->databaseUtil->insert($this->targetTable, $item);
+                ++$count;
+
+                if (!$this->dryRun) {
+                    if ($this->mergeTable) {
+                        $mergeIdentifier = $this->configModel->mergeIdentifierFields;
+                        if (empty($mergeIdentifier)) {
+                            throw new Exception('No unique identifier fields set.');
                         }
+                        $this->databaseUtil->update($this->targetTable, $item, $mergeIdentifier['target'].'=?', [$mergeIdentifier['source']]);
+                    } else {
+                        $this->databaseUtil->insert($this->targetTable, $item);
                     }
                 }
-
-                if ($count > 0) {
-                    Message::addConfirmation(sprintf('Successfully inserted %s records', $count));
-                } else {
-                    Message::addInfo(sprintf('Nothing to import'));
-                }
-            } catch (\Exception $e) {
-                Message::addError(sprintf('Error inserted %s records. Fehler: %s', $count, $e->getMessage()));
             }
+
+            if ($count > 0) {
+                Message::addConfirmation(sprintf('Successfully inserted %s records', $count));
+            } else {
+                Message::addInfo(sprintf('Nothing to import'));
+            }
+        } catch (\Exception $e) {
+            Message::addError(sprintf('Error inserted %s records. Error: %s', $count, $e->getMessage()));
         }
     }
 }

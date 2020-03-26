@@ -14,10 +14,12 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
     ],
     'list'        => [
         'sorting'           => [
-            'mode'        => 2,
-            'fields'      => ['title'],
-            'flag'        => 1,
-            'panelLayout' => 'search,limit',
+            'mode'                  => 4,
+            'fields'                => ['title DESC'],
+            'headerFields'          => ['title'],
+            'panelLayout'           => 'filter;sort,search,limit',
+            'child_record_callback' => [\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::class, 'listItems'],
+            'disableGrouping'       => true,
         ],
         'label'             => [
             'fields' => ['title'],

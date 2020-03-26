@@ -37,26 +37,45 @@ abstract class Source implements SourceInterface
     {
         $fileData = $this->getData($this->sourceModel->pathToDataArray);
         $data = [];
+        $arrMapping = unserialize($this->fieldMapping);
         if (null !== $fileData) {
-            foreach ($fileData as $index => $dataElement) {
-                foreach ($this->fieldMapping as $mappingElement) {
+            foreach ($fileData as $index => $arrElement) {
+                $dataElement = $this->getMappedValues($arrElement, $arrMapping);
+
+                $data[$index] = $dataElement;
+
+                /*foreach ($this->fieldMapping as $mappingElement) {
                     $arrElementMapping = explode('.', $mappingElement['value']);
 
                     $data[$index][$mappingElement['name']] = $this->getValueFromMapping($dataElement, $arrElementMapping);
-                }
+                }*/
             }
         }
 
         return $data;
     }
 
-    protected function getValueFromMapping($data, $mapping)
+    protected function getMappedValues($arrElement, $arrMapping)
     {
-        if (null === $mapping) {
+        $arrResult = [];
+
+        foreach ($arrMapping as $mappingElement) {
+            $arrMappingElement = explode('.', $mappingElement['value']);
+
+            $arrResult[$mappingElement['name']] = $this->getValue($arrElement, $arrMappingElement);
+        }
+
+        return $arrResult;
+    }
+
+    protected function getValue($data, $mapping)
+    {
+        if (empty($mapping)) {
             return $data;
         }
-        $data = $data[array_pop($mapping)];
 
-        return $this->getValueFromMapping($data, $mapping);
+        $data = $data[array_shift($mapping)];
+
+        return $this->getValue($data, $mapping);
     }
 }

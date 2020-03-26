@@ -286,7 +286,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'exclude'                 => true,
             'search'                  => true,
             'inputType'               => 'text',
-            'eval'                    => ['maxlength' => 255, 'tl_class' => 'w50', 'mandatory' => true],
+            'eval'                    => ['maxlength' => 255, 'tl_class' => 'w50'],
             'sql'                     => "varchar(255) NOT NULL default ''"
         ],
         'fieldMapping'      => [

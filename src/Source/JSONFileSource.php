@@ -16,10 +16,10 @@ class JSONFileSource extends FileSource
 
         $arrPath = explode('.', $path);
 
-        $arrData = [];
+        $arrData = json_decode($fileContent, true);
 
-        if (null === $fileContent || empty($arrPath)) {
-            $arrData = $this->getDataFromPath(json_decode($fileContent), $arrPath);
+        if (empty($arrPath)) {
+            $arrData = $this->getDataFromPath($arrData, $arrPath);
         }
 
         return $arrData;

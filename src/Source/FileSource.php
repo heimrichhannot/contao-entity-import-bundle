@@ -22,11 +22,13 @@ abstract class FileSource extends Source
      */
     protected $sourceModel;
 
-    public function __construct(string $filePath)
+    public function __construct(EntityImportSourceModel $sourceModel)
     {
+        $this->sourceModel = $sourceModel;
+
         parent::__construct($this->sourceModel);
 
-        $this->filePath = $filePath;
+        $this->filePath = \FilesModel::findByUuid($this->sourceModel->fileSRC)->path;
     }
 
     public function getFilePath(): string
