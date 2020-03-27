@@ -67,7 +67,7 @@ class EntityImportSourceContainer
             }
         }
 
-        return $value; //json_encode($value, JSON_PRETTY_PRINT);
+        return $value;
     }
 
     public function onLoadFieldMapping($value, $dc)
@@ -77,15 +77,28 @@ class EntityImportSourceContainer
         $fileType = $dc->activeRecord->fileType;
 
         switch ($fileType) {
-            case 'csv':
+            case static::FILETYPE_CSV:
 
                 break;
-            case 'json':
+            case static::FILETYPE_JSON:
 
                 break;
             default:
                 break;
         }
+
+        return $value;
+    }
+
+    public function onSaveFieldMapping($value, $dc)
+    {
+        $fileType = $dc->activeRecord->fileType;
+
+        if ($dc->activeRecord->fileType === static::FILETYPE_CSV) {
+            return $value;
+        }
+
+        return $value;
     }
 
     private function processInputFile($fileUuid, $type, $id)

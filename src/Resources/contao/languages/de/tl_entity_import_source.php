@@ -10,9 +10,9 @@ $arrLang['type']     = ['Typ', 'Wählen Sie hier den Typ des Imports aus.'];
 $arrLang['fileType'] = ['Typ', 'Wählen Sie hier den Typ der Datei aus.'];
 
 $arrLang['csvHeaderRow']      = ['Kopfdatensatz', 'Der erste Datensatz enthält die Spaltennamen'];
-$arrLang['csvFieldSeparator'] = ['Feld-Trennzeichen', 'Geben Sie hier das Feld-Trennzeichen ein.'];;
-$arrLang['csvTextSeparator']  = ['Text-Trennzeichen', 'Geben Sie hier das Text-Trennzeichen ein.'];
-$arrLang['csvArraySeparator'] = [
+$arrLang['csvDelimiter'] = ['Feld-Trennzeichen', 'Geben Sie hier das Feld-Trennzeichen ein.'];;
+$arrLang['csvEnclosure']  = ['Text-Trennzeichen', 'Geben Sie hier das Text-Trennzeichen ein.'];
+$arrLang['csvEscape'] = [
     'Array-Trennzeichen',
     'Geben Sie hier das Trennzeichen für die Umwandlung von trennzeichen-separierten Feldwerten ein. Wenn das entsprechende Häkchen in der Felderabbildung gesetzt ist, werden Werte wie "1;4;5" zu einem serialisierten Array transformiert.',
 ];

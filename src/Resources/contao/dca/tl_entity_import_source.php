@@ -77,7 +77,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
         'sourceType_http'               => 'sourceUrl,httpFileType',
         'sourceType_contao_file_system' => 'fileType',
         'sourceType_absolute_path'      => 'filePath',
-        'fileType_csv'                  => 'fileSRC,fileContentCsv,csvHeaderRow,csvFieldSeparator,csvTextSeparator,csvArraySeparator,fieldMapping',
+        'fileType_csv'                  => 'fileSRC,fileContentCsv,csvHeaderRow,csvDelimiter,csvEnclosure,csvEscape,fieldMapping',
         'fileType_json'                 => 'fileSRC,fileContentJson,pathToDataArray,fieldMapping',
         'httpFileType_csv'              => 'fileContentCsv',
         'httpFileType_json'             => 'fileContentJson',
@@ -293,16 +293,16 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
         'fieldMapping'      => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['fieldMapping'],
             'inputType' => 'multiColumnEditor',
-            'load_callback' => [[\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::class, 'onLoadFieldMapping']],
+            'save_callback' => [[\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::class, 'onSaveFieldMapping']],
             'eval'      => [
                 'tl_class' => 'clr',
                 'multiColumnEditor' => [
                     'sortable' => true,
+                    'load_callback' => [[\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::class, 'loadFieldMappingValueType']],
                     'fields'   => [
                         'name'  => [
                             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['fieldMapping']['name'],
                             'inputType' => 'text',
-                            'load_callback' => [[\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::class, 'onLoadFieldMappingName']],
                             'eval'      => [
                                 'groupStyle' => 'width: 48%',
                             ],
@@ -310,7 +310,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
                         'value' => [
                             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['fieldMapping']['value'],
                             'inputType' => 'text',
-                            'load_callback' => [[\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::class, 'onLoadFieldMappingValue']],
+                            'load_callback' => [[\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::class, 'loadFieldMappingValueType']],
                             'eval'      => [
                                 'groupStyle' => 'width: 48%',
                             ],
@@ -330,8 +330,8 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             ],
             'sql'       => "char(1) NOT NULL default ''",
         ],
-        'csvFieldSeparator' => [
-            'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['csvFieldSeparator'],
+        'csvDelimiter' => [
+            'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['csvDelimiter'],
             'exclude'   => true,
             'inputType' => 'text',
             'default'   => ',',
@@ -342,8 +342,8 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             ],
             'sql'       => "char(1) NOT NULL default ''",
         ],
-        'csvTextSeparator'  => [
-            'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['csvTextSeparator'],
+        'csvEnclosure'  => [
+            'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['csvEnclosure'],
             'exclude'   => true,
             'inputType' => 'text',
             'default'   => '"',
@@ -354,8 +354,8 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             ],
             'sql'       => "char(1) NOT NULL default ''",
         ],
-        'csvArraySeparator' => [
-            'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['csvArraySeparator'],
+        'csvEscape' => [
+            'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['csvEscape'],
             'exclude'   => true,
             'inputType' => 'text',
             'default'   => ';',

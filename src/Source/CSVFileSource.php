@@ -14,6 +14,8 @@ class CSVFileSource extends FileSource
     {
         $sourceModel = $this->sourceModel;
 
+        $fieldMapping = unserialize($this->fieldMapping);
+
         /*        if ($strSourceFile = Files::getPathFromUuid($this->sourceFile))
                 {
                     $objCsv = new CsvReader($strSourceFile);
