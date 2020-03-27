@@ -21,7 +21,7 @@ class CSVFileSource extends FileSource
                     $objCsv->setEnclosure($this->enclosure);
                     $objCsv->rewind();
                     $objCsv->next();
-        
+
                     while ($arrCurrent = $objCsv->current())
                     {
                         $this->arrItems[] = $arrCurrent;

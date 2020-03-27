@@ -57,22 +57,22 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'dryRun'     => [
                 'label' => &$GLOBALS['TL_LANG']['tl_entity_import_config']['dryRun'],
                 'href'  => 'key=dryRun',
-                'icon'  => 'regular.svg',
+                'icon'  => 'important.svg',
             ],
             'import'     => [
-                'label' => &$GLOBALS['TL_LANG']['tl_entity_import_config']['import'],
-                'href'  => 'key=import',
-                'icon'  => 'ok.svg',
+                'label'      => &$GLOBALS['TL_LANG']['tl_entity_import_config']['import'],
+                'href'       => 'key=import',
+                'icon'       => 'store.svg',
                 'attributes' => 'onclick="if (!confirm(\'' . $GLOBALS['TL_LANG']['tl_entity_import_config']['importConfirm'] . '\')) return false; Backend.getScrollOffset();"',
             ],
         ],
     ],
     'palettes'    => [
-        '__selector__' => ['mergeTable'],
-        'default'      => '{title_legend},title,targetTable,mergeTable;',
+        '__selector__' => ['importSettings'],
+        'default'      => '{title_legend},title,targetTable,importSettings;',
     ],
     'subpalettes' => [
-        'mergeTable' => 'mergeIdentifierFields',
+        'importSettings_mergeTable' => 'mergeIdentifierFields',
     ],
     'fields'      => [
         'id'                    => [
@@ -99,16 +99,21 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'search'           => true,
             'exclude'          => true,
             'inputType'        => 'select',
-            'eval'             => ['mandatory' => true, 'submitOnChange' => true, 'tl_class' => 'w50', 'chosen' => true],
+            'eval'             => ['mandatory' => true, 'submitOnChange' => true, 'tl_class' => 'w50', 'chosen' => true, 'includeBlankOption' => true],
             'options_callback' => [\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::class, 'getAllTargetTables'],
             'sql'              => "varchar(255) NOT NULL default ''",
         ],
-        'mergeTable'            => [
-            'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['mergeTable'],
+        'importSettings'        => [
+            'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['importSettings'],
             'exclude'   => true,
-            'inputType' => 'checkbox',
-            'eval'      => ['tl_class' => 'w50', 'submitOnChange' => true],
-            'sql'       => "char(1) NOT NULL default ''",
+            'inputType' => 'radio',
+            'options'   => [
+                'insert'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['importSettings']['options']['insert'],
+                'mergeTable' => &$GLOBALS['TL_LANG']['tl_entity_import_config']['importSettings']['options']['merge'],
+                'purgeTable' => &$GLOBALS['TL_LANG']['tl_entity_import_config']['importSettings']['options']['purge'],
+            ],
+            'eval'      => ['tl_class' => 'w50', 'submitOnChange' => true, 'mandatory' => true],
+            'sql'       => "varchar(255) NOT NULL default ''",
         ],
         'mergeIdentifierFields' => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['mergeIdentifierFields'],

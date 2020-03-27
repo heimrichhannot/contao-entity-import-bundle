@@ -67,6 +67,11 @@ class Importer implements ImporterInterface
     protected $isInitialized;
 
     /**
+     * @var bool
+     */
+    protected $purgeTableBeforeImport;
+
+    /**
      * Importer constructor.
      *
      * @param $databaseUtil    DatabaseUtil
@@ -84,7 +89,21 @@ class Importer implements ImporterInterface
         $this->source = $source;
         $this->configModel = $configModel;
         $this->targetTable = $configModel->targetTable;
-        $this->mergeTable = ($configModel->mergeTable ? $configModel->mergeTable : false);
+
+        switch ($configModel->importSettings) {
+            case 'mergeTable':
+                $this->mergeTable = true;
+                $this->purgeTableBeforeImport = false;
+                break;
+            case 'purgeTable':
+                $this->mergeTable = false;
+                $this->purgeTableBeforeImport = true;
+                break;
+            default:
+                $this->mergeTable = false;
+                $this->purgeTableBeforeImport = false;
+                break;
+        }
 
         $this->isInitialized = true;
     }
@@ -115,14 +134,14 @@ class Importer implements ImporterInterface
         return true;
     }
 
-    public function setDryRun(bool $dry)
-    {
-        $this->dryRun = $dry;
-    }
-
     public function getDataFromSource(): array
     {
         return $this->source->getMappedData();
+    }
+
+    public function setDryRun(bool $dry)
+    {
+        $this->dryRun = $dry;
     }
 
     protected function executeImport($items)
@@ -134,6 +153,10 @@ class Importer implements ImporterInterface
         try {
             $count = 0;
             $targetTableColumns = $this->database->getFieldNames($this->targetTable);
+
+            if ($this->purgeTableBeforeImport) {
+                $this->databaseUtil->delete($this->targetTable);
+            }
 
             foreach ($items as $item) {
                 $columnsNotExisting = array_diff(array_keys($item), $targetTableColumns);

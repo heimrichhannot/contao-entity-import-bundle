@@ -73,6 +73,19 @@ class EntityImportSourceContainer
     public function onLoadFieldMapping($value, $dc)
     {
         $arrValue = unserialize($value);
+
+        $fileType = $dc->activeRecord->fileType;
+
+        switch ($fileType) {
+            case 'csv':
+
+                break;
+            case 'json':
+
+                break;
+            default:
+                break;
+        }
     }
 
     private function processInputFile($fileUuid, $type, $id)
