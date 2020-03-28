@@ -70,30 +70,8 @@ class EntityImportSourceContainer
         return $value;
     }
 
-    public function onLoadFieldMapping($value, $dc)
-    {
-        $arrValue = unserialize($value);
-
-        $fileType = $dc->activeRecord->fileType;
-
-        switch ($fileType) {
-            case static::FILETYPE_CSV:
-
-                break;
-            case static::FILETYPE_JSON:
-
-                break;
-            default:
-                break;
-        }
-
-        return $value;
-    }
-
     public function onSaveFieldMapping($value, $dc)
     {
-        $fileType = $dc->activeRecord->fileType;
-
         if ($dc->activeRecord->fileType === static::FILETYPE_CSV) {
             return $value;
         }

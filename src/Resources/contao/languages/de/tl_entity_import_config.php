@@ -36,7 +36,7 @@ $arrLang['mergeIdentifierFields']           = [
 $arrLang['mergeIdentifierFields']['source'] = ['Quellfeld', 'Wählen Sie hier das Quellfeld aus der externen Quelle aus.'];
 $arrLang['mergeIdentifierFields']['target'] = ['Zielfeld', 'Wählen Sie hier das Zielfeld in das Importiert wird.'];
 
-$arrLang['importSettings'] = ['Importeinstellungen', ''];
+$arrLang['importSettings']                      = ['Importeinstellungen', ''];
 $arrLang['importSettings']['options']['insert'] = 'Beim Importieren neue Datensätze anlegen';
 $arrLang['importSettings']['options']['merge']  = 'Beim Importieren Datensätze zusammenführen (Merge)';
 $arrLang['importSettings']['options']['purge']  = 'Vor dem Importieren die Datensätze in der Zieltabelle löschen';
@@ -50,10 +50,13 @@ $arrLang['importConfirm'] = 'Soll der Import ID %s wirklich durchgeführt werden
  * Errors
  */
 $arrLang['error']['notInitialized']     = 'Importer ist noch nicht initialisiert.';
-$arrLang['error']['error']              = 'Fehler: %s';
+$arrLang['error']['error']              = 'Fehler: %s.';
 $arrLang['error']['tableDoNotExist']    = 'Die Zieltabelle existiert nicht.';
 $arrLang['error']['tableFieldsDiffer']  = 'Die Felder vom Ziel und Quelle unterscheiden sich.';
 $arrLang['error']['noIdentifierFields'] = 'Identifikatorfelder nicht gesetzt.';
 $arrLang['error']['successfulImport']   = 'Erfolgreicher Import von %s Einträgen';
 $arrLang['error']['emptyFile']          = 'Daten zum Importieren nicht vorhanden.';
 $arrLang['error']['errorImport']        = 'Fehlerhafter Import von %s Einträgen. Fehler: %s';
+$arrLang['error']['delimiter']          = 'Delimiter für csv ist nicht definiert';
+$arrLang['error']['enclosure']          = 'Enclosure für csv ist nicht definiert';
+$arrLang['error']['escape']             = 'Enclosure für csv ist nicht definiert';

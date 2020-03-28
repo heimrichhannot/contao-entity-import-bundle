@@ -35,6 +35,8 @@ class HookListener
         $enclosure = ('' !== $source->csvEnclosure ? $source->csvEnclosure : '"');
 
         $arrCsvFields = [];
+        $arrOptions = [];
+        $arrKeys = [];
 
         if ($strSourceFile = Files::getPathFromUuid($source->fileSRC)) {
             $objCsv = new CsvReader($strSourceFile);
@@ -51,20 +53,13 @@ class HookListener
         }
         $dca = &$GLOBALS['TL_DCA'][$strTable];
 
-        $arrKeys = [];
-        $arrValues = [];
-
         foreach ($arrCsvFields as $index => $field) {
-            array_push($arrKeys, (string) $index);
-
             if ($source->csvHeaderRow) {
-                array_push($arrValues, $field.' ['.$index.']');
+                $arrOptions[' '.$index] = $field.' ['.$index.']';
             } else {
-                array_push($arrValues, '['.$index.']');
+                $arrOptions[' '.$index] = '['.$index.']';
             }
         }
-
-        $arrOptions = array_combine($arrKeys, $arrValues);
 
         switch ($fileType) {
             case EntityImportSourceContainer::FILETYPE_CSV:

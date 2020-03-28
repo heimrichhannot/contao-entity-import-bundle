@@ -23,8 +23,7 @@ $GLOBALS['TL_LANG']['tl_entity_import_config']['delete'] = ['Delete config', 'De
  * Misc
  */
 $GLOBALS['TL_LANG']['tl_entity_import_config']['createNewContentElement'] = 'Create new tl_content entry';
-$GLOBALS['TL_LANG']['tl_entity_import_config']['importConfirm'] = 'Are you sure You want to Import with this settings?';
-
+$GLOBALS['TL_LANG']['tl_entity_import_config']['importConfirm']           = 'Are you sure You want to Import with this settings?';
 
 
 /**
@@ -36,11 +35,14 @@ $GLOBALS['TL_LANG']['tl_entity_import_config']['importerInfo'] = 'Using the clas
 /**
  * Errors
  */
-$arrLang['error']['notInitialized'] = 'Importer is not yet initialized.';
-$arrLang['error']['error'] = 'Error: %s';
-$arrLang['error']['tableDoNotExist'] = 'Target table does not exist.';
-$arrLang['error']['tableFieldsDiffer'] = 'Fields of target and source differ';
+$arrLang['error']['notInitialized']     = 'Importer is not yet initialized.';
+$arrLang['error']['error']              = 'Error: %s';
+$arrLang['error']['tableDoNotExist']    = 'Target table does not exist.';
+$arrLang['error']['tableFieldsDiffer']  = 'Fields of target and source differ';
 $arrLang['error']['noIdentifierFields'] = 'No unique identifier fields set.';
-$arrLang['error']['successfulImport'] = 'Successfully imported %s records';
-$arrLang['error']['emptyFile'] = 'Nothing to import';
-$arrLang['error']['errorImport'] = 'Error inserted %s records. Error: %s';
+$arrLang['error']['successfulImport']   = 'Successfully imported %s records';
+$arrLang['error']['emptyFile']          = 'Nothing to import';
+$arrLang['error']['errorImport']        = 'Error inserted %s records. Error: %s';
+$arrLang['error']['delimiter']          = 'Delimiter for csv is not defined';
+$arrLang['error']['enclosure']          = 'Enclosure for csv is not defined';
+$arrLang['error']['escape']             = 'Escape for csv is not defined';

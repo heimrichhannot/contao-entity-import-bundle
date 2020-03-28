@@ -10,16 +10,24 @@ namespace HeimrichHannot\EntityImportBundle\Source;
 
 class JSONFileSource extends FileSource
 {
-    public function getData(): array
+    public function getMappedData(): array
     {
         $fileContent = file_get_contents($this->filePath);
 
         $arrPath = explode('.', $this->sourceModel->pathToDataArray);
 
-        $arrData = json_decode($fileContent, true);
+        $fileData = json_decode($fileContent, true);
 
         if (empty($arrPath)) {
-            $arrData = $this->getDataFromPath($arrData, $arrPath);
+            $fileData = $this->getDataFromPath($fileData, $arrPath);
+        }
+
+        $arrData = [];
+        $arrMapping = unserialize($this->sourceModel->fieldMapping);
+        if (null !== $fileData) {
+            foreach ($fileData as $index => $arrElement) {
+                $arrData[] = $this->getMappedValues($arrElement, $arrMapping);
+            }
         }
 
         return $arrData;
@@ -34,5 +42,29 @@ class JSONFileSource extends FileSource
         $arrData = $arrData[array_pop($arrPath)];
 
         return $this->getDataFromPath($arrData, $arrPath);
+    }
+
+    protected function getMappedValues($arrElement, $arrMapping)
+    {
+        $arrResult = [];
+
+        foreach ($arrMapping as $mappingElement) {
+            $arrMappingElement = explode('.', $mappingElement['value']);
+
+            $arrResult[$mappingElement['name']] = $this->getValue($arrElement, $arrMappingElement);
+        }
+
+        return $arrResult;
+    }
+
+    protected function getValue($data, $mapping)
+    {
+        if (empty($mapping)) {
+            return $data;
+        }
+
+        $data = $data[array_shift($mapping)];
+
+        return $this->getValue($data, $mapping);
     }
 }
