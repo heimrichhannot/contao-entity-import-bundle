@@ -10,12 +10,13 @@ namespace HeimrichHannot\EntityImportBundle\Importer;
 
 use Contao\Database;
 use Contao\Message;
-use Contao\Model;
 use HeimrichHannot\EntityImportBundle\Event\AfterImportEvent;
 use HeimrichHannot\EntityImportBundle\Event\BeforeImportEvent;
 use HeimrichHannot\EntityImportBundle\Model\EntityImportConfigModel;
+use HeimrichHannot\EntityImportBundle\Model\EntityImportSourceModel;
 use HeimrichHannot\EntityImportBundle\Source\SourceInterface;
 use HeimrichHannot\UtilsBundle\Database\DatabaseUtil;
+use HeimrichHannot\UtilsBundle\Model\ModelUtil;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
@@ -72,25 +73,38 @@ class Importer implements ImporterInterface
     protected $purgeTableBeforeImport;
 
     /**
-     * Importer constructor.
-     *
-     * @param $databaseUtil    DatabaseUtil
-     * @param $eventDispatcher EventDispatcher
+     * @var EntityImportSourceModel
      */
-    public function __construct(EventDispatcher $eventDispatcher, DatabaseUtil $databaseUtil)
+    private $sourceModel;
+
+    /**
+     * @var ModelUtil
+     */
+    private $modelUtil;
+
+    /**
+     * Importer constructor.
+     */
+    public function __construct(EventDispatcher $eventDispatcher, DatabaseUtil $databaseUtil, ModelUtil $modelUtil)
     {
         $this->eventDispatcher = $eventDispatcher;
         $this->databaseUtil = $databaseUtil;
+        $this->modelUtil = $modelUtil;
     }
 
-    public function init(SourceInterface $source, Model $configModel)
+    public function init(int $configModel, int $sourceModel)
     {
         $this->database = Database::getInstance();
-        $this->source = $source;
-        $this->configModel = $configModel;
-        $this->targetTable = $configModel->targetTable;
 
-        switch ($configModel->importSettings) {
+        $this->configModel = $this->modelUtil->findModelInstanceByIdOrAlias('tl_entity_import_config', $configModel);
+        $this->sourceModel = $this->modelUtil->findModelInstanceByIdOrAlias('tl_entity_import_source', $sourceModel);
+        $this->targetTable = $this->configModel->targetTable;
+
+        if (null === $this->configModel) {
+            new Exception('SourceModel not defined');
+        }
+
+        switch ($this->configModel->importSettings) {
             case 'mergeTable':
                 $this->mergeTable = true;
                 $this->purgeTableBeforeImport = false;
@@ -113,23 +127,20 @@ class Importer implements ImporterInterface
      */
     public function run(): bool
     {
-        try {
-            if (!$this->isInitialized) {
-                throw new \Exception($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['notInitialized']);
-            }
-        } catch (\Exception $e) {
-            Message::addError($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['notInitialized'], $e->getMessage());
-        }
+        if (!$this->isInitialized) {
+            Message::addError(sprintf($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['errorMessage'], $GLOBALS['TL_LANG']['tl_entity_import_config']['error']['notInitialized']));
 
-        //System::getContainer()->get('huh.utils.model')->callModelMethod('tl', 'findBySpecialSomething', 1, 2, 3, 4)
+            return false;
+        }
 
         $items = $this->getDataFromSource();
 
-        $this->eventDispatcher->dispatch(BeforeImportEvent::NAME, new BeforeImportEvent());
+//        $event = $this->eventDispatcher->dispatch(BeforeImportEvent::NAME, new BeforeImportEvent($items));
 
+//        $this->executeImport($event->getItems());
         $this->executeImport($items);
 
-        $this->eventDispatcher->dispatch(AfterImportEvent::NAME, new AfterImportEvent());
+//        $event = $this->eventDispatcher->dispatch(AfterImportEvent::NAME, new AfterImportEvent());
 
         return true;
     }
@@ -166,16 +177,18 @@ class Importer implements ImporterInterface
 
                 ++$count;
 
-                if (!$this->dryRun) {
-                    if ($this->mergeTable) {
-                        $mergeIdentifier = unserialize($this->configModel->mergeIdentifierFields)[0];
-                        if (empty($mergeIdentifier)) {
-                            throw new Exception($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['noIdentifierFields']);
-                        }
-                        $this->databaseUtil->update($this->targetTable, $item, $mergeIdentifier['target'].'=?', [$mergeIdentifier['source']]);
-                    } else {
-                        $this->databaseUtil->insert($this->targetTable, $item);
+                if ($this->dryRun) {
+                    continue;
+                }
+
+                if ($this->mergeTable) {
+                    $mergeIdentifier = unserialize($this->configModel->mergeIdentifierFields)[0];
+                    if (empty($mergeIdentifier)) {
+                        throw new Exception($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['noIdentifierFields']);
                     }
+                    $this->databaseUtil->update($this->targetTable, $item, $mergeIdentifier['target'].'=?', [$mergeIdentifier['source']]);
+                } else {
+                    $this->databaseUtil->insert($this->targetTable, $item);
                 }
             }
 

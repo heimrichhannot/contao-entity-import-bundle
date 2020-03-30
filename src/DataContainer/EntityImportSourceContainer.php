@@ -10,6 +10,7 @@ namespace HeimrichHannot\EntityImportBundle\DataContainer;
 
 use Contao\StringUtil;
 use Contao\System;
+use Haste\IO\Reader\CsvReader;
 use HeimrichHannot\UtilsBundle\File\FileUtil;
 
 class EntityImportSourceContainer
@@ -40,10 +41,10 @@ class EntityImportSourceContainer
 
     public function onLoadFileSRC($value, $dc)
     {
-        $file = \FilesModel::findByUuid($value);
+        $file = System::getContainer()->get('huh.utils.model')->callModelMethod('tl_files', 'findByUuid', $value);
 
         if ($file) {
-            $this->processInputFile($file, null, $dc->id);
+            $this->processInputFile($file, null, $dc);
         }
 
         return $value;
@@ -53,33 +54,33 @@ class EntityImportSourceContainer
     {
         $row = $dc->activeRecord->row();
 
-        if (null !== $row['fileSRC']) {
-            switch ($row['sourceType']) {
-                case static::SOURCE_TYPE_CONTAO_FILE_SYSTEM:
-                    $value = $this->processInputFile(StringUtil::binToUuid($row['fileSRC']), $row['fileType'], $dc->id);
+        switch ($row['sourceType']) {
+            case static::SOURCE_TYPE_CONTAO_FILE_SYSTEM:
+                if (null === $row['fileSRC'] || null === $row['fileType']) {
+                    $value = '';
                     break;
-                case static::SOURCE_TYPE_ABSOLUTE_PATH:
+                }
+                $value = $this->processInputFile(StringUtil::binToUuid($row['fileSRC']), $row['fileType'], $dc);
+                break;
+            case static::SOURCE_TYPE_ABSOLUTE_PATH:
+                $value = '';
+                break;
+            case static::SOURCE_TYPE_HTTP:
+                if (null === $row['sourceUrl'] || null === $row['fileType']) {
+                    $value = '';
                     break;
-                case static::SOURCE_TYPE_HTTP:
-                    break;
-                default:
-                    break;
-            }
+                }
+                $value = $this->processHttp($row['sourceUrl'], $row['fileType'], $dc->id);
+                break;
+            default:
+                $value = '';
+                break;
         }
 
         return $value;
     }
 
-    public function onSaveFieldMapping($value, $dc)
-    {
-        if ($dc->activeRecord->fileType === static::FILETYPE_CSV) {
-            return $value;
-        }
-
-        return $value;
-    }
-
-    private function processInputFile($fileUuid, $type, $id)
+    private function processInputFile($fileUuid, $type, $dc)
     {
         if (null !== $type) {
             $fileType = $type;
@@ -87,16 +88,27 @@ class EntityImportSourceContainer
             $fileType = $this->fileUtil->getFileExtension($this->fileUtil->getPathFromUuid($fileUuid));
         }
 
-        $path = $this->fileUtil->getPathFromUuid($fileUuid);
-
         switch ($fileType) {
             case static::FILETYPE_CSV:
-                $csvFile = fopen($path, 'r');
-                $fileContentArray = fgetcsv($csvFile, 0, ',', '"', ';');
-                $fileContent = implode(',', $fileContentArray);
+
+                if ($path = $this->fileUtil->getPathFromUuid($fileUuid)) {
+                    $objCsv = new CsvReader($path);
+                    $csvDelimiter = '' !== $dc->csvDelimiter ? $dc->csvDelimiter : ',';
+                    $csvEnclosure = '' !== $dc->csvEscape ? $dc->csvEscape : '"';
+                    $csvEscape = '' !== $dc->csvEscape ? $dc->csvEscape : ';';
+
+                    $objCsv->setDelimiter($csvDelimiter);
+                    $objCsv->setEnclosure($csvEnclosure);
+                    $objCsv->setEscape($csvEscape);
+                    $objCsv->rewind();
+                    $objCsv->next();
+
+                    $arrData = $objCsv->current();
+                    $fileContent = implode(',', $arrData);
+                }
                 break;
             case static::FILETYPE_JSON:
-                $fileContent = file_get_contents($path);
+                $fileContent = $this->fileUtil->getFileContentFromUuid($fileUuid);
                 break;
             default:
                 $fileContent = '';
@@ -104,5 +116,28 @@ class EntityImportSourceContainer
         }
 
         return $fileContent;
+    }
+
+    private function processHttp($url, $type, $id)
+    {
+        if (null !== $type) {
+            $sourceType = $type;
+        } else {
+            $sourceType = 'json';
+        }
+
+        switch ($sourceType) {
+            case static::FILETYPE_CSV:
+                $content = 'csv';
+                break;
+            case static::FILETYPE_JSON:
+                $content = file_get_contents($url);
+                break;
+            default:
+                $content = '';
+                break;
+        }
+
+        return $content;
     }
 }

@@ -5,6 +5,12 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
         'dataContainer'    => 'Table',
         'enableVersioning' => true,
         'ptable'           => 'tl_entity_import_source',
+        'onsubmit_callback' => [
+            ['huh.utils.dca', 'setDateAdded'],
+        ],
+        'oncopy_callback'   => [
+            ['huh.utils.dca', 'setDateAddedOnCopy'],
+        ],
         'sql'              => [
             'keys' => [
                 'id'  => 'primary',
@@ -82,6 +88,13 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'foreignKey' => 'tl_entity_import_source.title',
             'sql'        => "int(10) unsigned NOT NULL default '0'",
             'relation'   => ['type' => 'belongsTo', 'load' => 'eager'],
+        ],
+        'dateAdded'                   => [
+            'label'   => &$GLOBALS['TL_LANG']['MSC']['dateAdded'],
+            'sorting' => true,
+            'flag'    => 6,
+            'eval'    => ['rgxp' => 'datim', 'doNotCopy' => true],
+            'sql'     => "int(10) unsigned NOT NULL default '0'",
         ],
         'tstamp'                => [
             'sql' => "int(10) unsigned NOT NULL default '0'",

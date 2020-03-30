@@ -12,7 +12,7 @@ class JSONFileSource extends FileSource
 {
     public function getMappedData(): array
     {
-        $fileContent = file_get_contents($this->filePath);
+        $fileContent = $this->getFileContent();
 
         $arrPath = explode('.', $this->sourceModel->pathToDataArray);
 

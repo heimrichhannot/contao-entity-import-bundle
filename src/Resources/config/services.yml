@@ -4,3 +4,5 @@ services:
 
   HeimrichHannot\EntityImportBundle\Importer\:
     resource: '../../Importer/*'
+
+  HeimrichHannot\EntityImportBundle\Source\SourceFactory: ~

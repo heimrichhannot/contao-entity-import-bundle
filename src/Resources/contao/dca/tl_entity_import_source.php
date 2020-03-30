@@ -6,6 +6,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
     'config'      => [
         'dataContainer'    => 'Table',
         'enableVersioning' => true,
+        'onload_callback'  => [[\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::class, 'initPalette']],
         'sql'              => [
             'keys' => [
                 'id' => 'primary',
@@ -66,7 +67,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
 
     // Palettes
     'palettes'    => [
-        '__selector__'                                                                       => ['type', 'sourceType', 'fileType', 'httpFileType'],
+        '__selector__'                                                                       => ['type', 'sourceType', 'fileType'],
         'default'                                                                            => '{title_legend},title,type;',
         HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::TYPE_DATABASE => '{title_legend},title,type;{db_legend},dbDriver,dbHost,dbUser,dbPass,dbDatabase,dbPconnect,dbCharset,dbPort,dbSocket',
         HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::TYPE_FILE     => '{title_legend},title,type;{file_legend},sourceType',
@@ -74,13 +75,11 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
 
     // Subpalettes
     'subpalettes' => [
-        'sourceType_http'               => 'sourceUrl,httpFileType',
-        'sourceType_contao_file_system' => 'fileType',
-        'sourceType_absolute_path'      => 'filePath',
-        'fileType_csv'                  => 'fileSRC,fileContentCsv,csvHeaderRow,csvDelimiter,csvEnclosure,csvEscape,fieldMapping',
-        'fileType_json'                 => 'fileSRC,fileContentJson,pathToDataArray,fieldMapping',
-        'httpFileType_csv'              => 'fileContentCsv',
-        'httpFileType_json'             => 'fileContentJson',
+        'sourceType_http'               => 'sourceUrl,fileType',
+        'sourceType_contao_file_system' => 'fileSRC,fileType',
+        'sourceType_absolute_path'      => 'absolutePath,filePath',
+        'fileType_csv'                  => 'fileContentCsv,csvHeaderRow,csvDelimiter,csvEnclosure,csvEscape,fieldMapping',
+        'fileType_json'                 => 'fileContentJson,pathToDataArray,fieldMapping',
     ],
     // Fields
     'fields'      => [
@@ -216,19 +215,6 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'eval'      => ['submitOnChange' => true, 'includeBlankOption' => true, 'tl_class' => 'w50'],
             'sql'       => "varchar(255) NOT NULL default ''",
         ],
-        'httpFileType'      => [
-            'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['fileType'],
-            'exclude'   => true,
-            'filter'    => true,
-            'inputType' => 'select',
-            'options'   => [
-                \HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::FILETYPE_CSV,
-                \HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::FILETYPE_JSON,
-            ],
-            'reference' => &$GLOBALS['TL_LANG']['tl_entity_import_source']['fileType'],
-            'eval'      => ['submitOnChange' => true, 'includeBlankOption' => true, 'tl_class' => 'w50'],
-            'sql'       => "varchar(255) NOT NULL default ''",
-        ],
         'filePath'          => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['filePath'],
             'exclude'   => true,
@@ -253,6 +239,13 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'inputType' => 'fileTree',
             'eval'      => ['filesOnly' => true, 'fieldType' => 'radio', 'mandatory' => true, 'tl_class' => 'w50 clr', 'submitOnChange' => true],
             'sql'       => "binary(16) NULL",
+        ],
+        'absolutePath' => [
+            'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['absolutePath'],
+            'exclude'   => true,
+            'filter'    => true,
+            'inputType' => 'text',
+            'eval'      => ['submitOnChange' => true, 'includeBlankOption' => true, 'tl_class' => 'clr w50'],
         ],
         'fileContentCsv'    => [
             'label'         => &$GLOBALS['TL_LANG']['tl_entity_import_source']['fileContentCsv'],
@@ -293,7 +286,6 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
         'fieldMapping'      => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['fieldMapping'],
             'inputType' => 'multiColumnEditor',
-            'save_callback' => [[\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::class, 'onSaveFieldMapping']],
             'eval'      => [
                 'tl_class' => 'clr',
                 'multiColumnEditor' => [

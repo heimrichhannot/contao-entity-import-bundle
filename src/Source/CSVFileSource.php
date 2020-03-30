@@ -35,7 +35,7 @@ class CSVFileSource extends FileSource
                 throw new \Exception($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['escape']);
             }
         } catch (\Exception $e) {
-            Message::addError(sprintf($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['error']), $e->getMessage());
+            Message::addError(sprintf($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['errorMessage']), $e->getMessage());
         }
 
         if ($strSourceFile = Files::getPathFromUuid($sourceModel->fileSRC)) {

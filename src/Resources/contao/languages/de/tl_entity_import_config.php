@@ -49,14 +49,15 @@ $arrLang['importConfirm'] = 'Soll der Import ID %s wirklich durchgeführt werden
 /**
  * Errors
  */
-$arrLang['error']['notInitialized']     = 'Importer ist noch nicht initialisiert.';
-$arrLang['error']['error']              = 'Fehler: %s.';
-$arrLang['error']['tableDoNotExist']    = 'Die Zieltabelle existiert nicht.';
-$arrLang['error']['tableFieldsDiffer']  = 'Die Felder vom Ziel und Quelle unterscheiden sich.';
-$arrLang['error']['noIdentifierFields'] = 'Identifikatorfelder nicht gesetzt.';
-$arrLang['error']['successfulImport']   = 'Erfolgreicher Import von %s Einträgen';
-$arrLang['error']['emptyFile']          = 'Daten zum Importieren nicht vorhanden.';
-$arrLang['error']['errorImport']        = 'Fehlerhafter Import von %s Einträgen. Fehler: %s';
-$arrLang['error']['delimiter']          = 'Delimiter für csv ist nicht definiert';
-$arrLang['error']['enclosure']          = 'Enclosure für csv ist nicht definiert';
-$arrLang['error']['escape']             = 'Enclosure für csv ist nicht definiert';
+$arrLang['error']['errorMessage']        = 'Beim Importieren ist ein Fehler aufgetreten: %s.';
+$arrLang['error']['notInitialized']      = 'Importer ist noch nicht initialisiert.';
+$arrLang['error']['tableDoNotExist']     = 'Die Zieltabelle existiert nicht.';
+$arrLang['error']['tableFieldsDiffer']   = 'Die Felder vom Ziel und Quelle unterscheiden sich.';
+$arrLang['error']['noIdentifierFields']  = 'Identifikatorfelder nicht gesetzt.';
+$arrLang['error']['successfulImport']    = 'Erfolgreicher Import von %s Einträgen';
+$arrLang['error']['emptyFile']           = 'Daten zum Importieren nicht vorhanden.';
+$arrLang['error']['errorImport']         = 'Fehlerhafter Import von %s Einträgen. Fehler: %s';
+$arrLang['error']['delimiter']           = 'Delimiter für csv ist nicht definiert';
+$arrLang['error']['enclosure']           = 'Enclosure für csv ist nicht definiert';
+$arrLang['error']['escape']              = 'Enclosure für csv ist nicht definiert';
+$arrLang['error']['filePathNotProvided'] = 'Der Pfad zur Datei wurde nicht gefunden.';

@@ -8,7 +8,12 @@
 
 namespace HeimrichHannot\EntityImportBundle\Source;
 
+use Contao\Message;
+use HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer;
 use HeimrichHannot\EntityImportBundle\Model\EntityImportSourceModel;
+use HeimrichHannot\UtilsBundle\File\FileUtil;
+use HeimrichHannot\UtilsBundle\Model\ModelUtil;
+use Symfony\Component\Config\FileLocator;
 
 abstract class FileSource extends Source
 {
@@ -18,21 +23,64 @@ abstract class FileSource extends Source
     protected $filePath;
 
     /**
+     * @var FileUtil
+     */
+    protected $fileUtil;
+
+    /**
      * @var EntityImportSourceModel
      */
     protected $sourceModel;
+    /**
+     * @var ModelUtil
+     */
+    private $modelUtil;
 
-    public function __construct(EntityImportSourceModel $sourceModel)
+    /**
+     * FileSource constructor.
+     *
+     * @param FileLocator $fileLocator
+     */
+    public function __construct(FileUtil $fileUtil, ModelUtil $modelUtil)
     {
-        $this->sourceModel = $sourceModel;
+        $this->fileUtil = $fileUtil;
+        $this->modelUtil = $modelUtil;
+    }
 
-        parent::__construct($this->sourceModel);
+    public function getFileContent()
+    {
+        $fileUuid = $this->modelUtil->callModelMethod('tl_files', 'findByPath', $this->getFilePath());
 
-        $this->filePath = \FilesModel::findByUuid($this->sourceModel->fileSRC)->path;
+        return $this->fileUtil->getFileContentFromUuid($fileUuid);
     }
 
     public function getFilePath(): string
     {
-        return $this->filePath;
+        $source = $this->sourceModel;
+
+        switch ($source->sourceType) {
+            case EntityImportSourceContainer::SOURCE_TYPE_HTTP:
+                $path = $source->sourceUrl;
+                break;
+            case EntityImportSourceContainer::SOURCE_TYPE_ABSOLUTE_PATH:
+                $path = $source->absolutePath;
+                break;
+            case EntityImportSourceContainer::SOURCE_TYPE_CONTAO_FILE_SYSTEM:
+                $path = $source->fileSRC;
+                break;
+            default:
+                $path = null;
+                break;
+        }
+
+        if (null === $path) {
+            Message::addError(sprintf($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['errorMessage']), $GLOBALS['TL_LANG']['tl_entity_import_config']['error']['filePathNotProvided']);
+
+            return false;
+        }
+
+        $this->filePath = $path;
+
+        return true;
     }
 }

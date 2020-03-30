@@ -8,6 +8,7 @@
 
 namespace HeimrichHannot\EntityImportBundle\EventListener;
 
+use Contao\DataContainer;
 use Haste\IO\Reader\CsvReader;
 use HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer;
 use HeimrichHannot\EntityImportBundle\Model\EntityImportSourceModel;
@@ -26,8 +27,12 @@ class HookListener
         $this->request = $request;
     }
 
-    public function loadDataContainerHook($strTable)
+    public function loadDataContainerHook(DataContainer $dc)
     {
+        if (null === ($source = $this->modelUtil->findModelInstanceByPk('tl_entity_import_source', $dc->id))) {
+            return;
+        }
+
         $source = EntityImportSourceModel::findOneBy('id', $this->request->getGet('id'));
         $fileType = $source->fileType;
 
@@ -48,9 +53,6 @@ class HookListener
             $arrCsvFields = $objCsv->current();
         }
 
-        if (!isset($GLOBALS['TL_DCA'][$strTable])) {
-            return;
-        }
         $dca = &$GLOBALS['TL_DCA'][$strTable];
 
         foreach ($arrCsvFields as $index => $field) {

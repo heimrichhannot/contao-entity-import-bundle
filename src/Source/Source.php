@@ -8,7 +8,7 @@
 
 namespace HeimrichHannot\EntityImportBundle\Source;
 
-use HeimrichHannot\EntityImportBundle\Model\EntityImportSourceModel;
+use HeimrichHannot\UtilsBundle\Model\ModelUtil;
 
 abstract class Source implements SourceInterface
 {
@@ -21,15 +21,23 @@ abstract class Source implements SourceInterface
      * @var EntityImportSourceModel
      */
     protected $sourceModel;
+    /**
+     * @var ModelUtil
+     */
+    private $modelUtil;
 
-    public function __construct(EntityImportSourceModel $sourceModel)
+    public function __construct(ModelUtil $modelUtil)
     {
-        $this->sourceModel = $sourceModel;
-        $this->fieldMapping = $sourceModel->fieldMapping;
+        $this->modelUtil = $modelUtil;
     }
 
     public function getMapping(): array
     {
         return $this->fieldMapping;
+    }
+
+    public function setFieldMapping($mapping): bool
+    {
+        $this->fieldMapping = $mapping;
     }
 }
