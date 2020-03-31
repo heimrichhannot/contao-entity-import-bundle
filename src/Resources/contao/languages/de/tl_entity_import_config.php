@@ -60,4 +60,4 @@ $arrLang['error']['errorImport']         = 'Fehlerhafter Import von %s Einträge
 $arrLang['error']['delimiter']           = 'Delimiter für csv ist nicht definiert';
 $arrLang['error']['enclosure']           = 'Enclosure für csv ist nicht definiert';
 $arrLang['error']['escape']              = 'Enclosure für csv ist nicht definiert';
-$arrLang['error']['filePathNotProvided'] = 'Der Pfad zur Datei wurde nicht gefunden.';
+$arrLang['error']['filePathNotProvided'] = 'Der Pfad zur Datei wurde nicht gefunden';

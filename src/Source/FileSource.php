@@ -13,7 +13,6 @@ use HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer;
 use HeimrichHannot\EntityImportBundle\Model\EntityImportSourceModel;
 use HeimrichHannot\UtilsBundle\File\FileUtil;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
-use Symfony\Component\Config\FileLocator;
 
 abstract class FileSource extends Source
 {
@@ -31,6 +30,8 @@ abstract class FileSource extends Source
      * @var EntityImportSourceModel
      */
     protected $sourceModel;
+
+    private $fileUuid;
     /**
      * @var ModelUtil
      */
@@ -38,8 +39,6 @@ abstract class FileSource extends Source
 
     /**
      * FileSource constructor.
-     *
-     * @param FileLocator $fileLocator
      */
     public function __construct(FileUtil $fileUtil, ModelUtil $modelUtil)
     {
@@ -47,26 +46,42 @@ abstract class FileSource extends Source
         $this->modelUtil = $modelUtil;
     }
 
+    public function getSourceModel(): EntityImportSourceModel
+    {
+        return $this->sourceModel;
+    }
+
+    public function setSourceModel(EntityImportSourceModel $sourceModel)
+    {
+        $this->sourceModel = $sourceModel;
+    }
+
     public function getFileContent()
     {
-        $fileUuid = $this->modelUtil->callModelMethod('tl_files', 'findByPath', $this->getFilePath());
-
-        return $this->fileUtil->getFileContentFromUuid($fileUuid);
+        return $this->fileUtil->getFileContentFromUuid($this->fileUuid);
     }
 
     public function getFilePath(): string
     {
-        $source = $this->sourceModel;
+        return $this->filePath;
+    }
+
+    public function setFilePath(int $sourceModel): string
+    {
+        $source = $this->modelUtil->findModelInstanceByIdOrAlias('tl_entity_import_source', $sourceModel);
 
         switch ($source->sourceType) {
             case EntityImportSourceContainer::SOURCE_TYPE_HTTP:
                 $path = $source->sourceUrl;
+                $uuid = null;
                 break;
             case EntityImportSourceContainer::SOURCE_TYPE_ABSOLUTE_PATH:
                 $path = $source->absolutePath;
+                $uuid = null;
                 break;
             case EntityImportSourceContainer::SOURCE_TYPE_CONTAO_FILE_SYSTEM:
-                $path = $source->fileSRC;
+                $uuid = $source->fileSRC;
+                $path = $this->fileUtil->getPathFromUuid($source->fileSRC);
                 break;
             default:
                 $path = null;
@@ -74,12 +89,13 @@ abstract class FileSource extends Source
         }
 
         if (null === $path) {
-            Message::addError(sprintf($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['errorMessage']), $GLOBALS['TL_LANG']['tl_entity_import_config']['error']['filePathNotProvided']);
+            Message::addError(sprintf($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['errorMessage'], $GLOBALS['TL_LANG']['tl_entity_import_config']['error']['filePathNotProvided']));
 
             return false;
         }
 
         $this->filePath = $path;
+        $this->fileUuid = $uuid;
 
         return true;
     }

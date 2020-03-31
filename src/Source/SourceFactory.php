@@ -39,23 +39,31 @@ class SourceFactory
 
         // TODO -> change to config.yml
         switch ($sourceModel->sourceType) {
-            case EntityImportSourceContainer::TYPE_DATABASE:
-                break;
-            case EntityImportSourceContainer::TYPE_FILE:
+            case EntityImportSourceContainer::SOURCE_TYPE_CONTAO_FILE_SYSTEM:
                 switch ($sourceModel->fileType) {
                     case EntityImportSourceContainer::FILETYPE_JSON:
-                        $source = new JSONFileSource($this->fileUtil);
+                        $source = new JSONFileSource($this->fileUtil, $this->modelUtil);
                         break;
-                    case EntityImportSourceContainer::TYPE_FILE:
-
+                    case EntityImportSourceContainer::FILETYPE_CSV:
+                        $source = new CSVFileSource($this->fileUtil, $this->modelUtil);
+                        break;
+                    default:
+                        // TODO: add Event for creating new FileSourceClasses
                         break;
                 }
                 break;
+            case EntityImportSourceContainer::SOURCE_TYPE_ABSOLUTE_PATH:
+                break;
+            case EntityImportSourceContainer::SOURCE_TYPE_HTTP:
+                break;
             default:
+                // TODO: add Event for other SourceTypes
                 break;
         }
 
-        $source->setFieldMapping($sourceModel->fieldMapping);
+        $source->setFieldMapping(unserialize($sourceModel->fieldMapping));
+        $source->setFilePath($sourceModel->id);
+        $source->setSourceModel($sourceModel);
 
         return $source;
     }

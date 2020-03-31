@@ -51,9 +51,11 @@ class ImporterFactory
             return null;
         }
 
+        $source = $this->sourceFactory->createInstance($sourceModel);
+
         $importer = new Importer($this->eventDispatcher, $this->databaseUtil, $this->modelUtil);
 
-        $importer->init($configModel->id, $sourceModel);
+        $importer->init($configModel->id, $sourceModel, $source);
 
         return $importer;
     }

@@ -92,13 +92,14 @@ class Importer implements ImporterInterface
         $this->modelUtil = $modelUtil;
     }
 
-    public function init(int $configModel, int $sourceModel)
+    public function init(int $configModel, int $sourceModel, SourceInterface $source)
     {
         $this->database = Database::getInstance();
 
         $this->configModel = $this->modelUtil->findModelInstanceByIdOrAlias('tl_entity_import_config', $configModel);
         $this->sourceModel = $this->modelUtil->findModelInstanceByIdOrAlias('tl_entity_import_source', $sourceModel);
         $this->targetTable = $this->configModel->targetTable;
+        $this->source = $source;
 
         if (null === $this->configModel) {
             new Exception('SourceModel not defined');
@@ -135,9 +136,8 @@ class Importer implements ImporterInterface
 
         $items = $this->getDataFromSource();
 
-//        $event = $this->eventDispatcher->dispatch(BeforeImportEvent::NAME, new BeforeImportEvent($items));
+//        $this->eventDispatcher->dispatch(BeforeImportEvent::NAME, new BeforeImportEvent($items));
 
-//        $this->executeImport($event->getItems());
         $this->executeImport($items);
 
 //        $event = $this->eventDispatcher->dispatch(AfterImportEvent::NAME, new AfterImportEvent());

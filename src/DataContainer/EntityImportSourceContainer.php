@@ -12,6 +12,7 @@ use Contao\StringUtil;
 use Contao\System;
 use Haste\IO\Reader\CsvReader;
 use HeimrichHannot\UtilsBundle\File\FileUtil;
+use HeimrichHannot\UtilsBundle\Model\ModelUtil;
 
 class EntityImportSourceContainer
 {
@@ -33,21 +34,68 @@ class EntityImportSourceContainer
      */
     private $fileUtil;
 
-    public function __construct(FileUtil $fileUtil)
+    /**
+     * @var ModelUtil
+     */
+    private $modelUtil;
+
+    public function __construct(FileUtil $fileUtil, ModelUtil $modelUtil)
     {
         $this->activeBundles = System::getContainer()->getParameter('kernel.bundles');
         $this->fileUtil = $fileUtil;
+        $this->modelUtil = $modelUtil;
     }
 
-    public function onLoadFileSRC($value, $dc)
+    public function initPalette($dc)
     {
-        $file = System::getContainer()->get('huh.utils.model')->callModelMethod('tl_files', 'findByUuid', $value);
-
-        if ($file) {
-            $this->processInputFile($file, null, $dc);
+        if (null === ($source = $this->modelUtil->findModelInstanceByPk($dc->table, $dc->id))) {
+            return;
         }
 
-        return $value;
+        $fileType = $source->fileType;
+
+        $delimiter = ('' !== $source->csvDelimiter ? $source->csvDelimiter : ',');
+        $enclosure = ('' !== $source->csvEnclosure ? $source->csvEnclosure : '"');
+        $escape = ('' !== $source->csvEscape ? $source->csvEscape : '"');
+
+        $arrCsvFields = [];
+        $arrOptions = [];
+
+        if ($strSourceFile = $this->fileUtil->getPathFromUuid($source->fileSRC)) {
+            $objCsv = new CsvReader($strSourceFile);
+            $objCsv->setDelimiter($delimiter);
+            $objCsv->setEnclosure($enclosure);
+            $objCsv->setEscape($escape);
+            $objCsv->rewind();
+            $objCsv->next();
+
+            $arrCsvFields = $objCsv->current();
+        }
+
+        $dca = &$GLOBALS['TL_DCA'][$dc->table];
+
+        foreach ($arrCsvFields as $index => $field) {
+            if ($source->csvHeaderRow) {
+                $arrOptions[' '.$index] = $field.' ['.$index.']';
+            } else {
+                $arrOptions[' '.$index] = '['.$index.']';
+            }
+        }
+
+        switch ($fileType) {
+            case self::FILETYPE_CSV:
+                $dca['fields']['fieldMapping']['eval']['multiColumnEditor']['fields']['value']['inputType'] = 'select';
+                $dca['fields']['fieldMapping']['eval']['multiColumnEditor']['fields']['value']['options'] = $arrOptions;
+                $dca['fields']['fieldMapping']['eval']['multiColumnEditor']['fields']['value']['eval']['includeBlankOption'] = true;
+                break;
+            case self::FILETYPE_JSON:
+                $dca['fields']['fieldMapping']['eval']['multiColumnEditor']['fields']['value']['inputType'] = 'text';
+                break;
+            default:
+                break;
+        }
+
+        return $dc;
     }
 
     public function onLoadFileContent($value, $dc)
@@ -88,18 +136,20 @@ class EntityImportSourceContainer
             $fileType = $this->fileUtil->getFileExtension($this->fileUtil->getPathFromUuid($fileUuid));
         }
 
+        $source = $this->modelUtil->findModelInstanceByPk($dc->table, $dc->id);
+
         switch ($fileType) {
             case static::FILETYPE_CSV:
 
                 if ($path = $this->fileUtil->getPathFromUuid($fileUuid)) {
-                    $objCsv = new CsvReader($path);
-                    $csvDelimiter = '' !== $dc->csvDelimiter ? $dc->csvDelimiter : ',';
-                    $csvEnclosure = '' !== $dc->csvEscape ? $dc->csvEscape : '"';
-                    $csvEscape = '' !== $dc->csvEscape ? $dc->csvEscape : ';';
+                    $delimiter = ('' !== $source->csvDelimiter ? $source->csvDelimiter : ',');
+                    $enclosure = ('' !== $source->csvEnclosure ? $source->csvEnclosure : '"');
+                    $escape = ('' !== $source->csvEscape ? $source->csvEscape : '"');
 
-                    $objCsv->setDelimiter($csvDelimiter);
-                    $objCsv->setEnclosure($csvEnclosure);
-                    $objCsv->setEscape($csvEscape);
+                    $objCsv = new CsvReader($path);
+                    $objCsv->setDelimiter($delimiter);
+                    $objCsv->setEnclosure($enclosure);
+                    $objCsv->setEscape($escape);
                     $objCsv->rewind();
                     $objCsv->next();
 

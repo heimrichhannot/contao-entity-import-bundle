@@ -15,8 +15,3 @@ $GLOBALS['BE_MOD']['system']['entityImport'] = [
  */
 $GLOBALS['TL_MODELS'][HeimrichHannot\EntityImportBundle\Model\EntityImportSourceModel::getTable()] = 'HeimrichHannot\EntityImportBundle\Model\EntityImportSourceModel';
 $GLOBALS['TL_MODELS'][HeimrichHannot\EntityImportBundle\Model\EntityImportConfigModel::getTable()] = 'HeimrichHannot\EntityImportBundle\Model\EntityImportConfigModel';
-
-/**
- * Hooks
- */
-$GLOBALS['TL_HOOKS']['loadDataContainer']['entityImport']  = [HeimrichHannot\EntityImportBundle\EventListener\HookListener::class, 'loadDataContainerHook'];

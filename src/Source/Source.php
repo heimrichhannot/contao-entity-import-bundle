@@ -18,10 +18,6 @@ abstract class Source implements SourceInterface
     protected $fieldMapping;
 
     /**
-     * @var EntityImportSourceModel
-     */
-    protected $sourceModel;
-    /**
      * @var ModelUtil
      */
     private $modelUtil;
@@ -36,8 +32,12 @@ abstract class Source implements SourceInterface
         return $this->fieldMapping;
     }
 
-    public function setFieldMapping($mapping): bool
+    public function setFieldMapping(array $mapping): bool
     {
-        $this->fieldMapping = $mapping;
+        if ($mapping) {
+            $this->fieldMapping = $mapping;
+        }
+
+        return true;
     }
 }
