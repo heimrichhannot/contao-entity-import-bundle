@@ -2,4 +2,4 @@ services:
   _defaults:
     autowire: true
 
-  HeimrichHannot\EntityImportBundle\EventListener\HookListener: ~
+  HeimrichHannot\EntityImportBundle\EventListener\BeforeImportEventListener: ~

@@ -9,8 +9,10 @@
 namespace HeimrichHannot\EntityImportBundle\Source;
 
 use HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer;
+use HeimrichHannot\EntityImportBundle\Event\ImporterFactoryCreateFileSourceEvent;
 use HeimrichHannot\UtilsBundle\File\FileUtil;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class SourceFactory
 {
@@ -23,10 +25,16 @@ class SourceFactory
      */
     private $fileUtil;
 
-    public function __construct(ModelUtil $modelUtil, FileUtil $fileUtil)
+    /**
+     * @var EventDispatcher
+     */
+    private $eventDispatcher;
+
+    public function __construct(ModelUtil $modelUtil, FileUtil $fileUtil, EventDispatcher $eventDispatcher)
     {
         $this->modelUtil = $modelUtil;
         $this->fileUtil = $fileUtil;
+        $this->eventDispatcher = $eventDispatcher;
     }
 
     public function createInstance(int $sourceModel): ?SourceInterface
@@ -48,7 +56,7 @@ class SourceFactory
                         $source = new CSVFileSource($this->fileUtil, $this->modelUtil);
                         break;
                     default:
-                        // TODO: add Event for creating new FileSourceClasses
+                        $source = $this->eventDispatcher->dispatch(ImporterFactoryCreateFileSourceEvent::NAME, new ImporterFactoryCreateFileSourceEvent($this->fileUtil, $this->modelUtil));
                         break;
                 }
                 break;
@@ -57,7 +65,7 @@ class SourceFactory
             case EntityImportSourceContainer::SOURCE_TYPE_HTTP:
                 break;
             default:
-                // TODO: add Event for other SourceTypes
+                $source = $this->eventDispatcher->dispatch(ImporterFactoryCreateSourceEvent::NAME, new ImporterFactoryCreateSourceEvent($this->fileUtil, $this->modelUtil));
                 break;
         }
 

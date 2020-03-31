@@ -136,11 +136,11 @@ class Importer implements ImporterInterface
 
         $items = $this->getDataFromSource();
 
-//        $this->eventDispatcher->dispatch(BeforeImportEvent::NAME, new BeforeImportEvent($items));
+        $event = $this->eventDispatcher->dispatch(BeforeImportEvent::NAME, new BeforeImportEvent($items));
 
-        $this->executeImport($items);
+        $this->executeImport($event->getItems());
 
-//        $event = $this->eventDispatcher->dispatch(AfterImportEvent::NAME, new AfterImportEvent());
+        $this->eventDispatcher->dispatch(AfterImportEvent::NAME, new AfterImportEvent($items));
 
         return true;
     }

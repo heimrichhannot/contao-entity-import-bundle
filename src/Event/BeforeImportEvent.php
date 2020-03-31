@@ -28,4 +28,9 @@ class BeforeImportEvent extends Event
     {
         return $this->items;
     }
+
+    public function setItems(array $items)
+    {
+        return $this->items = $items;
+    }
 }
