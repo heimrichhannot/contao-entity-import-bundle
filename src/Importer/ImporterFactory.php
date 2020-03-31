@@ -47,15 +47,18 @@ class ImporterFactory
 
     public function createInstance(int $sourceModel): ?ImporterInterface
     {
-        if (null === ($configModel = $this->modelUtil->findModelInstanceByPk('tl_entity_import_config', $sourceModel))) {
+        $sourceModel = $this->modelUtil->findModelInstanceByPk('tl_entity_import_source', $sourceModel);
+        $configModel = $this->modelUtil->findOneModelInstanceBy('tl_entity_import_config', ['pid'], [$sourceModel->id]);
+
+        if (null === $sourceModel) {
             return null;
         }
 
-        $source = $this->sourceFactory->createInstance($sourceModel);
+        $source = $this->sourceFactory->createInstance($sourceModel->id);
 
         $importer = new Importer($this->eventDispatcher, $this->databaseUtil, $this->modelUtil);
 
-        $importer->init($configModel->id, $sourceModel, $source);
+        $importer->init($configModel->id, $sourceModel->id, $source);
 
         return $importer;
     }

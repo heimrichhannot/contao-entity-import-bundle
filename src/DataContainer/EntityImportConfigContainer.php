@@ -14,7 +14,6 @@ use Contao\Database;
 use Contao\Date;
 use HeimrichHannot\EntityImportBundle\Importer\ImporterFactory;
 use HeimrichHannot\EntityImportBundle\Importer\ImporterInterface;
-use HeimrichHannot\EntityImportBundle\Model\EntityImportSourceModel;
 use HeimrichHannot\RequestBundle\Component\HttpFoundation\Request;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
 use HeimrichHannot\UtilsBundle\Url\UrlUtil;
@@ -64,7 +63,7 @@ class EntityImportConfigContainer
     {
         $arrOptions = [];
 
-        $fieldMapping = EntityImportSourceModel::findByPk($dc->id)->fieldMapping;
+        $fieldMapping = $this->modelUtil->findModelInstanceByPk('tl_entity_import_source', $dc->id)->fieldMapping;
 
         $arrFieldMapping = unserialize($fieldMapping);
 

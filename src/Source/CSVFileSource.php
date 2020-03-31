@@ -17,7 +17,7 @@ class CSVFileSource extends FileSource
     public function getMappedData(): array
     {
         $sourceModel = $this->sourceModel;
-        $fieldMapping = unserialize($this->fieldMapping);
+        $fieldMapping = $this->fieldMapping;
         $arrData = [];
 
         try {

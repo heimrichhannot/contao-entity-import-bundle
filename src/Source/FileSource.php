@@ -80,11 +80,12 @@ abstract class FileSource extends Source
                 $uuid = null;
                 break;
             case EntityImportSourceContainer::SOURCE_TYPE_CONTAO_FILE_SYSTEM:
-                $uuid = $source->fileSRC;
                 $path = $this->fileUtil->getPathFromUuid($source->fileSRC);
+                $uuid = $source->fileSRC;
                 break;
             default:
                 $path = null;
+                $uuid = null;
                 break;
         }
 
