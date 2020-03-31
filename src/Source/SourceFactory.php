@@ -10,6 +10,7 @@ namespace HeimrichHannot\EntityImportBundle\Source;
 
 use HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer;
 use HeimrichHannot\EntityImportBundle\Event\ImporterFactoryCreateFileSourceEvent;
+use HeimrichHannot\EntityImportBundle\Event\ImporterFactoryCreateSourceEvent;
 use HeimrichHannot\UtilsBundle\File\FileUtil;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
 use Symfony\Component\EventDispatcher\EventDispatcher;
@@ -56,16 +57,18 @@ class SourceFactory
                         $source = new CSVFileSource($this->fileUtil, $this->modelUtil);
                         break;
                     default:
-                        $source = $this->eventDispatcher->dispatch(ImporterFactoryCreateFileSourceEvent::NAME, new ImporterFactoryCreateFileSourceEvent($this->fileUtil, $this->modelUtil));
+                        $event = $this->eventDispatcher->dispatch(ImporterFactoryCreateFileSourceEvent::NAME, new ImporterFactoryCreateFileSourceEvent($this->fileUtil, $this->modelUtil));
+                        $source = $event->getFileSource();
                         break;
                 }
                 break;
-            case EntityImportSourceContainer::SOURCE_TYPE_ABSOLUTE_PATH:
-                break;
-            case EntityImportSourceContainer::SOURCE_TYPE_HTTP:
-                break;
+//            case EntityImportSourceContainer::SOURCE_TYPE_ABSOLUTE_PATH:
+//                break;
+//            case EntityImportSourceContainer::SOURCE_TYPE_HTTP:
+//                break;
             default:
-                $source = $this->eventDispatcher->dispatch(ImporterFactoryCreateSourceEvent::NAME, new ImporterFactoryCreateSourceEvent($this->fileUtil, $this->modelUtil));
+                $event = $this->eventDispatcher->dispatch(ImporterFactoryCreateSourceEvent::NAME, new ImporterFactoryCreateSourceEvent($this->fileUtil, $this->modelUtil));
+                $source = $event->getSource();
                 break;
         }
 
