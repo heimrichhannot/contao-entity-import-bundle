@@ -16,23 +16,24 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
 class ImporterFactory
 {
     /**
-     * @var ModelUtil
-     */
-    private $modelUtil;
-
-    /**
      * @var DatabaseUtil
      */
     private $databaseUtil;
 
     /**
-     * @var SourceFactory
-     */
-    private $sourceFactory;
-    /**
      * @var EventDispatcher
      */
     private $eventDispatcher;
+
+    /**
+     * @var ModelUtil
+     */
+    private $modelUtil;
+
+    /**
+     * @var SourceFactory
+     */
+    private $sourceFactory;
 
     /**
      * Importer constructor.
@@ -40,9 +41,9 @@ class ImporterFactory
     public function __construct(DatabaseUtil $databaseUtil, EventDispatcher $eventDispatcher, ModelUtil $modelUtil, SourceFactory $sourceFactory)
     {
         $this->databaseUtil = $databaseUtil;
-        $this->sourceFactory = $sourceFactory;
-        $this->modelUtil = $modelUtil;
         $this->eventDispatcher = $eventDispatcher;
+        $this->modelUtil = $modelUtil;
+        $this->sourceFactory = $sourceFactory;
     }
 
     public function createInstance(int $sourceModel): ?ImporterInterface
@@ -57,30 +58,6 @@ class ImporterFactory
 
         $source = $this->sourceFactory->createInstance($sourceModel->id);
 
-        $importer = new Importer($this->eventDispatcher, $this->databaseUtil, $this->modelUtil);
-
-        // TODO: remove; already contained in configmodel
-        $this->targetTable = $this->configModel->targetTable;
-
-        if (null === $this->configModel) {
-            new \Exception('SourceModel not defined');
-        }
-
-        switch ($this->configModel->importSettings) {
-            case 'mergeTable':
-                $this->mergeTable = true;
-                $this->purgeTableBeforeImport = false;
-                break;
-            case 'purgeTable':
-                $this->mergeTable = false;
-                $this->purgeTableBeforeImport = true;
-                break;
-            default:
-                $this->mergeTable = false;
-                $this->purgeTableBeforeImport = false;
-                break;
-        }
-
-        return $importer;
+        return new Importer($this->databaseUtil, $this->eventDispatcher, $configModel, $this->modelUtil, $source);
     }
 }

@@ -14,7 +14,6 @@ use Contao\Model;
 use HeimrichHannot\EntityImportBundle\Event\AfterImportEvent;
 use HeimrichHannot\EntityImportBundle\Event\BeforeImportEvent;
 use HeimrichHannot\EntityImportBundle\Model\EntityImportConfigModel;
-use HeimrichHannot\EntityImportBundle\Model\EntityImportSourceModel;
 use HeimrichHannot\EntityImportBundle\Source\SourceInterface;
 use HeimrichHannot\UtilsBundle\Database\DatabaseUtil;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
@@ -44,11 +43,6 @@ class Importer implements ImporterInterface
     protected $mergeTable;
 
     /**
-     * @var Database
-     */
-    protected $database;
-
-    /**
      * @var EventDispatcher
      */
     protected $eventDispatcher;
@@ -57,11 +51,6 @@ class Importer implements ImporterInterface
      * @var string
      */
     protected $targetTable;
-
-    /**
-     * @var DatabaseUtil
-     */
-    protected $databaseUtil;
 
     /**
      * @var bool
@@ -74,9 +63,9 @@ class Importer implements ImporterInterface
     protected $purgeTableBeforeImport;
 
     /**
-     * @var EntityImportSourceModel
+     * @var DatabaseUtil
      */
-    private $sourceModel;
+    private $databaseUtil;
 
     /**
      * @var ModelUtil
@@ -86,13 +75,13 @@ class Importer implements ImporterInterface
     /**
      * Importer constructor.
      */
-    public function __construct(Model $configModel, SourceInterface $source, EventDispatcher $eventDispatcher, DatabaseUtil $databaseUtil, ModelUtil $modelUtil)
+    public function __construct(DatabaseUtil $databaseUtil, EventDispatcher $eventDispatcher, Model $configModel, ModelUtil $modelUtil, SourceInterface $source)
     {
-        $this->eventDispatcher = $eventDispatcher;
         $this->databaseUtil = $databaseUtil;
+        $this->eventDispatcher = $eventDispatcher;
+        $this->configModel = $configModel;
         $this->modelUtil = $modelUtil;
         $this->source = $source;
-        $this->configModel = $configModel;
     }
 
     /**
@@ -123,17 +112,23 @@ class Importer implements ImporterInterface
 
     protected function executeImport($items)
     {
-        if (!$this->database->tableExists($this->targetTable)) {
+        $targetTable = $this->configModel->targetTable;
+
+        $database = Database::getInstance();
+
+        if (!$database->tableExists($this->configModel->targetTable)) {
             new Exception($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['tableDoNotExist']);
         }
 
         try {
             $count = 0;
-            $targetTableColumns = $this->database->getFieldNames($this->targetTable);
+            $targetTableColumns = $database->getFieldNames($this->configModel->targetTable);
 
-            if ($this->purgeTableBeforeImport) {
-                $this->databaseUtil->delete($this->targetTable);
+            if ($this->configModel->purgeBeforeImport) {
+                $this->databaseUtil->delete($this->configModel->targetTable, $this->configModel->purgeWhereClause);
             }
+
+            $mode = $this->configModel->importMode;
 
             foreach ($items as $item) {
                 $columnsNotExisting = array_diff(array_keys($item), $targetTableColumns);
@@ -147,14 +142,17 @@ class Importer implements ImporterInterface
                     continue;
                 }
 
-                if ($this->mergeTable) {
+                if ('insert' === $mode) {
+                    $this->databaseUtil->insert($this->configModel->targetTable, $item);
+                } elseif ('merge' === $mode) {
                     $mergeIdentifier = unserialize($this->configModel->mergeIdentifierFields)[0];
                     if (empty($mergeIdentifier)) {
                         throw new Exception($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['noIdentifierFields']);
                     }
-                    $this->databaseUtil->update($this->targetTable, $item, $mergeIdentifier['target'].'=?', [$mergeIdentifier['source']]);
+                    $this->databaseUtil->update($this->configModel->targetTable, $item, $mergeIdentifier['target'].'=?', [$mergeIdentifier['source']]);
                 } else {
-                    $this->databaseUtil->insert($this->targetTable, $item);
+                    throw new Exception($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['modeNotSet']);
+                    continue;
                 }
             }
 

@@ -5,16 +5,16 @@ $lang = &$GLOBALS['TL_LANG']['tl_entity_import_config'];
 /**
  * Fields
  */
-$lang['title'][0]                           = 'Titel';
-$lang['title'][1]                           = 'Geben Sie hier den Titel des Imports ein.';
-$lang['targetTable'][0]                     = 'Zieltabelle';
-$lang['targetTable'][1]                     = 'Wählen Sie hier die Tabelle, in die importiert werden soll.';
-$lang['mergeTable'][0] = 'Beim Importieren zusammenführen (Merge)';
-$lang['mergeTable'][1] = 'Wählen Sie diese Option, wenn beim Importieren bereits bestehende Datensätze mit den zu importierenden Datensätzen zusammengeführt werden sollen.';
+$lang['title'][0]             = 'Titel';
+$lang['title'][1]             = 'Geben Sie hier den Titel des Imports ein.';
+$lang['targetTable'][0]       = 'Zieltabelle';
+$lang['targetTable'][1]       = 'Wählen Sie hier die Tabelle, in die importiert werden soll.';
+$lang['mergeTable'][0]        = 'Beim Importieren zusammenführen (Merge)';
+$lang['mergeTable'][1]        = 'Wählen Sie diese Option, wenn beim Importieren bereits bestehende Datensätze mit den zu importierenden Datensätzen zusammengeführt werden sollen.';
 $lang['purgeBeforeImport'][0] = 'Daten vor dem Import löschen';
 $lang['purgeBeforeImport'][1] = 'Wählen Sie diese Option wenn die vorhandenen Daten vor dem Import gelöscht werden sollen.';
-$lang['purgeWhereClause'][0] = 'WHERE-Bedingungen für das Löschen';
-$lang['purgeWhereClause'][1] = 'Geben Sie hier SQL-Bedingungen in der Form "pid=27 AND id=1" ein, die für das Löschen von Datensätzen vor jedem Import gelten sollen.';
+$lang['purgeWhereClause'][0]  = 'WHERE-Bedingungen für das Löschen';
+$lang['purgeWhereClause'][1]  = 'Geben Sie hier SQL-Bedingungen in der Form "pid=27 AND id=1" ein, die für das Löschen von Datensätzen vor jedem Import gelten sollen.';
 
 $lang['mergeIdentifierFields'][0]           = 'Merge-Identifikationsfelder';
 $lang['mergeIdentifierFields'][0]           = 'Wählen Sie hier die Felder aus, die für das Auffinden bestehender Datensätze genutzt werden sollen (bspw. E-Mail, ID, Vorname + Nachname, ...).';
@@ -23,8 +23,8 @@ $lang['mergeIdentifierFields']['source'][1] = 'Wählen Sie hier das Quellfeld au
 $lang['mergeIdentifierFields']['target'][0] = 'Wählen Sie hier das Zielfeld in das Importiert wird.';
 $lang['mergeIdentifierFields']['target'][1] = 'Wählen Sie hier das Zielfeld in das Importiert wird.';
 
-$lang['importMode'][0]                      = 'Importeinstellungen';
-$lang['importMode'][1]                      = 'Wählen Sie hier die Einstellungen für dem Import.';
+$lang['importMode'][0] = 'Importeinstellungen';
+$lang['importMode'][1] = 'Wählen Sie hier die Einstellungen für dem Import.';
 
 /**
  * Reference
@@ -33,8 +33,8 @@ $lang['reference'] = [
     'importMode' => [
         'insert' => 'Beim Importieren neue Datensätze anlegen',
         'merge'  => 'Beim Importieren Datensätze zusammenführen (Merge)',
-        'purge'  => 'Vor dem Importieren die Datensätze in der Zieltabelle löschen'
-    ]
+        'purge'  => 'Vor dem Importieren die Datensätze in der Zieltabelle löschen',
+    ],
 ];
 
 /**
@@ -57,6 +57,7 @@ $lang['error']['delimiter']           = 'Delimiter für csv ist nicht definiert'
 $lang['error']['enclosure']           = 'Enclosure für csv ist nicht definiert';
 $lang['error']['escape']              = 'Enclosure für csv ist nicht definiert';
 $lang['error']['filePathNotProvided'] = 'Der Pfad zur Datei wurde nicht gefunden';
+$lang['error']['modeNotSet']          = 'Der Import Modus ist nicht gesetzt';
 
 /**
  * Backend Modules

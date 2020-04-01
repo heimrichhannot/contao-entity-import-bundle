@@ -49,9 +49,12 @@ class JSONFileSource extends FileSource
         $arrResult = [];
 
         foreach ($arrMapping as $mappingElement) {
-            $arrMappingElement = explode('.', $mappingElement['value']);
-
-            $arrResult[$mappingElement['name']] = $this->getValue($arrElement, $arrMappingElement);
+            if ('static_value' === $mappingElement['valueType']) {
+                $arrResult[$mappingElement['name']] = $mappingElement['staticValue'];
+            } elseif ('source_value' === $mappingElement['valueType']) {
+                $arrMappingElement = explode('.', $mappingElement['sourceValue']);
+                $arrResult[$mappingElement['name']] = $this->getValue($arrElement, $arrMappingElement);
+            }
         }
 
         return $arrResult;
