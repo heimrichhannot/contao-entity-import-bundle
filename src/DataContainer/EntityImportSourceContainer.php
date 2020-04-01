@@ -84,12 +84,12 @@ class EntityImportSourceContainer
 
         switch ($fileType) {
             case self::FILETYPE_CSV:
-                $dca['fields']['fieldMapping']['eval']['multiColumnEditor']['fields']['value']['inputType'] = 'select';
-                $dca['fields']['fieldMapping']['eval']['multiColumnEditor']['fields']['value']['options'] = $arrOptions;
-                $dca['fields']['fieldMapping']['eval']['multiColumnEditor']['fields']['value']['eval']['includeBlankOption'] = true;
+                $dca['fields']['fieldMapping']['eval']['multiColumnEditor']['fields']['sourceValue']['inputType'] = 'select';
+                $dca['fields']['fieldMapping']['eval']['multiColumnEditor']['fields']['sourceValue']['options'] = $arrOptions;
+                $dca['fields']['fieldMapping']['eval']['multiColumnEditor']['fields']['sourceValue']['eval']['includeBlankOption'] = true;
                 break;
             case self::FILETYPE_JSON:
-                $dca['fields']['fieldMapping']['eval']['multiColumnEditor']['fields']['value']['inputType'] = 'text';
+                $dca['fields']['fieldMapping']['eval']['multiColumnEditor']['fields']['sourceValue']['inputType'] = 'text';
                 break;
             default:
                 break;

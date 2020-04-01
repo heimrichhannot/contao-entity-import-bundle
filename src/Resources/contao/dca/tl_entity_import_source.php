@@ -316,13 +316,18 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
                                 'static_value'
                             ],
                             'reference' => &$GLOBALS['TL_LANG']['tl_entity_import_source']['reference']['valueType'],
-                            'eval'                    => ['groupStyle' => 'width: 20%', 'mandatory' => true, 'includeBlankOption' => true, 'submitOnChange' => true],
+                            'eval'                    => [
+                                'groupStyle' => 'width: 20%',
+                                'mandatory' => true,
+                                'includeBlankOption' => true,
+                                'submitOnChange' => true,
+                            ],
                             'sql'                     => "varchar(64) NOT NULL default ''"
                         ],
                         'sourceValue' => [
                             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['fieldMapping']['sourceValue'],
                             'inputType' => 'text',
-                            'load_callback' => [[\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::class, 'loadFieldMappingValueType']],
+                            'load_callback' => [[\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::class, 'loadFieldMappingSourceValue']],
                             'eval'      => [
                                 'groupStyle' => 'width: 38%',
                             ],

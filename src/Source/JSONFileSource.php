@@ -54,6 +54,8 @@ class JSONFileSource extends FileSource
             } elseif ('source_value' === $mappingElement['valueType']) {
                 $arrMappingElement = explode('.', $mappingElement['sourceValue']);
                 $arrResult[$mappingElement['name']] = $this->getValue($arrElement, $arrMappingElement);
+            } else {
+                continue;
             }
         }
 

@@ -64,7 +64,13 @@ class CSVFileSource extends FileSource
     {
         $arrElement = [];
         foreach ($arrMapping as $mappingElement) {
-            $arrElement[$mappingElement['name']] = $arrCurrent[$mappingElement['value']];
+            if ('source_value' === $mappingElement['valueType']) {
+                $arrElement[$mappingElement['name']] = $arrCurrent[$mappingElement['sourceValue']];
+            } elseif ('static_value' === $mappingElement['valueType']) {
+                $arrElement[$mappingElement['name']] = $mappingElement['staticValue'];
+            } else {
+                continue;
+            }
         }
 
         return $arrElement;
