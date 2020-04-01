@@ -47,10 +47,11 @@ class ImporterFactory
 
     public function createInstance(int $sourceModel): ?ImporterInterface
     {
-        $sourceModel = $this->modelUtil->findModelInstanceByPk('tl_entity_import_source', $sourceModel);
-        $configModel = $this->modelUtil->findOneModelInstanceBy('tl_entity_import_config', ['pid'], [$sourceModel->id]);
+        if (null === ($sourceModel = $this->modelUtil->findModelInstanceByPk('tl_entity_import_source', $sourceModel))) {
+            return null;
+        }
 
-        if (null === $sourceModel) {
+        if (null === ($configModel = $this->modelUtil->findOneModelInstanceBy('tl_entity_import_config', ['tl_entity_import_config.pid'], [$sourceModel->id]))) {
             return null;
         }
 
@@ -58,7 +59,27 @@ class ImporterFactory
 
         $importer = new Importer($this->eventDispatcher, $this->databaseUtil, $this->modelUtil);
 
-        $importer->init($configModel->id, $sourceModel->id, $source);
+        // TODO: remove; already contained in configmodel
+        $this->targetTable = $this->configModel->targetTable;
+
+        if (null === $this->configModel) {
+            new \Exception('SourceModel not defined');
+        }
+
+        switch ($this->configModel->importSettings) {
+            case 'mergeTable':
+                $this->mergeTable = true;
+                $this->purgeTableBeforeImport = false;
+                break;
+            case 'purgeTable':
+                $this->mergeTable = false;
+                $this->purgeTableBeforeImport = true;
+                break;
+            default:
+                $this->mergeTable = false;
+                $this->purgeTableBeforeImport = false;
+                break;
+        }
 
         return $importer;
     }

@@ -10,6 +10,7 @@ namespace HeimrichHannot\EntityImportBundle\Importer;
 
 use Contao\Database;
 use Contao\Message;
+use Contao\Model;
 use HeimrichHannot\EntityImportBundle\Event\AfterImportEvent;
 use HeimrichHannot\EntityImportBundle\Event\BeforeImportEvent;
 use HeimrichHannot\EntityImportBundle\Model\EntityImportConfigModel;
@@ -85,42 +86,13 @@ class Importer implements ImporterInterface
     /**
      * Importer constructor.
      */
-    public function __construct(EventDispatcher $eventDispatcher, DatabaseUtil $databaseUtil, ModelUtil $modelUtil)
+    public function __construct(Model $configModel, SourceInterface $source, EventDispatcher $eventDispatcher, DatabaseUtil $databaseUtil, ModelUtil $modelUtil)
     {
         $this->eventDispatcher = $eventDispatcher;
         $this->databaseUtil = $databaseUtil;
         $this->modelUtil = $modelUtil;
-    }
-
-    public function init(int $configModel, int $sourceModel, SourceInterface $source)
-    {
-        $this->database = Database::getInstance();
-
-        $this->configModel = $this->modelUtil->findModelInstanceByIdOrAlias('tl_entity_import_config', $configModel);
-        $this->sourceModel = $this->modelUtil->findModelInstanceByIdOrAlias('tl_entity_import_source', $sourceModel);
-        $this->targetTable = $this->configModel->targetTable;
         $this->source = $source;
-
-        if (null === $this->configModel) {
-            new Exception('SourceModel not defined');
-        }
-
-        switch ($this->configModel->importSettings) {
-            case 'mergeTable':
-                $this->mergeTable = true;
-                $this->purgeTableBeforeImport = false;
-                break;
-            case 'purgeTable':
-                $this->mergeTable = false;
-                $this->purgeTableBeforeImport = true;
-                break;
-            default:
-                $this->mergeTable = false;
-                $this->purgeTableBeforeImport = false;
-                break;
-        }
-
-        $this->isInitialized = true;
+        $this->configModel = $configModel;
     }
 
     /**
@@ -128,12 +100,6 @@ class Importer implements ImporterInterface
      */
     public function run(): bool
     {
-        if (!$this->isInitialized) {
-            Message::addError(sprintf($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['errorMessage'], $GLOBALS['TL_LANG']['tl_entity_import_config']['error']['notInitialized']));
-
-            return false;
-        }
-
         $items = $this->getDataFromSource();
 
         $event = $this->eventDispatcher->dispatch(BeforeImportEvent::NAME, new BeforeImportEvent($items));

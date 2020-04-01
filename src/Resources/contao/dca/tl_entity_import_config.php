@@ -2,16 +2,16 @@
 
 $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
     'config'      => [
-        'dataContainer'    => 'Table',
-        'enableVersioning' => true,
-        'ptable'           => 'tl_entity_import_source',
+        'dataContainer'     => 'Table',
+        'enableVersioning'  => true,
+        'ptable'            => 'tl_entity_import_source',
         'onsubmit_callback' => [
             ['huh.utils.dca', 'setDateAdded'],
         ],
         'oncopy_callback'   => [
             ['huh.utils.dca', 'setDateAddedOnCopy'],
         ],
-        'sql'              => [
+        'sql'               => [
             'keys' => [
                 'id'  => 'primary',
                 'pid' => 'index',
@@ -74,11 +74,13 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
         ],
     ],
     'palettes'    => [
-        '__selector__' => ['importSettings'],
-        'default'      => '{title_legend},title,targetTable,importSettings;',
+        '__selector__' => ['importMode', 'purgeBeforeImport'],
+        'default'      => '{title_legend},title,targetTable,importMode;',
     ],
     'subpalettes' => [
-        'importSettings_mergeTable' => 'mergeIdentifierFields',
+        'importMode_insert' => 'purgeBeforeImport',
+        'importMode_merge' => 'mergeIdentifierFields',
+        'purgeBeforeImport' => 'purgeWhereClause'
     ],
     'fields'      => [
         'id'                    => [
@@ -89,7 +91,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'sql'        => "int(10) unsigned NOT NULL default '0'",
             'relation'   => ['type' => 'belongsTo', 'load' => 'eager'],
         ],
-        'dateAdded'                   => [
+        'dateAdded'             => [
             'label'   => &$GLOBALS['TL_LANG']['MSC']['dateAdded'],
             'sorting' => true,
             'flag'    => 6,
@@ -116,17 +118,32 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'options_callback' => [\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::class, 'getAllTargetTables'],
             'sql'              => "varchar(255) NOT NULL default ''",
         ],
-        'importSettings'        => [
-            'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['importSettings'],
+        'importMode'            => [
+            'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['importMode'],
             'exclude'   => true,
-            'inputType' => 'radio',
+            'inputType' => 'select',
             'options'   => [
-                'insert'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['importSettings']['options']['insert'],
-                'mergeTable' => &$GLOBALS['TL_LANG']['tl_entity_import_config']['importSettings']['options']['merge'],
-                'purgeTable' => &$GLOBALS['TL_LANG']['tl_entity_import_config']['importSettings']['options']['purge'],
+                'insert',
+                'merge',
             ],
+            'reference' => &$GLOBALS['TL_LANG']['tl_entity_import_config']['reference']['importMode'],
             'eval'      => ['tl_class' => 'w50', 'submitOnChange' => true, 'mandatory' => true],
             'sql'       => "varchar(255) NOT NULL default ''",
+        ],
+        'purgeBeforeImport'       => [
+            'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['purgeBeforeImport'],
+            'exclude'   => true,
+            'inputType' => 'checkbox',
+            'eval'      => ['submitOnChange' => true, 'tl_class' => 'clr w50'],
+            'sql'       => "char(1) NOT NULL default ''",
+        ],
+        'purgeWhereClause'        => [
+            'label'       => &$GLOBALS['TL_LANG']['tl_entity_import_config']['purgeWhereClause'],
+            'inputType'   => 'textarea',
+            'exclude'     => true,
+            'eval'        => ['class' => 'monospace', 'rte' => 'ace', 'tl_class' => 'clr long'],
+            'explanation' => 'insertTags',
+            'sql'         => "text NULL",
         ],
         'mergeIdentifierFields' => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['mergeIdentifierFields'],
@@ -161,6 +178,24 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
                 ],
             ],
             'sql'       => "blob NULL",
+        ],
+        'useCron'        => [
+            'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['useCron'],
+            'inputType' => 'checkbox',
+            'exclude'   => true,
+            'eval'      => [
+                'tl_class'          => 'clr',
+                'submitOnChange'    => true
+            ],
+            'sql'       => "char(1) NOT NULL default ''",
+        ],
+        'cronInterval'        => [
+            'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['cronInterval'],
+            'exclude'   => true,
+            'inputType' => 'select',
+            'options'   => ['minutely', 'hourly', 'daily', 'weekly', 'monthly'],
+            'eval'      => ['tl_class' => 'w50', 'includeBlankOption' => false],
+            'sql'       => "varchar(12) NOT NULL default ''",
         ],
     ],
 ];
