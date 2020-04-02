@@ -9,7 +9,6 @@
 namespace HeimrichHannot\EntityImportBundle\DataContainer;
 
 use Contao\System;
-use Haste\IO\Reader\CsvReader;
 use HeimrichHannot\EntityImportBundle\Source\CSVFileSource;
 use HeimrichHannot\EntityImportBundle\Source\FileSource;
 use HeimrichHannot\EntityImportBundle\Source\SourceFactory;
@@ -66,8 +65,7 @@ class EntityImportSourceContainer
         switch ($fileType) {
             case self::FILETYPE_CSV:
 
-                /** @var CSVFileSource $source */
-                $source = $this->sourceFactory->createInstance($sourceModel->id);
+/** @var CSVFileSource $source */ $source = $this->sourceFactory->createInstance($sourceModel->id);
 
                 $options = [];
                 $fields = $source->getHeadingLine();
@@ -117,78 +115,5 @@ class EntityImportSourceContainer
         }
 
         return $source->getFileContent();
-    }
-
-    private function processInputFile($fileUuid, $type, $dc)
-    {
-        if (null !== $type) {
-            $fileType = $type;
-        } else {
-            $fileType = $this->fileUtil->getFileExtension($this->fileUtil->getPathFromUuid($fileUuid));
-        }
-
-        $source = $this->modelUtil->findModelInstanceByPk($dc->table, $dc->id);
-
-        switch ($fileType) {
-            case static::FILETYPE_CSV:
-
-                if ($path = $this->fileUtil->getPathFromUuid($fileUuid)) {
-                    $delimiter = ($source->csvDelimiter ?: ',');
-                    $enclosure = ('' !== $source->csvEnclosure ? $source->csvEnclosure : '"');
-                    $escape = ('' !== $source->csvEscape ? $source->csvEscape : '"');
-
-                    $objCsv = new CsvReader($path);
-                    $objCsv->setDelimiter($delimiter);
-                    $objCsv->setEnclosure($enclosure);
-                    $objCsv->setEscape($escape);
-                    $objCsv->rewind();
-                    $objCsv->next();
-
-                    $arrData = $objCsv->current();
-                    $fileContent = implode(',', $arrData);
-                }
-
-                break;
-
-            case static::FILETYPE_JSON:
-                $fileContent = $this->fileUtil->getFileContentFromUuid($fileUuid);
-
-                break;
-
-            default:
-                $fileContent = '';
-
-                break;
-        }
-
-        return $fileContent;
-    }
-
-    private function processHttp($url, $type, $id)
-    {
-        if (null !== $type) {
-            $sourceType = $type;
-        } else {
-            $sourceType = 'json';
-        }
-
-        switch ($sourceType) {
-            case static::FILETYPE_CSV:
-                $content = 'csv';
-
-                break;
-
-            case static::FILETYPE_JSON:
-                $content = file_get_contents($url);
-
-                break;
-
-            default:
-                $content = '';
-
-                break;
-        }
-
-        return $content;
     }
 }

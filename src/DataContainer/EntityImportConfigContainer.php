@@ -42,8 +42,6 @@ class EntityImportConfigContainer
 
     /**
      * EntityImportConfigContainer constructor.
-     *
-     * @param StringUtil $stringUtil
      */
     public function __construct(Request $request, ImporterFactory $importerFactory, UrlUtil $urlUtil, ModelUtil $modelUtil)
     {
