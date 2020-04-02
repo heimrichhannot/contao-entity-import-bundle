@@ -41,9 +41,9 @@ $lang['fileContentCsv'][1]  = 'Hier wird die erste Spalte des CSV-Dokuments darg
 $lang['sourceType'][0]      = 'Quelle';
 $lang['sourceType'][1]      = 'Wählen Sie hier die Art der Dateiquelle aus.';
 
-$lang['sourceType'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::SOURCE_TYPE_HTTP]               = 'HTTP';
-$lang['sourceType'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::SOURCE_TYPE_CONTAO_FILE_SYSTEM] = 'Contao Dateiverwaltung';
-$lang['sourceType'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::SOURCE_TYPE_ABSOLUTE_PATH]      = 'Absoluter Pfad';
+$lang['sourceType'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::RETRIEVAL_TYPE_HTTP]               = 'HTTP';
+$lang['sourceType'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::RETRIEVAL_TYPE_CONTAO_FILE_SYSTEM] = 'Contao Dateiverwaltung';
+$lang['sourceType'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::RETRIEVAL_TYPE_ABSOLUTE_PATH]      = 'Absoluter Pfad';
 $lang['type'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::TYPE_DATABASE]                        = 'Datenbank';
 $lang['type'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::TYPE_FILE]                            = 'Datei';
 

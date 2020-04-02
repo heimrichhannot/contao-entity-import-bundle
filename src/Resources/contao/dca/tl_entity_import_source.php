@@ -67,17 +67,17 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
 
     // Palettes
     'palettes'    => [
-        '__selector__'                                                                       => ['type', 'sourceType', 'fileType'],
+        '__selector__'                                                                       => ['type', 'retrievalType', 'fileType'],
         'default'                                                                            => '{title_legend},title,type;',
         HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::TYPE_DATABASE => '{title_legend},title,type;{db_legend},dbDriver,dbHost,dbUser,dbPass,dbDatabase,dbPconnect,dbCharset,dbPort,dbSocket',
-        HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::TYPE_FILE     => '{title_legend},title,type;{file_legend},sourceType',
+        HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::TYPE_FILE     => '{title_legend},title,type;{file_legend},retrievalType',
     ],
 
     // Subpalettes
     'subpalettes' => [
-        'sourceType_http'               => 'sourceUrl,fileType',
-        'sourceType_contao_file_system' => 'fileSRC,fileType',
-        'sourceType_absolute_path'      => 'absolutePath,filePath',
+        'retrievalType_http'               => 'sourceUrl,fileType',
+        'retrievalType_contao_file_system' => 'fileSRC,fileType',
+        'retrievalType_absolute_path'      => 'absolutePath,filePath',
         'fileType_csv'                  => 'fileContentCsv,csvHeaderRow,csvDelimiter,csvEnclosure,csvEscape,fieldMapping',
         'fileType_json'                 => 'fileContentJson,pathToDataArray,fieldMapping',
     ],
@@ -188,17 +188,17 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'eval'      => ['tl_class' => 'w50', 'rgxp' => 'url'],
             'sql'       => "varchar(64) NOT NULL default ''",
         ],
-        'sourceType'        => [
-            'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['sourceType'],
+        'retrievalType'        => [
+            'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['retrievalType'],
             'exclude'   => true,
             'filter'    => true,
             'inputType' => 'select',
             'options'   => [
-                \HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::SOURCE_TYPE_HTTP,
-                \HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::SOURCE_TYPE_CONTAO_FILE_SYSTEM,
-                \HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::SOURCE_TYPE_ABSOLUTE_PATH,
+                \HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::RETRIEVAL_TYPE_HTTP,
+                \HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::RETRIEVAL_TYPE_CONTAO_FILE_SYSTEM,
+                \HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::RETRIEVAL_TYPE_ABSOLUTE_PATH,
             ],
-            'reference' => &$GLOBALS['TL_LANG']['tl_entity_import_source']['sourceType'],
+            'reference' => &$GLOBALS['TL_LANG']['tl_entity_import_source']['retrievalType'],
             'eval'      => ['submitOnChange' => true, 'includeBlankOption' => true, 'tl_class' => 'w50'],
             'sql'       => "varchar(255) NOT NULL default ''",
         ],

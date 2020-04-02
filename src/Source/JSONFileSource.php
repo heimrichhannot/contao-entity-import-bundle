@@ -8,62 +8,66 @@
 
 namespace HeimrichHannot\EntityImportBundle\Source;
 
+use Contao\StringUtil;
+
 class JSONFileSource extends FileSource
 {
     public function getMappedData(): array
     {
         $fileContent = $this->getFileContent();
 
-        $arrPath = explode('.', $this->sourceModel->pathToDataArray);
+        $path = explode('.', $this->sourceModel->pathToDataArray);
 
         $fileData = json_decode($fileContent, true);
 
-        if (empty($arrPath)) {
-            $fileData = $this->getDataFromPath($fileData, $arrPath);
+        if (empty($path)) {
+            $fileData = $this->getDataFromPath($fileData, $path);
         }
 
-        $arrData = [];
-        $arrMapping = unserialize($this->sourceModel->fieldMapping);
+        $data = [];
+        $mapping = StringUtil::deserialize($this->sourceModel->fieldMapping);
+
         if (null !== $fileData) {
-            foreach ($fileData as $index => $arrElement) {
-                $arrData[] = $this->getMappedValues($arrElement, $arrMapping);
+            foreach ($fileData as $index => $element) {
+                $data[] = $this->getMappedValues($element, $mapping);
             }
         }
 
-        return $arrData;
+        return $data;
     }
 
-    protected function getDataFromPath(array $arrData, array $arrPath): array
+    protected function getDataFromPath(array $data, array $path): array
     {
-        if (empty($arrPath)) {
-            return $arrData;
+        if (empty($path)) {
+            return $data;
         }
 
-        $arrData = $arrData[array_pop($arrPath)];
+        $data = $data[array_pop($path)];
 
-        return $this->getDataFromPath($arrData, $arrPath);
+        return $this->getDataFromPath($data, $path);
     }
 
-    protected function getMappedValues($arrElement, $arrMapping)
+    protected function getMappedValues($element, $mapping): array
     {
-        $arrResult = [];
+        $result = [];
 
-        foreach ($arrMapping as $mappingElement) {
+        foreach ($mapping as $mappingElement) {
             if ('static_value' === $mappingElement['valueType']) {
-                $arrResult[$mappingElement['name']] = $mappingElement['staticValue'];
+                $result[$mappingElement['name']] = $mappingElement['staticValue'];
             } elseif ('source_value' === $mappingElement['valueType']) {
-                $arrMappingElement = explode('.', $mappingElement['sourceValue']);
-                $arrResult[$mappingElement['name']] = $this->getValue($arrElement, $arrMappingElement);
+                $result[$mappingElement['name']] = $this->getValue($element, $mappingElement);
             } else {
                 continue;
             }
         }
 
-        return $arrResult;
+        return $result;
     }
 
-    protected function getValue($data, $mapping)
+    protected function getValue($data, $mapping): ?array
     {
+        $mapping = explode('.', $mapping['sourceValue']);
+
         if (empty($mapping)) {
             return $data;
         }

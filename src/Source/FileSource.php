@@ -13,6 +13,7 @@ use HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer;
 use HeimrichHannot\EntityImportBundle\Model\EntityImportSourceModel;
 use HeimrichHannot\UtilsBundle\File\FileUtil;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
+use HeimrichHannot\UtilsBundle\Request\CurlRequestUtil;
 
 abstract class FileSource extends Source
 {
@@ -32,18 +33,25 @@ abstract class FileSource extends Source
     protected $sourceModel;
 
     private $fileUuid;
+
     /**
      * @var ModelUtil
      */
     private $modelUtil;
 
     /**
+     * @var CurlRequestUtil
+     */
+    private $curlRequestUtil;
+
+    /**
      * FileSource constructor.
      */
-    public function __construct(FileUtil $fileUtil, ModelUtil $modelUtil)
+    public function __construct(FileUtil $fileUtil, ModelUtil $modelUtil, CurlRequestUtil $curlRequestUtil)
     {
         $this->fileUtil = $fileUtil;
         $this->modelUtil = $modelUtil;
+        $this->curlRequestUtil = $curlRequestUtil;
     }
 
     public function getSourceModel(): EntityImportSourceModel
@@ -56,9 +64,17 @@ abstract class FileSource extends Source
         $this->sourceModel = $sourceModel;
     }
 
-    public function getFileContent()
+    public function getFileContent(): string
     {
-        return $this->fileUtil->getFileContentFromUuid($this->fileUuid);
+        return file_get_contents($this->filePath);
+    }
+
+    public function getLinesFromFile(int $limit): string
+    {
+        $fileContent = $this->getFileContent();
+        $lines = explode("\n", $fileContent);
+
+        return implode("\n", \array_slice($lines, 0, $limit));
     }
 
     public function getFilePath(): string
@@ -70,22 +86,39 @@ abstract class FileSource extends Source
     {
         $source = $this->modelUtil->findModelInstanceByIdOrAlias('tl_entity_import_source', $sourceModel);
 
-        switch ($source->sourceType) {
-            case EntityImportSourceContainer::SOURCE_TYPE_HTTP:
-                $path = $source->sourceUrl;
-                $uuid = null;
+        switch ($source->retrievalType) {
+            case EntityImportSourceContainer::RETRIEVAL_TYPE_HTTP:
+                try {
+                } catch (\Exception $e) {
+                }
+
+                $handle = $this->curlRequestUtil->createCurlHandle($source->sourceUrl);
+                $handle->execute();
+                $response = $handle->getInfo(CURLINFO_HTTP_CODE);
+                $handle->close();
+
+                if (200 == $response) {
+                    $path = $source->sourceUrl;
+                } else {
+                    //TODO: check for cached file
+                    $path = '';
+                }
+
                 break;
-            case EntityImportSourceContainer::SOURCE_TYPE_ABSOLUTE_PATH:
+
+            case EntityImportSourceContainer::RETRIEVAL_TYPE_ABSOLUTE_PATH:
                 $path = $source->absolutePath;
-                $uuid = null;
+
                 break;
-            case EntityImportSourceContainer::SOURCE_TYPE_CONTAO_FILE_SYSTEM:
+
+            case EntityImportSourceContainer::RETRIEVAL_TYPE_CONTAO_FILE_SYSTEM:
                 $path = $this->fileUtil->getPathFromUuid($source->fileSRC);
-                $uuid = $source->fileSRC;
+
                 break;
+
             default:
                 $path = null;
-                $uuid = null;
+
                 break;
         }
 
@@ -96,7 +129,6 @@ abstract class FileSource extends Source
         }
 
         $this->filePath = $path;
-        $this->fileUuid = $uuid;
 
         return true;
     }

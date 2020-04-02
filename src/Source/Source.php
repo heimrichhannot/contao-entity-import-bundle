@@ -32,12 +32,8 @@ abstract class Source implements SourceInterface
         return $this->fieldMapping;
     }
 
-    public function setFieldMapping(array $mapping): bool
+    public function setFieldMapping(array $mapping)
     {
-        if ($mapping) {
-            $this->fieldMapping = $mapping;
-        }
-
-        return true;
+        $this->fieldMapping = $mapping;
     }
 }

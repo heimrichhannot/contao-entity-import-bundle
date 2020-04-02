@@ -130,6 +130,7 @@ class Importer implements ImporterInterface
 
             foreach ($items as $item) {
                 $columnsNotExisting = array_diff(array_keys($item), $targetTableColumns);
+
                 if (!empty($columnsNotExisting)) {
                     throw new Exception($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['tableFieldsDiffer']);
                 }
@@ -144,6 +145,7 @@ class Importer implements ImporterInterface
                     $this->databaseUtil->insert($this->configModel->targetTable, $item);
                 } elseif ('merge' === $mode) {
                     $mergeIdentifier = unserialize($this->configModel->mergeIdentifierFields)[0];
+
                     if (empty($mergeIdentifier)) {
                         throw new Exception($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['noIdentifierFields']);
                     }

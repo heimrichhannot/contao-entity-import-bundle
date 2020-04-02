@@ -10,7 +10,6 @@ namespace HeimrichHannot\EntityImportBundle\Source;
 
 use Contao\Message;
 use Haste\IO\Reader\CsvReader;
-use HeimrichHannot\Haste\Util\Files;
 
 class CSVFileSource extends FileSource
 {
@@ -18,61 +17,75 @@ class CSVFileSource extends FileSource
     {
         $sourceModel = $this->sourceModel;
         $fieldMapping = $this->fieldMapping;
-        $arrData = [];
+        $data = [];
 
+        $settings = $this->getCsvSettings();
+
+        $sourceFile = $this->getFileContent();
+
+        $csv = new CsvReader($sourceFile);
+        $csv->setDelimiter($settings['delimiter']);
+        $csv->setEnclosure($settings['enclosure']);
+        $csv->setEscape($settings['escape']);
+        $csv->rewind();
+        $csv->next();
+
+        while ($current = $csv->current()) {
+            $data[] = $this->getRowData($current, $fieldMapping);
+
+            $csv->next();
+        }
+
+        if ($sourceModel->csvHeaderRow) {
+            array_shift($data);
+        }
+
+        return $data;
+    }
+
+    public function getHeadingLine(): array
+    {
+        return explode(',', $this->getLinesFromFile(1));
+    }
+
+    protected function getCsvSettings(): array
+    {
         try {
-            $delimiter = $sourceModel->csvDelimiter;
-            if (null === $delimiter) {
+            if (null === $this->sourceModel->csvDelimiter) {
                 throw new \Exception($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['delimiter']);
             }
-            $enclosure = $sourceModel->csvEnclosure;
-            if (null === $enclosure) {
+            $settings['delimiter'] = $this->sourceModel->csvDelimiter;
+
+            if (null === $this->sourceModel->csvEnclosure) {
                 throw new \Exception($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['enclosure']);
             }
+            $settings['enclosure'] = $this->sourceModel->csvEnclosure;
 
-            $escape = $sourceModel->csvEscape;
-            if (null === $escape) {
+            if (null === $this->sourceModel->csvEscape) {
                 throw new \Exception($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['escape']);
             }
+            $settings['escape'] = $this->sourceModel->csvEscape;
         } catch (\Exception $e) {
             Message::addError(sprintf($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['errorMessage']), $e->getMessage());
         }
 
-        if ($strSourceFile = Files::getPathFromUuid($sourceModel->fileSRC)) {
-            $objCsv = new CsvReader($strSourceFile);
-            $objCsv->setDelimiter($delimiter);
-            $objCsv->setEnclosure($enclosure);
-            $objCsv->setEscape($escape);
-            $objCsv->rewind();
-            $objCsv->next();
-
-            while ($arrCurrent = $objCsv->current()) {
-                $arrData[] = $this->getRowData($arrCurrent, $fieldMapping);
-
-                $objCsv->next();
-            }
-        }
-
-        if ($sourceModel->csvHeaderRow) {
-            array_shift($arrData);
-        }
-
-        return $arrData;
+        return $settings;
     }
 
-    protected function getRowData($arrCurrent, $arrMapping): array
+    protected function getRowData($current, $mapping): array
     {
-        $arrElement = [];
-        foreach ($arrMapping as $mappingElement) {
-            if ('source_value' === $mappingElement['valueType']) {
-                $arrElement[$mappingElement['name']] = $arrCurrent[$mappingElement['sourceValue']];
-            } elseif ('static_value' === $mappingElement['valueType']) {
-                $arrElement[$mappingElement['name']] = $mappingElement['staticValue'];
+        $row = [];
+
+        foreach ($mapping as $element) {
+            if ('source_value' === $element['valueType']) {
+                $row[$element['name']] = $current[$element['sourceValue']];
+            } elseif ('static_value' === $element['valueType']) {
+                $row[$element['name']] = $element['staticValue'];
             } else {
                 continue;
             }
         }
 
-        return $arrElement;
+        return $row;
     }
 }

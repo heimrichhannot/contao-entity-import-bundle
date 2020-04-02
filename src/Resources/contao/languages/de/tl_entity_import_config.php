@@ -20,8 +20,8 @@ $lang['mergeIdentifierFields'][0]           = 'Merge-Identifikationsfelder';
 $lang['mergeIdentifierFields'][0]           = 'Wählen Sie hier die Felder aus, die für das Auffinden bestehender Datensätze genutzt werden sollen (bspw. E-Mail, ID, Vorname + Nachname, ...).';
 $lang['mergeIdentifierFields']['source'][0] = 'Quellfeld';
 $lang['mergeIdentifierFields']['source'][1] = 'Wählen Sie hier das Quellfeld aus der externen Quelle aus.';
-$lang['mergeIdentifierFields']['target'][0] = 'Wählen Sie hier das Zielfeld in das Importiert wird.';
-$lang['mergeIdentifierFields']['target'][1] = 'Wählen Sie hier das Zielfeld in das Importiert wird.';
+$lang['mergeIdentifierFields']['target'][0] = 'Feld in Zieltabelle';
+$lang['mergeIdentifierFields']['target'][1] = 'Wählen Sie hier das Zielfeld in das importiert wird.';
 
 $lang['importMode'][0] = 'Importeinstellungen';
 $lang['importMode'][1] = 'Wählen Sie hier die Einstellungen für dem Import.';

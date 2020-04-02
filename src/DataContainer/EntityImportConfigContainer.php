@@ -12,6 +12,7 @@ use Contao\Config;
 use Contao\CoreBundle\Exception\RedirectResponseException;
 use Contao\Database;
 use Contao\Date;
+use Contao\StringUtil;
 use HeimrichHannot\EntityImportBundle\Importer\ImporterFactory;
 use HeimrichHannot\RequestBundle\Component\HttpFoundation\Request;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
@@ -41,6 +42,8 @@ class EntityImportConfigContainer
 
     /**
      * EntityImportConfigContainer constructor.
+     *
+     * @param StringUtil $stringUtil
      */
     public function __construct(Request $request, ImporterFactory $importerFactory, UrlUtil $urlUtil, ModelUtil $modelUtil)
     {
@@ -57,41 +60,46 @@ class EntityImportConfigContainer
 
     public function getSourceFields($dc)
     {
-        $arrOptions = [];
+        $options = [];
 
         $fieldMapping = $this->modelUtil->findModelInstanceByPk('tl_entity_import_source', $dc->id)->fieldMapping;
 
-        $arrFieldMapping = unserialize($fieldMapping);
+        $mapping = StringUtil::deserialize($fieldMapping);
 
-        if (!\is_array($arrFieldMapping) || empty($arrFieldMapping)) {
-            return $arrOptions;
+        if (!\is_array($mapping) || empty($mapping)) {
+            return $options;
         }
 
-        foreach ($arrFieldMapping as $arrField) {
-            $arrOptions[$arrField['name']] = $arrField['name'].' ['.$arrField['value'].']';
+        foreach ($mapping as $field) {
+            $options[$field['name']] = $field['name'].' ['.$field['value'].']';
         }
 
-        return $arrOptions;
+        return $options;
     }
 
     public function getTargetFields($dc)
     {
-        $arrOptions = [];
-        $arrFields = Database::getInstance()->listFields($dc->activeRecord->row()['targetTable']);
+        $options = [];
 
-        if (!\is_array($arrFields) || empty($arrFields)) {
-            return $arrOptions;
+        if (null === ($configModel = $this->modelUtil->findModelInstanceByPk('tl_entity_import_config', $dc->id))) {
+            throw new \Exception(sprintf('Entity config model of ID %s not found', $dc->id));
         }
 
-        foreach ($arrFields as $arrField) {
-            if (\in_array('index', $arrField, true)) {
+        $fields = Database::getInstance()->listFields($configModel->targetTable);
+
+        if (!\is_array($fields) || empty($fields)) {
+            return $options;
+        }
+
+        foreach ($fields as $field) {
+            if (\in_array('index', $field, true)) {
                 continue;
             }
 
-            $arrOptions[$arrField['name']] = $arrField['name'].' ['.$arrField['origtype'].']';
+            $options[$field['name']] = $field['name'].' ['.$field['origtype'].']';
         }
 
-        return $arrOptions;
+        return $options;
     }
 
     public function import()

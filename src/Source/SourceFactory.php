@@ -8,11 +8,12 @@
 
 namespace HeimrichHannot\EntityImportBundle\Source;
 
+use Contao\StringUtil;
 use HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer;
 use HeimrichHannot\EntityImportBundle\Event\ImporterFactoryCreateFileSourceEvent;
-use HeimrichHannot\EntityImportBundle\Event\ImporterFactoryCreateSourceEvent;
 use HeimrichHannot\UtilsBundle\File\FileUtil;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
+use HeimrichHannot\UtilsBundle\Request\CurlRequestUtil;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class SourceFactory
@@ -31,11 +32,17 @@ class SourceFactory
      */
     private $eventDispatcher;
 
-    public function __construct(ModelUtil $modelUtil, FileUtil $fileUtil, EventDispatcher $eventDispatcher)
+    /**
+     * @var CurlRequestUtil
+     */
+    private $curlRequestUtil;
+
+    public function __construct(ModelUtil $modelUtil, FileUtil $fileUtil, EventDispatcher $eventDispatcher, CurlRequestUtil $curlRequestUtil)
     {
         $this->modelUtil = $modelUtil;
         $this->fileUtil = $fileUtil;
         $this->eventDispatcher = $eventDispatcher;
+        $this->curlRequestUtil = $curlRequestUtil;
     }
 
     public function createInstance(int $sourceModel): ?SourceInterface
@@ -47,32 +54,37 @@ class SourceFactory
         $source = null;
 
         // TODO -> change to config.yml
-        switch ($sourceModel->sourceType) {
-            case EntityImportSourceContainer::SOURCE_TYPE_CONTAO_FILE_SYSTEM:
+        switch ($sourceModel->type) {
+            case EntityImportSourceContainer::TYPE_DATABASE:
+                break;
+
+            case EntityImportSourceContainer::TYPE_FILE:
                 switch ($sourceModel->fileType) {
                     case EntityImportSourceContainer::FILETYPE_JSON:
-                        $source = new JSONFileSource($this->fileUtil, $this->modelUtil);
+                        $source = new JSONFileSource($this->fileUtil, $this->modelUtil, $this->curlRequestUtil);
+
                         break;
+
                     case EntityImportSourceContainer::FILETYPE_CSV:
-                        $source = new CSVFileSource($this->fileUtil, $this->modelUtil);
+                        $source = new CSVFileSource($this->fileUtil, $this->modelUtil, $this->curlRequestUtil);
+
                         break;
+
                     default:
                         $event = $this->eventDispatcher->dispatch(ImporterFactoryCreateFileSourceEvent::NAME, new ImporterFactoryCreateFileSourceEvent($this->fileUtil, $this->modelUtil));
                         $source = $event->getFileSource();
+
+                        if (null === $source) {
+                            throw new \Exception('No file source class found for file type '.$sourceModel->fileType);
+                        }
+
                         break;
                 }
-                break;
-//            case EntityImportSourceContainer::SOURCE_TYPE_ABSOLUTE_PATH:
-//                break;
-//            case EntityImportSourceContainer::SOURCE_TYPE_HTTP:
-//                break;
-            default:
-                $event = $this->eventDispatcher->dispatch(ImporterFactoryCreateSourceEvent::NAME, new ImporterFactoryCreateSourceEvent($this->fileUtil, $this->modelUtil));
-                $source = $event->getSource();
+
                 break;
         }
 
-        $source->setFieldMapping(unserialize($sourceModel->fieldMapping));
+        $source->setFieldMapping(StringUtil::deserialize($sourceModel->fieldMapping, true));
         $source->setFilePath($sourceModel->id);
         $source->setSourceModel($sourceModel);
 

@@ -9,6 +9,7 @@
 namespace HeimrichHannot\EntityImportBundle\Event;
 
 use HeimrichHannot\EntityImportBundle\Source\Source;
+use HeimrichHannot\EntityImportBundle\Source\SourceInterface;
 use HeimrichHannot\UtilsBundle\File\FileUtil;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
 use Symfony\Component\EventDispatcher\Event;
@@ -18,7 +19,7 @@ class ImporterFactoryCreateSourceEvent extends Event
     public const NAME = 'huh.entity_import.importer_factory_create_source_event';
 
     /**
-     * @var Source
+     * @var SourceInterface
      */
     private $source;
     /**
@@ -30,10 +31,11 @@ class ImporterFactoryCreateSourceEvent extends Event
      */
     private $fileUtil;
 
-    public function __construct(FileUtil $fileUtil, ModelUtil $modelUtil)
+    public function __construct(SourceInterface $source, FileUtil $fileUtil, ModelUtil $modelUtil)
     {
         $this->fileUtil = $fileUtil;
         $this->modelUtil = $modelUtil;
+        $this->source = $source;
     }
 
     public function getSource()
