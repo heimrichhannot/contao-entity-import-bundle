@@ -8,7 +8,6 @@
 
 namespace HeimrichHannot\EntityImportBundle\Source;
 
-use Contao\Message;
 use Contao\Model;
 use Contao\StringUtil;
 use GuzzleHttp\Client;
@@ -68,30 +67,39 @@ abstract class FileSource extends Source
 
     public function getFileContent(): string
     {
-//        if (null === $path) {
-//            Message::addError(sprintf($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['errorMessage'], $GLOBALS['TL_LANG']['tl_entity_import_config']['error']['filePathNotProvided']));
-//
-//            return false;
-//        }
+        switch ($this->sourceModel->retrievalType) {
+            case EntityImportSourceContainer::RETRIEVAL_TYPE_CONTAO_FILE_SYSTEM:
+                $content = file_get_contents($this->sourceModel->filePath);
 
-        if (EntityImportSourceContainer::RETRIEVAL_TYPE_CONTAO_FILE_SYSTEM === $this->sourceModel->retrievalType) {
-            return file_get_contents($this->sourceModel->filePath);
-        } elseif (EntityImportSourceContainer::RETRIEVAL_TYPE_HTTP === $this->sourceModel->retrievalType) {
-            $auth = [];
+                break;
 
-            if (null !== $this->sourceModel->httpAuth) {
-                $auth = StringUtil::deserialize($this->sourceModel->httpAuth);
-            }
+            case EntityImportSourceContainer::RETRIEVAL_TYPE_HTTP:
+                $auth = [];
 
-            return $this->getFileFromUrl($this->sourceModel->httpMethod, $this->sourceModel->sourceUrl, $auth)->getBody();
-        } elseif (EntityImportSourceContainer::RETRIEVAL_TYPE_ABSOLUTE_PATH === $this->sourceModel->retrievalType) {
-            return '';
+                if (null !== $this->sourceModel->httpAuth) {
+                    $auth = StringUtil::deserialize($this->sourceModel->httpAuth);
+                }
+
+                // TODO: event for custom authentication
+
+                $content = $this->getFileFromUrl($this->sourceModel->httpMethod, $this->sourceModel->sourceUrl, $auth)->getBody();
+
+                break;
+
+            case EntityImportSourceContainer::RETRIEVAL_TYPE_ABSOLUTE_PATH:
+                $content = '';
+
+                break;
+
+            default:
+                // TODO: event for other retrievalTypes
+//                $event = new
+//                return $event->getContent();
+                $content = '';
+
+                break;
         }
-        $content = '';
 
-//            $event = new
-
-//            return $event->getContent();
         return $content;
     }
 
