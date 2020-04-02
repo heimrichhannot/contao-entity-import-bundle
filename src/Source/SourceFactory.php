@@ -85,7 +85,6 @@ class SourceFactory
         }
 
         $source->setFieldMapping(StringUtil::deserialize($sourceModel->fieldMapping, true));
-        $source->setFilePath($sourceModel->id);
         $source->setSourceModel($sourceModel);
 
         return $source;

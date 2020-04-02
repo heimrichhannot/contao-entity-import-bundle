@@ -35,14 +35,14 @@ $GLOBALS['TL_LANG']['tl_entity_import_config']['importerInfo'] = 'Using the clas
 /**
  * Errors
  */
-$arrLang['error']['notInitialized']     = 'Importer is not yet initialized.';
-$arrLang['error']['error']              = 'Error: %s';
-$arrLang['error']['tableDoNotExist']    = 'Target table does not exist.';
-$arrLang['error']['tableFieldsDiffer']  = 'Fields of target and source differ';
-$arrLang['error']['noIdentifierFields'] = 'No unique identifier fields set.';
-$arrLang['error']['successfulImport']   = 'Successfully imported %s records';
-$arrLang['error']['emptyFile']          = 'Nothing to import';
-$arrLang['error']['errorImport']        = 'Error inserted %s records. Error: %s';
-$arrLang['error']['delimiter']          = 'Delimiter for csv is not defined';
-$arrLang['error']['enclosure']          = 'Enclosure for csv is not defined';
-$arrLang['error']['escape']             = 'Escape for csv is not defined';
+$GLOBALS['TL_LANG']['tl_entity_import_config']['error']['notInitialized']     = 'Importer is not yet initialized.';
+$GLOBALS['TL_LANG']['tl_entity_import_config']['error']['error']              = 'Error: %s';
+$GLOBALS['TL_LANG']['tl_entity_import_config']['error']['tableDoNotExist']    = 'Target table does not exist.';
+$GLOBALS['TL_LANG']['tl_entity_import_config']['error']['tableFieldsDiffer']  = 'Fields of target and source differ';
+$GLOBALS['TL_LANG']['tl_entity_import_config']['error']['noIdentifierFields'] = 'No unique identifier fields set.';
+$GLOBALS['TL_LANG']['tl_entity_import_config']['error']['successfulImport']   = 'Successfully imported %s records';
+$GLOBALS['TL_LANG']['tl_entity_import_config']['error']['emptyFile']          = 'Nothing to import';
+$GLOBALS['TL_LANG']['tl_entity_import_config']['error']['errorImport']        = 'Error inserted %s records. Error: %s';
+$GLOBALS['TL_LANG']['tl_entity_import_config']['error']['delimiter']          = 'Delimiter for csv is not defined';
+$GLOBALS['TL_LANG']['tl_entity_import_config']['error']['enclosure']          = 'Enclosure for csv is not defined';
+$GLOBALS['TL_LANG']['tl_entity_import_config']['error']['escape']             = 'Escape for csv is not defined';

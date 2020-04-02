@@ -65,7 +65,8 @@ class EntityImportSourceContainer
         switch ($fileType) {
             case self::FILETYPE_CSV:
 
-/** @var CSVFileSource $source */ $source = $this->sourceFactory->createInstance($sourceModel->id);
+                /** @var CSVFileSource $source */
+                $source = $this->sourceFactory->createInstance($sourceModel->id);
 
                 $options = [];
                 $fields = $source->getHeadingLine();
@@ -81,12 +82,14 @@ class EntityImportSourceContainer
                 $dca['fields']['fieldMapping']['eval']['multiColumnEditor']['fields']['sourceValue']['inputType'] = 'select';
                 $dca['fields']['fieldMapping']['eval']['multiColumnEditor']['fields']['sourceValue']['options'] = $options;
                 $dca['fields']['fieldMapping']['eval']['multiColumnEditor']['fields']['sourceValue']['eval']['includeBlankOption'] = true;
+                $dca['fields']['fileContent']['eval']['rte'] = 'ace';
 
                 break;
 
             case self::FILETYPE_JSON:
 
                 $dca['fields']['fieldMapping']['eval']['multiColumnEditor']['fields']['sourceValue']['inputType'] = 'text';
+                $dca['fields']['fileContent']['eval']['rte'] = 'ace|json';
 
                 break;
 

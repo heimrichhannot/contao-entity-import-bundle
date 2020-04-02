@@ -75,11 +75,11 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
 
     // Subpalettes
     'subpalettes' => [
-        'retrievalType_http'               => 'sourceUrl,fileType',
+        'retrievalType_http'               => 'sourceUrl,httpMethod,httpAuth,fileType',
         'retrievalType_contao_file_system' => 'fileSRC,fileType',
-        'retrievalType_absolute_path'      => 'absolutePath,filePath',
-        'fileType_csv'                  => 'fileContentCsv,csvHeaderRow,csvDelimiter,csvEnclosure,csvEscape,fieldMapping',
-        'fileType_json'                 => 'fileContentJson,pathToDataArray,fieldMapping',
+        'retrievalType_absolute_path'      => 'absolutePath',
+        'fileType_csv'                  => 'fileContent,csvHeaderRow,csvDelimiter,csvEnclosure,csvEscape,fieldMapping',
+        'fileType_json'                 => 'fileContent,pathToDataArray,fieldMapping',
     ],
     // Fields
     'fields'      => [
@@ -215,23 +215,56 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'eval'      => ['submitOnChange' => true, 'includeBlankOption' => true, 'tl_class' => 'w50'],
             'sql'       => "varchar(255) NOT NULL default ''",
         ],
-        'filePath'          => [
-            'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['filePath'],
-            'exclude'   => true,
-            'filter'    => true,
-            'inputType' => 'text',
-            'reference' => &$GLOBALS['TL_LANG']['tl_entity_import_source']['filePath'],
-            'eval'      => ['submitOnChange' => true, 'includeBlankOption' => true, 'tl_class' => 'w50'],
-            'sql'       => "varchar(255) NOT NULL default ''",
-        ],
         'sourceUrl'         => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['sourceUrl'],
             'exclude'   => true,
             'filter'    => true,
             'inputType' => 'text',
-            'reference' => &$GLOBALS['TL_LANG']['tl_entity_import_source']['sourceUrl'],
             'eval'      => ['submitOnChange' => true, 'includeBlankOption' => true, 'tl_class' => 'clr w50'],
             'sql'       => "varchar(255) NOT NULL default ''",
+        ],
+        'httpMethod' => [
+            'label'                   => &$GLOBALS['TL_LANG']['tl_entity_import_source']['httpMethod'],
+            'exclude'                 => true,
+            'filter'                  => true,
+            'inputType'               => 'select',
+            'options' => [
+                'get',
+                'post'
+            ],
+            'reference' => &$GLOBALS['TL_LANG']['tl_entity_import_source']['reference']['httpMethod'],
+            'eval'                    => ['tl_class' => 'w50', 'mandatory' => true, 'includeBlankOption' => true, 'submitOnChange' => true],
+            'sql'                     => "varchar(64) NOT NULL default ''"
+        ],
+        'httpAuth' => [
+            'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['httpAuth'],
+            'inputType' => 'multiColumnEditor',
+            'eval'      => [
+                'tl_class' => 'long clr',
+                'multiColumnEditor' => [
+                    'minRowCount' => 0,
+                    'sortable' => true,
+                    'fields'   => [
+                        'name'  => [
+                            'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['httpAuth']['name'],
+                            'exclude'   => true,
+                            'inputType' => 'text',
+                            'eval'      => [
+                                'groupStyle' => 'width: 48%',
+                            ],
+                        ],
+                        'value' => [
+                            'label'                   => &$GLOBALS['TL_LANG']['tl_entity_import_source']['httpAuth']['value'],
+                            'exclude'                 => true,
+                            'inputType'               => 'text',
+                            'eval'                    => [
+                                'groupStyle' => 'width: 48%',
+                            ]
+                        ],
+                    ],
+                ],
+            ],
+            'sql'       => "blob NULL",
         ],
         'fileSRC'           => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['fileSRC'],
@@ -247,22 +280,8 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'inputType' => 'text',
             'eval'      => ['submitOnChange' => true, 'includeBlankOption' => true, 'tl_class' => 'clr w50'],
         ],
-        'fileContentCsv'    => [
-            'label'         => &$GLOBALS['TL_LANG']['tl_entity_import_source']['fileContentCsv'],
-            'exclude'       => true,
-            'inputType'     => 'textarea',
-            'eval'          => [
-                'allowHtml'  => true,
-                'class'      => 'monospace',
-                'rte'        => 'ace|csv',
-                'helpwizard' => false,
-                'tl_class'   => 'long clr'
-            ],
-            'load_callback' => [[\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::class, 'onLoadFileContent']],
-            'sql'           => "blob NULL",
-        ],
-        'fileContentJson'   => [
-            'label'         => &$GLOBALS['TL_LANG']['tl_entity_import_source']['fileContentJson'],
+        'fileContent'    => [
+            'label'         => &$GLOBALS['TL_LANG']['tl_entity_import_source']['fileContent'],
             'exclude'       => true,
             'inputType'     => 'textarea',
             'eval'          => [
@@ -270,7 +289,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
                 'class'      => 'monospace',
                 'rte'        => 'ace|json',
                 'helpwizard' => false,
-                'tl_class'   => 'long clr',
+                'tl_class'   => 'long clr'
             ],
             'load_callback' => [[\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::class, 'onLoadFileContent']],
             'sql'           => "blob NULL",

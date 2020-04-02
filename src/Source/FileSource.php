@@ -9,6 +9,9 @@
 namespace HeimrichHannot\EntityImportBundle\Source;
 
 use Contao\Message;
+use Contao\Model;
+use Contao\StringUtil;
+use GuzzleHttp\Client;
 use HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer;
 use HeimrichHannot\EntityImportBundle\Model\EntityImportSourceModel;
 use HeimrichHannot\UtilsBundle\File\FileUtil;
@@ -32,8 +35,6 @@ abstract class FileSource extends Source
      */
     protected $sourceModel;
 
-    private $fileUuid;
-
     /**
      * @var ModelUtil
      */
@@ -52,6 +53,7 @@ abstract class FileSource extends Source
         $this->fileUtil = $fileUtil;
         $this->modelUtil = $modelUtil;
         $this->curlRequestUtil = $curlRequestUtil;
+        parent::__construct($this->modelUtil);
     }
 
     public function getSourceModel(): EntityImportSourceModel
@@ -59,14 +61,38 @@ abstract class FileSource extends Source
         return $this->sourceModel;
     }
 
-    public function setSourceModel(EntityImportSourceModel $sourceModel)
+    public function setSourceModel(Model $sourceModel)
     {
         $this->sourceModel = $sourceModel;
     }
 
     public function getFileContent(): string
     {
-        return file_get_contents($this->filePath);
+//        if (null === $path) {
+//            Message::addError(sprintf($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['errorMessage'], $GLOBALS['TL_LANG']['tl_entity_import_config']['error']['filePathNotProvided']));
+//
+//            return false;
+//        }
+
+        if (EntityImportSourceContainer::RETRIEVAL_TYPE_CONTAO_FILE_SYSTEM === $this->sourceModel->retrievalType) {
+            return file_get_contents($this->sourceModel->filePath);
+        } elseif (EntityImportSourceContainer::RETRIEVAL_TYPE_HTTP === $this->sourceModel->retrievalType) {
+            $auth = [];
+
+            if (null !== $this->sourceModel->httpAuth) {
+                $auth = StringUtil::deserialize($this->sourceModel->httpAuth);
+            }
+
+            return $this->getFileFromUrl($this->sourceModel->httpMethod, $this->sourceModel->sourceUrl, $auth)->getBody();
+        } elseif (EntityImportSourceContainer::RETRIEVAL_TYPE_ABSOLUTE_PATH === $this->sourceModel->retrievalType) {
+            return '';
+        }
+        $content = '';
+
+//            $event = new
+
+//            return $event->getContent();
+        return $content;
     }
 
     public function getLinesFromFile(int $limit): string
@@ -77,59 +103,10 @@ abstract class FileSource extends Source
         return implode("\n", \array_slice($lines, 0, $limit));
     }
 
-    public function getFilePath(): string
+    protected function getFileFromUrl(string $method, string $url, array $auth = [])
     {
-        return $this->filePath;
-    }
+        $client = new Client();
 
-    public function setFilePath(int $sourceModel): string
-    {
-        $source = $this->modelUtil->findModelInstanceByIdOrAlias('tl_entity_import_source', $sourceModel);
-
-        switch ($source->retrievalType) {
-            case EntityImportSourceContainer::RETRIEVAL_TYPE_HTTP:
-                try {
-                } catch (\Exception $e) {
-                }
-
-                $handle = $this->curlRequestUtil->createCurlHandle($source->sourceUrl);
-                $handle->execute();
-                $response = $handle->getInfo(CURLINFO_HTTP_CODE);
-                $handle->close();
-
-                if (200 == $response) {
-                    $path = $source->sourceUrl;
-                } else {
-                    //TODO: check for cached file
-                    $path = '';
-                }
-
-                break;
-
-            case EntityImportSourceContainer::RETRIEVAL_TYPE_ABSOLUTE_PATH:
-                $path = $source->absolutePath;
-
-                break;
-
-            case EntityImportSourceContainer::RETRIEVAL_TYPE_CONTAO_FILE_SYSTEM:
-                $path = $this->fileUtil->getPathFromUuid($source->fileSRC);
-
-                break;
-
-            default:
-                $path = null;
-
-                break;
-        }
-
-        if (null === $path) {
-            Message::addError(sprintf($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['errorMessage'], $GLOBALS['TL_LANG']['tl_entity_import_config']['error']['filePathNotProvided']));
-
-            return false;
-        }
-
-        $this->filePath = $path;
-
-        return true;
+        return $client->request($method, $url, $auth);
     }
 }

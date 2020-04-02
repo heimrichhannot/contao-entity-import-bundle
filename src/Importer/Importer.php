@@ -11,6 +11,7 @@ namespace HeimrichHannot\EntityImportBundle\Importer;
 use Contao\Database;
 use Contao\Message;
 use Contao\Model;
+use Contao\StringUtil;
 use HeimrichHannot\EntityImportBundle\Event\AfterImportEvent;
 use HeimrichHannot\EntityImportBundle\Event\BeforeImportEvent;
 use HeimrichHannot\EntityImportBundle\Model\EntityImportConfigModel;
@@ -38,29 +39,9 @@ class Importer implements ImporterInterface
     protected $dryRun = false;
 
     /**
-     * @var bool
-     */
-    protected $mergeTable;
-
-    /**
      * @var EventDispatcher
      */
     protected $eventDispatcher;
-
-    /**
-     * @var string
-     */
-    protected $targetTable;
-
-    /**
-     * @var bool
-     */
-    protected $isInitialized;
-
-    /**
-     * @var bool
-     */
-    protected $purgeTableBeforeImport;
 
     /**
      * @var DatabaseUtil
@@ -144,7 +125,7 @@ class Importer implements ImporterInterface
                 if ('insert' === $mode) {
                     $this->databaseUtil->insert($this->configModel->targetTable, $item);
                 } elseif ('merge' === $mode) {
-                    $mergeIdentifier = unserialize($this->configModel->mergeIdentifierFields)[0];
+                    $mergeIdentifier = StringUtil::deserialize($this->configModel->mergeIdentifierFields, true)[0];
 
                     if (empty($mergeIdentifier)) {
                         throw new Exception($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['noIdentifierFields']);

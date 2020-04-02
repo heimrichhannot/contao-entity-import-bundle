@@ -34,10 +34,9 @@ $lang['fieldMapping']['sourceValue'][1] = 'Geben Sie hier den Ort des Wertes in 
 $lang['fieldMapping']['staticValue'][0] = 'Statischer Wert';
 $lang['fieldMapping']['staticValue'][1] = 'Geben Sie hier den Wert ein, der gleich in allen Datensätzen eingetragen werden soll.';
 
-$lang['fileContentJson'][0] = 'JSON Ansicht';
-$lang['fileContentJson'][1] = 'Hier wird das erste Objekt der ausgewählten JSON Datei dargestellt.';
-$lang['fileContentCsv'][0]  = 'CSV Ansicht ';
-$lang['fileContentCsv'][1]  = 'Hier wird die erste Spalte des CSV-Dokuments dargestellt.';
+$lang['fileContent'][0] = 'Dateivorschau';
+$lang['fileContent'][1] = 'Hier können Sie den Inhalt der ausgewählten Datei sehen. Es wird nicht die gesammte Datei dargestellt.';
+
 $lang['sourceType'][0]      = 'Quelle';
 $lang['sourceType'][1]      = 'Wählen Sie hier die Art der Dateiquelle aus.';
 
@@ -49,8 +48,8 @@ $lang['type'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourc
 
 $lang['sourceUrl'][0]   = 'Url';
 $lang['sourceUrl'][1]   = 'Geben Sie hier die URL zur Datei ein.';
-$lang['filePath'][0]    = 'Absoluter Dateipfad';
-$lang['filePath'][1]    = 'Geben Sie hier einen absoluten Dateipfad auf dem Server ein.';
+$lang['absolutePath'][0]    = 'Absoluter Dateipfad';
+$lang['absolutePath'][1]    = 'Geben Sie hier einen absoluten Dateipfad auf dem Server ein.';
 $lang['fileSRC'][0]     = 'Datei wählen oder hochladen';
 $lang['fileSRC'][1]     = 'Wählen Sie hier eine vorhandene Datei, oder laden Sie eine neue Datei hoch.';
 $lang['dbDriver'][0]    = 'Treiber';
@@ -71,6 +70,14 @@ $lang['dbSocket'][0]    = 'Socket';
 $lang['dbSocket'][1]    = 'Geben Sie hier einen Socket ein.';
 $lang['externalUrl'][0] = 'Url';
 $lang['externalUrl'][1] = 'Tragen Sie hier die Url ein, von der die Daten importiert werden sollen.';
+$lang['httpMethod'][0]  = 'HTTP-Methode';
+$lang['httpMethod'][1]  = 'Wählen Sie hier die HTTP-Methode mit der auf die Datei zugegriffen werden soll.';
+$lang['httpAuth'][0]    = 'Authentifizierung';
+$lang['httpAuth'][1]    = 'Traugen Sie hier die Daten für die Authentifizierung ein.';
+$lang['httpAuth']['name'][0]    = 'Bezeichnung';
+$lang['httpAuth']['name'][1]    = 'Traugen Sie hier die Bezeichnung des Wertes für die Authentifizierung. Bsp: username';
+$lang['httpAuth']['value'][0]    = 'Wert';
+$lang['httpAuth']['value'][1]    = 'Traugen Sie hier den Wert für die Authentifizierung.';
 
 /**
  * Reference
@@ -79,6 +86,10 @@ $lang['reference'] = [
     'valueType' => [
         'source_value' => 'dynamisch',
         'static_value' => 'statisch'
+    ],
+    'httpMethod' => [
+        'get' => 'GET',
+        'post' => 'POST'
     ]
 ];
 
