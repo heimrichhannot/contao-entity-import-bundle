@@ -327,7 +327,6 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
                         'sourceValue' => [
                             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['fieldMapping']['sourceValue'],
                             'inputType' => 'text',
-                            'load_callback' => [[\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::class, 'loadFieldMappingSourceValue']],
                             'eval'      => [
                                 'groupStyle' => 'width: 38%',
                             ],

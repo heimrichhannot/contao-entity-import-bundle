@@ -112,8 +112,6 @@ class Importer implements ImporterInterface
 
     protected function executeImport($items)
     {
-        $targetTable = $this->configModel->targetTable;
-
         $database = Database::getInstance();
 
         if (!$database->tableExists($this->configModel->targetTable)) {
@@ -152,7 +150,6 @@ class Importer implements ImporterInterface
                     $this->databaseUtil->update($this->configModel->targetTable, $item, $mergeIdentifier['target'].'=?', [$mergeIdentifier['source']]);
                 } else {
                     throw new Exception($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['modeNotSet']);
-                    continue;
                 }
             }
 

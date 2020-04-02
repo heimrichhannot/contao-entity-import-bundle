@@ -13,7 +13,6 @@ use Contao\CoreBundle\Exception\RedirectResponseException;
 use Contao\Database;
 use Contao\Date;
 use HeimrichHannot\EntityImportBundle\Importer\ImporterFactory;
-use HeimrichHannot\EntityImportBundle\Importer\ImporterInterface;
 use HeimrichHannot\RequestBundle\Component\HttpFoundation\Request;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
 use HeimrichHannot\UtilsBundle\Url\UrlUtil;
@@ -24,10 +23,7 @@ class EntityImportConfigContainer
      * @var Request
      */
     private $request;
-    /**
-     * @var ImporterInterface
-     */
-    private $importer;
+
     /**
      * @var UrlUtil
      */
