@@ -12,6 +12,8 @@ use Contao\Model;
 use Contao\StringUtil;
 use GuzzleHttp\Client;
 use HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer;
+use HeimrichHannot\EntityImportBundle\Event\BeforeAuthenicationEvent;
+use HeimrichHannot\EntityImportBundle\Event\FileSourceGetContentEvent;
 use HeimrichHannot\EntityImportBundle\Model\EntityImportSourceModel;
 use HeimrichHannot\UtilsBundle\File\FileUtil;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
@@ -65,6 +67,14 @@ abstract class FileSource extends Source
         $this->sourceModel = $sourceModel;
     }
 
+    public function getLinesFromFile(int $limit): string
+    {
+        $fileContent = $this->getFileContent();
+        $lines = explode("\n", $fileContent);
+
+        return implode("\n", \array_slice($lines, 0, $limit));
+    }
+
     public function getFileContent(): string
     {
         switch ($this->sourceModel->retrievalType) {
@@ -80,9 +90,9 @@ abstract class FileSource extends Source
                     $auth = StringUtil::deserialize($this->sourceModel->httpAuth);
                 }
 
-                // TODO: event for custom authentication
+                $event = new BeforeAuthenicationEvent($auth);
 
-                $content = $this->getFileFromUrl($this->sourceModel->httpMethod, $this->sourceModel->sourceUrl, $auth)->getBody();
+                $content = $this->getFileFromUrl($this->sourceModel->httpMethod, $this->sourceModel->sourceUrl, $event->getAuth())->getBody();
 
                 break;
 
@@ -92,23 +102,16 @@ abstract class FileSource extends Source
                 break;
 
             default:
-                // TODO: event for other retrievalTypes
-//                $event = new
-//                return $event->getContent();
                 $content = '';
+
+                $event = new FileSourceGetContentEvent($content);
+
+                return $event->getContent();
 
                 break;
         }
 
         return $content;
-    }
-
-    public function getLinesFromFile(int $limit): string
-    {
-        $fileContent = $this->getFileContent();
-        $lines = explode("\n", $fileContent);
-
-        return implode("\n", \array_slice($lines, 0, $limit));
     }
 
     protected function getFileFromUrl(string $method, string $url, array $auth = [])
