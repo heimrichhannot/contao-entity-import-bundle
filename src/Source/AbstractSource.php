@@ -10,7 +10,7 @@ namespace HeimrichHannot\EntityImportBundle\Source;
 
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
 
-abstract class Source implements SourceInterface
+abstract class AbstractSource implements SourceInterface
 {
     /**
      * @var array

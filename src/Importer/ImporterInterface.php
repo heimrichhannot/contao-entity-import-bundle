@@ -13,4 +13,6 @@ interface ImporterInterface
     public function getDataFromSource(): array;
 
     public function run(): bool;
+
+    public function setDryRun(bool $dry);
 }

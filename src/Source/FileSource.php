@@ -19,13 +19,8 @@ use HeimrichHannot\UtilsBundle\File\FileUtil;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
 use HeimrichHannot\UtilsBundle\Request\CurlRequestUtil;
 
-abstract class FileSource extends Source
+abstract class FileSource extends AbstractSource
 {
-    /**
-     * @var string
-     */
-    protected $filePath;
-
     /**
      * @var FileUtil
      */
@@ -79,7 +74,7 @@ abstract class FileSource extends Source
     {
         switch ($this->sourceModel->retrievalType) {
             case EntityImportSourceContainer::RETRIEVAL_TYPE_CONTAO_FILE_SYSTEM:
-                $content = file_get_contents($this->sourceModel->filePath);
+                $content = file_get_contents($this->fileUtil->getPathFromUuid($this->sourceModel->fileSRC));
 
                 break;
 

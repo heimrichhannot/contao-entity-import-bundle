@@ -292,7 +292,6 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
                 'tl_class'   => 'long clr'
             ],
             'load_callback' => [[\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::class, 'onLoadFileContent']],
-            'sql'           => "blob NULL",
         ],
         'pathToDataArray' => [
             'label'                   => &$GLOBALS['TL_LANG']['tl_entity_import_source']['pathToDataArray'],

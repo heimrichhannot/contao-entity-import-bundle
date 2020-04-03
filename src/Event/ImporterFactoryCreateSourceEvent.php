@@ -8,7 +8,6 @@
 
 namespace HeimrichHannot\EntityImportBundle\Event;
 
-use HeimrichHannot\EntityImportBundle\Source\Source;
 use HeimrichHannot\EntityImportBundle\Source\SourceInterface;
 use HeimrichHannot\UtilsBundle\File\FileUtil;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
@@ -43,7 +42,7 @@ class ImporterFactoryCreateSourceEvent extends Event
         return $this->source;
     }
 
-    public function setSource(Source $source)
+    public function setSource(SourceInterface $source)
     {
         $this->source = $source;
     }
