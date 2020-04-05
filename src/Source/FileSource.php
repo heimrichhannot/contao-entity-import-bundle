@@ -9,7 +9,6 @@
 namespace HeimrichHannot\EntityImportBundle\Source;
 
 use Contao\Model;
-use Contao\StringUtil;
 use GuzzleHttp\Client;
 use HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer;
 use HeimrichHannot\EntityImportBundle\Event\BeforeAuthenicationEvent;
@@ -17,7 +16,7 @@ use HeimrichHannot\EntityImportBundle\Event\FileSourceGetContentEvent;
 use HeimrichHannot\EntityImportBundle\Model\EntityImportSourceModel;
 use HeimrichHannot\UtilsBundle\File\FileUtil;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
-use HeimrichHannot\UtilsBundle\Request\CurlRequestUtil;
+use HeimrichHannot\UtilsBundle\String\StringUtil;
 
 abstract class FileSource extends AbstractSource
 {
@@ -34,21 +33,20 @@ abstract class FileSource extends AbstractSource
     /**
      * @var ModelUtil
      */
-    private $modelUtil;
-
+    protected $modelUtil;
     /**
-     * @var CurlRequestUtil
+     * @var StringUtil
      */
-    private $curlRequestUtil;
+    protected $stringUtil;
 
     /**
      * FileSource constructor.
      */
-    public function __construct(FileUtil $fileUtil, ModelUtil $modelUtil, CurlRequestUtil $curlRequestUtil)
+    public function __construct(FileUtil $fileUtil, ModelUtil $modelUtil, StringUtil $stringUtil)
     {
         $this->fileUtil = $fileUtil;
         $this->modelUtil = $modelUtil;
-        $this->curlRequestUtil = $curlRequestUtil;
+        $this->stringUtil = $stringUtil;
         parent::__construct($this->modelUtil);
     }
 
@@ -82,10 +80,11 @@ abstract class FileSource extends AbstractSource
                 $auth = [];
 
                 if (null !== $this->sourceModel->httpAuth) {
-                    $auth = StringUtil::deserialize($this->sourceModel->httpAuth);
+                    $httpAuth = StringUtil::deserialize($this->sourceModel->httpAuth);
+                    $auth = ['auth' => [$httpAuth['username'], $httpAuth['password']]];
                 }
 
-                $event = new BeforeAuthenicationEvent($auth);
+                $event = new BeforeAuthenicationEvent($auth, $this->sourceModel);
 
                 $content = $this->getFileFromUrl($this->sourceModel->httpMethod, $this->sourceModel->sourceUrl, $event->getAuth())->getBody();
 
@@ -99,7 +98,7 @@ abstract class FileSource extends AbstractSource
             default:
                 $content = '';
 
-                $event = new FileSourceGetContentEvent($content);
+                $event = new FileSourceGetContentEvent($content, $this->sourceModel);
 
                 return $event->getContent();
 

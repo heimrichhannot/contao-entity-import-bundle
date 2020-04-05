@@ -74,10 +74,10 @@ $lang['httpMethod'][0]  = 'HTTP-Methode';
 $lang['httpMethod'][1]  = 'Wählen Sie hier die HTTP-Methode mit der auf die Datei zugegriffen werden soll.';
 $lang['httpAuth'][0]    = 'Authentifizierung';
 $lang['httpAuth'][1]    = 'Traugen Sie hier die Daten für die Authentifizierung ein.';
-$lang['httpAuth']['name'][0]    = 'Bezeichnung';
-$lang['httpAuth']['name'][1]    = 'Traugen Sie hier die Bezeichnung des Wertes für die Authentifizierung. Bsp: username';
-$lang['httpAuth']['value'][0]    = 'Wert';
-$lang['httpAuth']['value'][1]    = 'Traugen Sie hier den Wert für die Authentifizierung.';
+$lang['httpAuth']['username'][0]    = 'Benutzername';
+$lang['httpAuth']['username'][1]    = 'Traugen Sie hier Ihren Benutzernamen ein.';
+$lang['httpAuth']['password'][0]    = 'Passwort';
+$lang['httpAuth']['password'][1]    = 'Traugen Sie hier Ihr Passwort ein.';
 
 /**
  * Reference

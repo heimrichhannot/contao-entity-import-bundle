@@ -53,7 +53,7 @@ class JSONFileSource extends FileSource
 
         foreach ($mapping as $mappingElement) {
             if ('static_value' === $mappingElement['valueType']) {
-                $result[$mappingElement['name']] = $mappingElement['staticValue'];
+                $result[$mappingElement['name']] = $this->stringUtil->replaceInsertTags($mappingElement['staticValue']);
             } elseif ('source_value' === $mappingElement['valueType']) {
                 $result[$mappingElement['name']] = $this->getValue($element, $mappingElement);
             } else {
@@ -64,9 +64,11 @@ class JSONFileSource extends FileSource
         return $result;
     }
 
-    protected function getValue($data, $mapping): ?array
+    protected function getValue($data, $mapping)
     {
-        $mapping = explode('.', $mapping['sourceValue']);
+        if (\array_key_exists('sourceValue', $mapping)) {
+            $mapping = explode('.', $mapping['sourceValue']);
+        }
 
         if (empty($mapping)) {
             return $data;

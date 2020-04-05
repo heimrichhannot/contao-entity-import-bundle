@@ -8,6 +8,7 @@
 
 namespace HeimrichHannot\EntityImportBundle\Event;
 
+use Contao\Model;
 use Symfony\Component\EventDispatcher\Event;
 
 class FileSourceGetContentEvent extends Event
@@ -18,10 +19,18 @@ class FileSourceGetContentEvent extends Event
      * @var string
      */
     private $content;
+    /**
+     * @var Model
+     */
+    private $sourceModel;
 
-    public function __construct(string $content)
+    /**
+     * FileSourceGetContentEvent constructor.
+     */
+    public function __construct(string $content, Model $sourceModel)
     {
         $this->content = $content;
+        $this->sourceModel = $sourceModel;
     }
 
     public function getContent(): string

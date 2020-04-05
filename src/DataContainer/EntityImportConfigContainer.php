@@ -127,7 +127,7 @@ class EntityImportConfigContainer
             throw new \Exception(sprintf('Entity source model of ID %s not found', $configModel->pid));
         }
 
-        $importer = $this->importerFactory->createInstance($sourceModel->id);
+        $importer = $this->importerFactory->createInstance($configModel->id);
         $importer->setDryRun($dry);
         $importer->run();
 

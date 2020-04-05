@@ -15,15 +15,11 @@ class CSVFileSource extends FileSource
 {
     public function getMappedData(): array
     {
-        $sourceModel = $this->sourceModel;
-        $fieldMapping = $this->fieldMapping;
         $data = [];
-
         $settings = $this->getCsvSettings();
+        $filePath = $this->fileUtil->getPathFromUuid($this->sourceModel->fileSRC);
 
-        $sourceFile = $this->getFileContent();
-
-        $csv = new CsvReader($sourceFile);
+        $csv = new CsvReader($filePath);
         $csv->setDelimiter($settings['delimiter']);
         $csv->setEnclosure($settings['enclosure']);
         $csv->setEscape($settings['escape']);
@@ -31,12 +27,12 @@ class CSVFileSource extends FileSource
         $csv->next();
 
         while ($current = $csv->current()) {
-            $data[] = $this->getRowData($current, $fieldMapping);
+            $data[] = $this->getRowData($current, $this->fieldMapping);
 
             $csv->next();
         }
 
-        if ($sourceModel->csvHeaderRow) {
+        if ($this->sourceModel->csvHeaderRow) {
             array_shift($data);
         }
 
@@ -80,7 +76,7 @@ class CSVFileSource extends FileSource
             if ('source_value' === $element['valueType']) {
                 $row[$element['name']] = $current[$element['sourceValue']];
             } elseif ('static_value' === $element['valueType']) {
-                $row[$element['name']] = $element['staticValue'];
+                $row[$element['name']] = $this->stringUtil->replaceInsertTags($element['staticValue']);
             } else {
                 continue;
             }

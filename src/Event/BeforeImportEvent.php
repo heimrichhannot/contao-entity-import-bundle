@@ -8,6 +8,8 @@
 
 namespace HeimrichHannot\EntityImportBundle\Event;
 
+use Contao\Model;
+use HeimrichHannot\EntityImportBundle\Source\SourceInterface;
 use Symfony\Component\EventDispatcher\Event;
 
 class BeforeImportEvent extends Event
@@ -18,10 +20,23 @@ class BeforeImportEvent extends Event
      * @var array
      */
     private $items;
+    /**
+     * @var Model
+     */
+    private $configModel;
+    /**
+     * @var SourceInterface
+     */
+    private $source;
 
-    public function __construct(array $items)
+    /**
+     * BeforeImportEvent constructor.
+     */
+    public function __construct(array $items, Model $configModel, SourceInterface $source)
     {
         $this->items = $items;
+        $this->configModel = $configModel;
+        $this->source = $source;
     }
 
     public function getItems(): array

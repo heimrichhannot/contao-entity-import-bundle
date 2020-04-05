@@ -24,7 +24,7 @@ class ExecuteImportCommand extends AbstractLockedCommand implements FrameworkAwa
     /**
      * @var string
      */
-    protected static $defaultName = 'huh:entity-import:execute';
+    public static $defaultName = 'huh:entity-import:execute';
 
     /**
      * @var InputInterface
@@ -81,7 +81,7 @@ class ExecuteImportCommand extends AbstractLockedCommand implements FrameworkAwa
     {
         $this->setName('huh:entity-import:execute');
         $this->setDescription('Runs a given importer config on the command line.');
-        $this->addArgument('config-id', InputArgument::REQUIRED, 'The importer config id');
+        $this->addArgument('source-id', InputArgument::REQUIRED, 'The importer source id');
         $this->addArgument('dry-run', InputArgument::OPTIONAL, 'Run importer without making changes to the database');
     }
 
@@ -105,27 +105,27 @@ class ExecuteImportCommand extends AbstractLockedCommand implements FrameworkAwa
 
     private function import()
     {
-        $importerConfigId = $this->input->getArgument('config-id');
-        $importerConfigDryRun = $this->input->getArgument('dry-run');
+        $importerSourceId = $this->input->getArgument('source-id');
+        $importerDryRun = $this->input->getArgument('dry-run') ?: false;
 
-        if (null === ($configModel = $this->modelUtil->findModelInstanceByPk('tl_entity_import_config', $importerConfigId))) {
-            $this->io->error('Exporter config with id '.$importerConfigId.' not found.');
+        if (null === ($sourceModel = $this->modelUtil->findModelInstanceByPk('tl_entity_import_source', $importerSourceId))) {
+            $this->io->error('Exporter config with id '.$importerSourceId.' not found.');
 
             return false;
         }
 
-        if ($configModel->language) {
+        if ($sourceModel->language) {
             $language = $GLOBALS['TL_LANGUAGE'];
 
-            $GLOBALS['TL_LANGUAGE'] = $configModel->language;
+            $GLOBALS['TL_LANGUAGE'] = $sourceModel->language;
         }
 
         /** @var ImporterInterface $importer */
-        $importer = $this->importerFactory->createInstance($configModel->id);
-        $importer->setDryRun($importerConfigDryRun);
+        $importer = $this->importerFactory->createInstance($sourceModel->id);
+        $importer->setDryRun($importerDryRun);
         $importer->run();
 
-        if ($configModel->language) {
+        if ($sourceModel->language) {
             $GLOBALS['TL_LANGUAGE'] = $language;
         }
 

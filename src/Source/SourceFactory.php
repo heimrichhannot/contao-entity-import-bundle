@@ -8,12 +8,11 @@
 
 namespace HeimrichHannot\EntityImportBundle\Source;
 
-use Contao\StringUtil;
 use HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer;
 use HeimrichHannot\EntityImportBundle\Event\ImporterFactoryCreateFileSourceEvent;
 use HeimrichHannot\UtilsBundle\File\FileUtil;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
-use HeimrichHannot\UtilsBundle\Request\CurlRequestUtil;
+use HeimrichHannot\UtilsBundle\String\StringUtil;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class SourceFactory
@@ -31,18 +30,20 @@ class SourceFactory
      * @var EventDispatcher
      */
     private $eventDispatcher;
+    /**
+     * @var StringUtil
+     */
+    private $stringUtil;
 
     /**
-     * @var CurlRequestUtil
+     * SourceFactory constructor.
      */
-    private $curlRequestUtil;
-
-    public function __construct(ModelUtil $modelUtil, FileUtil $fileUtil, EventDispatcher $eventDispatcher, CurlRequestUtil $curlRequestUtil)
+    public function __construct(ModelUtil $modelUtil, FileUtil $fileUtil, EventDispatcher $eventDispatcher, StringUtil $stringUtil)
     {
         $this->modelUtil = $modelUtil;
         $this->fileUtil = $fileUtil;
         $this->eventDispatcher = $eventDispatcher;
-        $this->curlRequestUtil = $curlRequestUtil;
+        $this->stringUtil = $stringUtil;
     }
 
     public function createInstance(int $sourceModel): ?SourceInterface
@@ -61,17 +62,17 @@ class SourceFactory
             case EntityImportSourceContainer::TYPE_FILE:
                 switch ($sourceModel->fileType) {
                     case EntityImportSourceContainer::FILETYPE_JSON:
-                        $source = new JSONFileSource($this->fileUtil, $this->modelUtil, $this->curlRequestUtil);
+                        $source = new JSONFileSource($this->fileUtil, $this->modelUtil, $this->stringUtil);
 
                         break;
 
                     case EntityImportSourceContainer::FILETYPE_CSV:
-                        $source = new CSVFileSource($this->fileUtil, $this->modelUtil, $this->curlRequestUtil);
+                        $source = new CSVFileSource($this->fileUtil, $this->modelUtil, $this->stringUtil);
 
                         break;
 
                     default:
-                        $event = $this->eventDispatcher->dispatch(ImporterFactoryCreateFileSourceEvent::NAME, new ImporterFactoryCreateFileSourceEvent($this->fileUtil, $this->modelUtil));
+                        $event = $this->eventDispatcher->dispatch(ImporterFactoryCreateFileSourceEvent::NAME, new ImporterFactoryCreateFileSourceEvent($sourceModel, $this->fileUtil, $this->modelUtil));
                         $source = $event->getFileSource();
 
                         if (null === $source) {
@@ -84,7 +85,7 @@ class SourceFactory
                 break;
         }
 
-        $source->setFieldMapping(StringUtil::deserialize($sourceModel->fieldMapping, true));
+        $source->setFieldMapping(\Contao\StringUtil::deserialize($sourceModel->fieldMapping, true));
         $source->setSourceModel($sourceModel);
 
         return $source;

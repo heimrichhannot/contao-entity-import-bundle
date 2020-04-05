@@ -8,6 +8,7 @@
 
 namespace HeimrichHannot\EntityImportBundle\Event;
 
+use Contao\Model;
 use HeimrichHannot\EntityImportBundle\Source\FileSource;
 use HeimrichHannot\UtilsBundle\File\FileUtil;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
@@ -29,11 +30,19 @@ class ImporterFactoryCreateFileSourceEvent extends Event
      * @var FileUtil
      */
     private $fileUtil;
+    /**
+     * @var Model
+     */
+    private $sourceModel;
 
-    public function __construct(FileUtil $fileUtil, ModelUtil $modelUtil)
+    /**
+     * ImporterFactoryCreateFileSourceEvent constructor.
+     */
+    public function __construct(Model $sourceModel, FileUtil $fileUtil, ModelUtil $modelUtil)
     {
         $this->fileUtil = $fileUtil;
         $this->modelUtil = $modelUtil;
+        $this->sourceModel = $sourceModel;
     }
 
     public function getFileSource()

@@ -56,13 +56,13 @@ class Importer implements ImporterInterface
     /**
      * Importer constructor.
      */
-    public function __construct(DatabaseUtil $databaseUtil, EventDispatcher $eventDispatcher, Model $configModel, ModelUtil $modelUtil, SourceInterface $source)
+    public function __construct(Model $configModel, SourceInterface $source, EventDispatcher $eventDispatcher, DatabaseUtil $databaseUtil, ModelUtil $modelUtil)
     {
+        $this->configModel = $configModel;
+        $this->source = $source;
         $this->databaseUtil = $databaseUtil;
         $this->eventDispatcher = $eventDispatcher;
-        $this->configModel = $configModel;
         $this->modelUtil = $modelUtil;
-        $this->source = $source;
     }
 
     /**
@@ -72,11 +72,11 @@ class Importer implements ImporterInterface
     {
         $items = $this->getDataFromSource();
 
-        $event = $this->eventDispatcher->dispatch(BeforeImportEvent::NAME, new BeforeImportEvent($items));
+        $event = $this->eventDispatcher->dispatch(BeforeImportEvent::NAME, new BeforeImportEvent($items, $this->configModel, $this->source));
 
         $this->executeImport($event->getItems());
 
-        $this->eventDispatcher->dispatch(AfterImportEvent::NAME, new AfterImportEvent($items));
+        $this->eventDispatcher->dispatch(AfterImportEvent::NAME, new AfterImportEvent($items, $this->configModel, $this->source));
 
         return true;
     }
