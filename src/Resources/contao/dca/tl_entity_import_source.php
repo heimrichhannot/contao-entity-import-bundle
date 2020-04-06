@@ -252,7 +252,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
                             'exclude'   => true,
                             'inputType' => 'text',
                             'eval'      => [
-                                'groupStyle' => 'width: 50%',
+                                'groupStyle' => 'width: 49%',
                             ],
                         ],
                         'value' => [
@@ -260,7 +260,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
                             'exclude'   => true,
                             'inputType' => 'text',
                             'eval'      => [
-                                'groupStyle' => 'width: 50%',
+                                'groupStyle' => 'width: 49%',
                             ],
                         ],
                     ],
@@ -288,10 +288,9 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'inputType'     => 'textarea',
             'eval'          => [
                 'disabled'   => true,
+                'rows'  => 20,
                 'allowHtml'  => true,
                 'class'      => 'monospace',
-                'cols'       => 20,
-                'rows'       => 10,
                 'rte'        => 'ace|json',
                 'helpwizard' => false,
                 'tl_class'   => 'long clr',

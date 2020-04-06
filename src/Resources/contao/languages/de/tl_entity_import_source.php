@@ -37,12 +37,12 @@ $lang['fieldMapping']['staticValue'][1] = 'Geben Sie hier den Wert ein, der glei
 $lang['fileContent'][0] = 'Dateivorschau';
 $lang['fileContent'][1] = 'Hier können Sie den Inhalt der ausgewählten Datei sehen. Es wird nicht die gesammte Datei dargestellt.';
 
-$lang['sourceType'][0]      = 'Quelle';
-$lang['sourceType'][1]      = 'Wählen Sie hier die Art der Dateiquelle aus.';
+$lang['retrievalType'][0]      = 'Quelle';
+$lang['retrievalType'][1]      = 'Wählen Sie hier die Art der Dateiquelle aus.';
 
-$lang['sourceType'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::RETRIEVAL_TYPE_HTTP]               = 'HTTP';
-$lang['sourceType'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::RETRIEVAL_TYPE_CONTAO_FILE_SYSTEM] = 'Contao Dateiverwaltung';
-$lang['sourceType'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::RETRIEVAL_TYPE_ABSOLUTE_PATH]      = 'Absoluter Pfad';
+$lang['retrievalType'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::RETRIEVAL_TYPE_HTTP]               = 'HTTP';
+$lang['retrievalType'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::RETRIEVAL_TYPE_CONTAO_FILE_SYSTEM] = 'Contao Dateiverwaltung';
+$lang['retrievalType'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::RETRIEVAL_TYPE_ABSOLUTE_PATH]      = 'Absoluter Pfad';
 $lang['type'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::TYPE_DATABASE]                        = 'Datenbank';
 $lang['type'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::TYPE_FILE]                            = 'Datei';
 
