@@ -81,7 +81,7 @@ class ExecuteImportCommand extends AbstractLockedCommand implements FrameworkAwa
     {
         $this->setName('huh:entity-import:execute');
         $this->setDescription('Runs a given importer config on the command line.');
-        $this->addArgument('source-id', InputArgument::REQUIRED, 'The importer source id');
+        $this->addArgument('config-id', InputArgument::REQUIRED, 'The importer source id');
         $this->addArgument('dry-run', InputArgument::OPTIONAL, 'Run importer without making changes to the database');
     }
 
@@ -105,27 +105,27 @@ class ExecuteImportCommand extends AbstractLockedCommand implements FrameworkAwa
 
     private function import()
     {
-        $importerSourceId = $this->input->getArgument('source-id');
+        $importerConfigId = $this->input->getArgument('config-id');
         $importerDryRun = $this->input->getArgument('dry-run') ?: false;
 
-        if (null === ($sourceModel = $this->modelUtil->findModelInstanceByPk('tl_entity_import_source', $importerSourceId))) {
-            $this->io->error('Exporter config with id '.$importerSourceId.' not found.');
+        if (null === ($configModel = $this->modelUtil->findModelInstanceByPk('tl_entity_import_config', $importerConfigId))) {
+            $this->io->error('Exporter config with id '.$importerConfigId.' not found.');
 
             return false;
         }
 
-        if ($sourceModel->language) {
+        if ($configModel->language) {
             $language = $GLOBALS['TL_LANGUAGE'];
 
-            $GLOBALS['TL_LANGUAGE'] = $sourceModel->language;
+            $GLOBALS['TL_LANGUAGE'] = $configModel->language;
         }
 
         /** @var ImporterInterface $importer */
-        $importer = $this->importerFactory->createInstance($sourceModel->id);
+        $importer = $this->importerFactory->createInstance($configModel->id);
         $importer->setDryRun($importerDryRun);
         $importer->run();
 
-        if ($sourceModel->language) {
+        if ($configModel->language) {
             $GLOBALS['TL_LANGUAGE'] = $language;
         }
 

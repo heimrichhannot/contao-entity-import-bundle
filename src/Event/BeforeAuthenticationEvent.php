@@ -11,7 +11,7 @@ namespace HeimrichHannot\EntityImportBundle\Event;
 use Contao\Model;
 use Symfony\Component\EventDispatcher\Event;
 
-class BeforeAuthenicationEvent extends Event
+class BeforeAuthenticationEvent extends Event
 {
     public const NAME = 'huh.entity_import.before_authentication_event';
 
@@ -25,7 +25,7 @@ class BeforeAuthenicationEvent extends Event
     private $sourceModel;
 
     /**
-     * BeforeAuthenicationEvent constructor.
+     * BeforeAuthenticationEvent constructor.
      */
     public function __construct(array $auth, Model $sourceModel)
     {

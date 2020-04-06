@@ -288,6 +288,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'inputType'     => 'textarea',
             'eval'          => [
                 'disabled'   => true,
+                'maxRows' => 20,
                 'rows'  => 20,
                 'allowHtml'  => true,
                 'class'      => 'monospace',

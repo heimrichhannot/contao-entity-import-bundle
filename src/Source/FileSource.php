@@ -11,7 +11,7 @@ namespace HeimrichHannot\EntityImportBundle\Source;
 use Contao\Model;
 use GuzzleHttp\Client;
 use HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer;
-use HeimrichHannot\EntityImportBundle\Event\BeforeAuthenicationEvent;
+use HeimrichHannot\EntityImportBundle\Event\BeforeAuthenticationEvent;
 use HeimrichHannot\EntityImportBundle\Event\FileSourceGetContentEvent;
 use HeimrichHannot\EntityImportBundle\Model\EntityImportSourceModel;
 use HeimrichHannot\UtilsBundle\File\FileUtil;
@@ -84,7 +84,7 @@ abstract class FileSource extends AbstractSource
                     $auth = ['auth' => [$httpAuth['username'], $httpAuth['password']]];
                 }
 
-                $event = new BeforeAuthenicationEvent($auth, $this->sourceModel);
+                $event = new BeforeAuthenticationEvent($auth, $this->sourceModel);
 
                 $content = $this->getFileFromUrl($this->sourceModel->httpMethod, $this->sourceModel->sourceUrl, $event->getAuth())->getBody();
 
