@@ -17,7 +17,8 @@ use HeimrichHannot\EntityImportBundle\Model\EntityImportSourceModel;
 use HeimrichHannot\UtilsBundle\File\FileUtil;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
 use HeimrichHannot\UtilsBundle\String\StringUtil;
-use Symfony\Component\Cache\Adapter\FilesystemAdapter;
+use Psr\Http\Message\ResponseInterface;
+use Symfony\Component\Cache\Simple\FilesystemCache;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 abstract class AbstractFileSource extends AbstractSource
@@ -41,26 +42,28 @@ abstract class AbstractFileSource extends AbstractSource
      * @var StringUtil
      */
     protected $stringUtil;
+
     /**
      * @var EventDispatcher
      */
     private $eventDispatcher;
+
     /**
-     * @var FilesystemAdapter
+     * @var FilesystemCache
      */
-    private $filesystemAdapter;
+    private $filesystemCache;
 
     /**
      * AbstractFileSource constructor.
      */
-    public function __construct(FileUtil $fileUtil, ModelUtil $modelUtil, StringUtil $stringUtil, EventDispatcher $eventDispatcher, FilesystemAdapter $filesystemAdapter)
+    public function __construct(FileUtil $fileUtil, ModelUtil $modelUtil, StringUtil $stringUtil, EventDispatcher $eventDispatcher)
     {
         $this->fileUtil = $fileUtil;
         $this->modelUtil = $modelUtil;
         $this->stringUtil = $stringUtil;
         $this->eventDispatcher = $eventDispatcher;
+
         parent::__construct($this->modelUtil);
-        $this->filesystemAdapter = $filesystemAdapter;
     }
 
     public function getSourceModel(): EntityImportSourceModel
@@ -73,15 +76,24 @@ abstract class AbstractFileSource extends AbstractSource
         $this->sourceModel = $sourceModel;
     }
 
-    public function getLinesFromFile(int $limit): string
+    public function getFilesystemCache(): FilesystemCache
     {
-        $fileContent = $this->getFileContent();
+        if (null === $this->filesystemCache) {
+            $this->filesystemCache = new FilesystemCache('contaoEntityImportBundle', 300);
+        }
+
+        return $this->filesystemCache;
+    }
+
+    public function getLinesFromFile(int $limit, bool $cache = false): string
+    {
+        $fileContent = $this->getFileContent($cache);
         $lines = explode("\n", $fileContent);
 
         return implode("\n", \array_slice($lines, 0, $limit));
     }
 
-    public function getFileContent(): string
+    public function getFileContent(bool $cache = false): string
     {
         $content = '';
 
@@ -101,14 +113,19 @@ abstract class AbstractFileSource extends AbstractSource
 
                 $event = $this->eventDispatcher->dispatch(BeforeAuthenticationEvent::NAME, new BeforeAuthenticationEvent($auth, $this->sourceModel));
 
-                $httpResponse = $this->getFileFromUrl($this->sourceModel->httpMethod, $this->sourceModel->sourceUrl, $event->getAuth());
+                if ($cache) {
+                    $content = $this->getFileCache($this->sourceModel->sourceUrl);
 
-                if (200 === $httpResponse->getStatusCode()) {
-                    $content = $httpResponse->getBody();
-                    $this->setFileCache($this->sourceModel->sourceUrl, $content);
-                } else {
-                    $content = $this->getFileFromCache($this->sourceModel->sourceUrl);
+                    if (null === $content) {
+                        $this->setFileCache($this->sourceModel->sourceUrl, $this->sourceModel->httpMethod, $event->getAuth());
+                        $content = $this->getFileCache($this->sourceModel->sourceUrl);
+                    }
+
+                    break;
                 }
+
+                $httpResponse = $this->getFileFromUrl($this->sourceModel->httpMethod, $this->sourceModel->sourceUrl, $event->getAuth());
+                $content = $httpResponse->getBody();
 
                 break;
 
@@ -124,27 +141,30 @@ abstract class AbstractFileSource extends AbstractSource
         return $content;
     }
 
-    protected function getFileFromUrl(string $method, string $url, array $auth = [])
+    protected function getFileFromUrl(string $method, string $url, array $auth = []): ResponseInterface
     {
         $client = new Client();
 
         return $client->request($method, $url, $auth);
     }
 
-    protected function setFileCache(string $fileIdentifier, string $content)
+    protected function getFileCache(string $fileIdentifier): string
     {
-        $httpFile = $this->filesystemAdapter->getItem('entity-import-file.'.$fileIdentifier);
-        $httpFile->set($content);
+        $filesystemCache = $this->getFilesystemCache();
+
+        $content = '';
+
+        return $filesystemCache->get('entity-import-file.'.$fileIdentifier, $content);
     }
 
-    protected function getFileFromCache(string $fileIdentifier): string
+    protected function setFileCache(string $fileIdentifier, string $method, array $auth)
     {
-        $httpFile = $this->filesystemAdapter->getItem('entity-import-file.'.$fileIdentifier);
+        $filesystemCache = $this->getFilesystemCache();
+        $response = $this->getFileFromUrl($method, $fileIdentifier, $auth);
 
-        if ($httpFile->isHit()) {
-            return $httpFile->get();
+        if (200 === $response->getStatusCode()) {
+            $content = $response->getBody();
+            $filesystemCache->set('entity-import-file.'.$fileIdentifier, $content);
         }
-
-        return '';
     }
 }

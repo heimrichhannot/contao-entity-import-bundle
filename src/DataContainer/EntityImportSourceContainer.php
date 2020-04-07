@@ -79,16 +79,18 @@ class EntityImportSourceContainer
                     }
                 }
 
-                $dca['fields']['fieldMapping']['eval']['multiColumnEditor']['fields']['sourceValue']['inputType'] = 'select';
-                $dca['fields']['fieldMapping']['eval']['multiColumnEditor']['fields']['sourceValue']['options'] = $options;
-                $dca['fields']['fieldMapping']['eval']['multiColumnEditor']['fields']['sourceValue']['eval']['includeBlankOption'] = true;
+                $sourceValueDca = &$dca['fields']['fieldMapping']['eval']['multiColumnEditor']['fields']['sourceValue'];
+
+                $sourceValueDca['inputType'] = 'select';
+                $sourceValueDca['options'] = $options;
+                $sourceValueDca['eval']['includeBlankOption'] = true;
+                $sourceValueDca['eval']['mandatory'] = true;
+                $sourceValueDca['eval']['chosen'] = true;
                 $dca['fields']['fileContent']['eval']['rte'] = 'ace';
 
                 break;
 
             case self::FILETYPE_JSON:
-
-                $dca['fields']['fieldMapping']['eval']['multiColumnEditor']['fields']['sourceValue']['inputType'] = 'text';
                 $dca['fields']['fileContent']['eval']['rte'] = 'ace|json';
 
                 break;
@@ -96,11 +98,9 @@ class EntityImportSourceContainer
             default:
                 break;
         }
-
-        return $dc;
     }
 
-    public function onLoadFileContent($value, $dc)
+    public function onLoadFileContent(?string $value, $dc)
     {
         if (null === ($sourceModel = $this->modelUtil->findModelInstanceByPk('tl_entity_import_source', $dc->id))) {
             return '';
@@ -114,9 +114,9 @@ class EntityImportSourceContainer
         $source = $this->sourceFactory->createInstance($dc->id);
 
         if ($sourceModel->fileType === static::FILETYPE_CSV) {
-            return $source->getLinesFromFile(5);
+            return $source->getLinesFromFile(5, true);
         }
 
-        return $source->getFileContent();
+        return $source->getFileContent(true);
     }
 }

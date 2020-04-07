@@ -11,6 +11,7 @@ namespace HeimrichHannot\EntityImportBundle\DataContainer;
 use Contao\Config;
 use Contao\CoreBundle\Exception\RedirectResponseException;
 use Contao\Database;
+use Contao\DataContainer;
 use Contao\Date;
 use Contao\StringUtil;
 use HeimrichHannot\EntityImportBundle\Importer\ImporterFactory;
@@ -63,21 +64,21 @@ class EntityImportConfigContainer
         $this->arrayUtil = $arrayUtil;
     }
 
-    public function getAllTargetTables($dc)
+    public function getAllTargetTables(DataContainer $dc): array
     {
         return array_values(Database::getInstance()->listTables(null, true));
     }
 
-    public function getSourceFields($dc)
+    public function getSourceFields(DataContainer $dc): array
     {
         $options = [];
 
         if (null === ($configModel = $this->modelUtil->findModelInstanceByPk('tl_entity_import_config', $dc->id))) {
-            return;
+            return $options;
         }
 
         if (null === ($sourceModel = $this->modelUtil->findModelInstanceByPk('tl_entity_import_source', $configModel->pid))) {
-            return;
+            return $options;
         }
 
         $mapping = StringUtil::deserialize($sourceModel->fieldMapping);

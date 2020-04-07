@@ -330,7 +330,6 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
                         'valueType'   => [
                             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['fieldMapping']['valueType'],
                             'exclude'   => true,
-                            'filter'    => true,
                             'inputType' => 'select',
                             'options'   => [
                                 'source_value',
