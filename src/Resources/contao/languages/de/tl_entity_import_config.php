@@ -26,6 +26,12 @@ $lang['mergeIdentifierFields']['target'][1] = 'Wählen Sie hier das Zielfeld in 
 $lang['importMode'][0] = 'Importeinstellungen';
 $lang['importMode'][1] = 'Wählen Sie hier die Einstellungen für dem Import.';
 
+$lang['useCron'][0] = 'Cronjob nutzen';
+$lang['useCron'][1] = 'Wählen Sie diese Option, um den Importer per Cronjob auszulösen.';
+$lang['cronInterval'][0] = 'Cron-Interval';
+$lang['cronInterval'][1] = 'Wählen Sie hier das Interval aus, in dem der Import ausgeführt werden soll.';
+
+
 /**
  * Reference
  */
@@ -35,6 +41,13 @@ $lang['reference'] = [
         'merge'  => 'Beim Importieren Datensätze zusammenführen (Merge)',
         'purge'  => 'Vor dem Importieren die Datensätze in der Zieltabelle löschen',
     ],
+    'cronInterval' => [
+        'minutely' => 'Minütlich',
+        'hourly' => 'Stündlich',
+        'daily' => 'Täglich',
+        'weekly' => 'Wöchentlich',
+        'monthly' => 'Monatlich'
+    ]
 ];
 
 /**

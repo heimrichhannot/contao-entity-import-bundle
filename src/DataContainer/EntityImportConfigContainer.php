@@ -15,6 +15,8 @@ use Contao\Date;
 use Contao\StringUtil;
 use HeimrichHannot\EntityImportBundle\Importer\ImporterFactory;
 use HeimrichHannot\RequestBundle\Component\HttpFoundation\Request;
+use HeimrichHannot\UtilsBundle\Arrays\ArrayUtil;
+use HeimrichHannot\UtilsBundle\Database\DatabaseUtil;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
 use HeimrichHannot\UtilsBundle\Url\UrlUtil;
 
@@ -39,16 +41,26 @@ class EntityImportConfigContainer
      * @var ImporterFactory
      */
     private $importerFactory;
+    /**
+     * @var DatabaseUtil
+     */
+    private $databaseUtil;
+    /**
+     * @var ArrayUtil
+     */
+    private $arrayUtil;
 
     /**
      * EntityImportConfigContainer constructor.
      */
-    public function __construct(Request $request, ImporterFactory $importerFactory, UrlUtil $urlUtil, ModelUtil $modelUtil)
+    public function __construct(Request $request, ImporterFactory $importerFactory, UrlUtil $urlUtil, ModelUtil $modelUtil, DatabaseUtil $databaseUtil, ArrayUtil $arrayUtil)
     {
         $this->request = $request;
         $this->urlUtil = $urlUtil;
         $this->modelUtil = $modelUtil;
         $this->importerFactory = $importerFactory;
+        $this->databaseUtil = $databaseUtil;
+        $this->arrayUtil = $arrayUtil;
     }
 
     public function getAllTargetTables($dc)
@@ -60,16 +72,22 @@ class EntityImportConfigContainer
     {
         $options = [];
 
-        $fieldMapping = $this->modelUtil->findModelInstanceByPk('tl_entity_import_source', $dc->id)->fieldMapping;
+        if (null === ($configModel = $this->modelUtil->findModelInstanceByPk('tl_entity_import_config', $dc->id))) {
+            return;
+        }
 
-        $mapping = StringUtil::deserialize($fieldMapping);
+        if (null === ($sourceModel = $this->modelUtil->findModelInstanceByPk('tl_entity_import_source', $configModel->pid))) {
+            return;
+        }
+
+        $mapping = StringUtil::deserialize($sourceModel->fieldMapping);
 
         if (!\is_array($mapping) || empty($mapping)) {
             return $options;
         }
 
         foreach ($mapping as $field) {
-            $options[$field['name']] = $field['name'].' ['.$field['value'].']';
+            $options[$field['name']] = $field['name'].' ['.$field['sourceValue'].']';
         }
 
         return $options;

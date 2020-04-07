@@ -11,7 +11,7 @@ namespace HeimrichHannot\EntityImportBundle\Source;
 use Contao\Message;
 use Haste\IO\Reader\CsvReader;
 
-class CSVFileSource extends FileSource
+class CSVFileSource extends AbstractFileSource
 {
     public function getMappedData(): array
     {

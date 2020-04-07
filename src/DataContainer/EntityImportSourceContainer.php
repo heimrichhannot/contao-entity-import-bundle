@@ -9,8 +9,8 @@
 namespace HeimrichHannot\EntityImportBundle\DataContainer;
 
 use Contao\System;
+use HeimrichHannot\EntityImportBundle\Source\AbstractFileSource;
 use HeimrichHannot\EntityImportBundle\Source\CSVFileSource;
-use HeimrichHannot\EntityImportBundle\Source\FileSource;
 use HeimrichHannot\EntityImportBundle\Source\SourceFactory;
 use HeimrichHannot\UtilsBundle\File\FileUtil;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
@@ -110,7 +110,7 @@ class EntityImportSourceContainer
             return '';
         }
 
-        /** @var FileSource $source */
+        /** @var AbstractFileSource $source */
         $source = $this->sourceFactory->createInstance($dc->id);
 
         if ($sourceModel->fileType === static::FILETYPE_CSV) {

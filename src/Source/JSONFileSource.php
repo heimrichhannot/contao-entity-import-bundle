@@ -10,7 +10,7 @@ namespace HeimrichHannot\EntityImportBundle\Source;
 
 use Contao\StringUtil;
 
-class JSONFileSource extends FileSource
+class JSONFileSource extends AbstractFileSource
 {
     public function getMappedData(): array
     {

@@ -11,14 +11,15 @@ namespace HeimrichHannot\EntityImportBundle\Source;
 use Contao\Model;
 use GuzzleHttp\Client;
 use HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer;
+use HeimrichHannot\EntityImportBundle\Event\AfterFileSourceGetContentEvent;
 use HeimrichHannot\EntityImportBundle\Event\BeforeAuthenticationEvent;
-use HeimrichHannot\EntityImportBundle\Event\FileSourceGetContentEvent;
 use HeimrichHannot\EntityImportBundle\Model\EntityImportSourceModel;
 use HeimrichHannot\UtilsBundle\File\FileUtil;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
 use HeimrichHannot\UtilsBundle\String\StringUtil;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 
-abstract class FileSource extends AbstractSource
+abstract class AbstractFileSource extends AbstractSource
 {
     /**
      * @var FileUtil
@@ -34,19 +35,25 @@ abstract class FileSource extends AbstractSource
      * @var ModelUtil
      */
     protected $modelUtil;
+
     /**
      * @var StringUtil
      */
     protected $stringUtil;
+    /**
+     * @var EventDispatcher
+     */
+    private $eventDispatcher;
 
     /**
-     * FileSource constructor.
+     * AbstractFileSource constructor.
      */
-    public function __construct(FileUtil $fileUtil, ModelUtil $modelUtil, StringUtil $stringUtil)
+    public function __construct(FileUtil $fileUtil, ModelUtil $modelUtil, StringUtil $stringUtil, EventDispatcher $eventDispatcher)
     {
         $this->fileUtil = $fileUtil;
         $this->modelUtil = $modelUtil;
         $this->stringUtil = $stringUtil;
+        $this->eventDispatcher = $eventDispatcher;
         parent::__construct($this->modelUtil);
     }
 
@@ -70,6 +77,8 @@ abstract class FileSource extends AbstractSource
 
     public function getFileContent(): string
     {
+        $content = '';
+
         switch ($this->sourceModel->retrievalType) {
             case EntityImportSourceContainer::RETRIEVAL_TYPE_CONTAO_FILE_SYSTEM:
                 $content = file_get_contents($this->fileUtil->getPathFromUuid($this->sourceModel->fileSRC));
@@ -80,30 +89,32 @@ abstract class FileSource extends AbstractSource
                 $auth = [];
 
                 if (null !== $this->sourceModel->httpAuth) {
-                    $httpAuth = StringUtil::deserialize($this->sourceModel->httpAuth);
+                    $httpAuth = \Contao\StringUtil::deserialize($this->sourceModel->httpAuth);
                     $auth = ['auth' => [$httpAuth['username'], $httpAuth['password']]];
                 }
 
-                $event = new BeforeAuthenticationEvent($auth, $this->sourceModel);
+                $event = $this->eventDispatcher->dispatch(BeforeAuthenticationEvent::NAME, new BeforeAuthenticationEvent($auth, $this->sourceModel));
 
-                $content = $this->getFileFromUrl($this->sourceModel->httpMethod, $this->sourceModel->sourceUrl, $event->getAuth())->getBody();
+                $httpResponse = $this->getFileFromUrl($this->sourceModel->httpMethod, $this->sourceModel->sourceUrl, $event->getAuth());
+
+                if (200 === $httpResponse->getStatusCode()) {
+                    $content = $httpResponse->getBody();
+                    $this->setFileCache($content);
+                } else {
+                    //TODO: prevent null if file dont exist in cache
+                    $content = $this->getFileFromCache($this->sourceModel->sourceUrl);
+                }
 
                 break;
 
             case EntityImportSourceContainer::RETRIEVAL_TYPE_ABSOLUTE_PATH:
-                $content = '';
-
-                break;
-
-            default:
-                $content = '';
-
-                $event = new FileSourceGetContentEvent($content, $this->sourceModel);
-
-                return $event->getContent();
+                $content = file_get_contents($this->sourceModel->absolutePath);
 
                 break;
         }
+
+        $event = $this->eventDispatcher->dispatch(AfterFileSourceGetContentEvent::NAME, new AfterFileSourceGetContentEvent($content, $this->sourceModel));
+        $content = $event->getContent();
 
         return $content;
     }
@@ -113,5 +124,16 @@ abstract class FileSource extends AbstractSource
         $client = new Client();
 
         return $client->request($method, $url, $auth);
+    }
+
+    protected function setFileCache($content)
+    {
+        //TODO -> logic to cache files
+    }
+
+    protected function getFileFromCache(string $fileIdentifier): string
+    {
+        //TODO -> logic to get cached files content
+        return '';
     }
 }

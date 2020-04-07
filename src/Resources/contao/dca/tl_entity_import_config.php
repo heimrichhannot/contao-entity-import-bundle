@@ -74,13 +74,14 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
         ],
     ],
     'palettes'    => [
-        '__selector__' => ['importMode', 'purgeBeforeImport'],
-        'default'      => '{title_legend},title,targetTable,importMode;',
+        '__selector__' => ['importMode', 'purgeBeforeImport', 'useCron'],
+        'default'      => '{title_legend},title,targetTable,importMode,useCron;',
     ],
     'subpalettes' => [
         'importMode_insert' => 'purgeBeforeImport',
         'importMode_merge' => 'mergeIdentifierFields',
-        'purgeBeforeImport' => 'purgeWhereClause'
+        'purgeBeforeImport' => 'purgeWhereClause',
+        'useCron' => 'cronInterval'
     ],
     'fields'      => [
         'id'                    => [
@@ -184,7 +185,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'inputType' => 'checkbox',
             'exclude'   => true,
             'eval'      => [
-                'tl_class'          => 'clr',
+                'tl_class'          => 'w50 clr',
                 'submitOnChange'    => true
             ],
             'sql'       => "char(1) NOT NULL default ''",
@@ -194,7 +195,8 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'exclude'   => true,
             'inputType' => 'select',
             'options'   => ['minutely', 'hourly', 'daily', 'weekly', 'monthly'],
-            'eval'      => ['tl_class' => 'w50', 'includeBlankOption' => false],
+            'reference' => &$GLOBALS['TL_LANG']['tl_entity_import_config']['reference']['cronInterval'],
+            'eval'      => ['tl_class' => 'w50 clr', 'includeBlankOption' => true, 'mandatory' => true],
             'sql'       => "varchar(12) NOT NULL default ''",
         ],
     ],

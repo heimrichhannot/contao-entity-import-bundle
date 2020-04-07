@@ -9,7 +9,7 @@
 namespace HeimrichHannot\EntityImportBundle\Source;
 
 use HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer;
-use HeimrichHannot\EntityImportBundle\Event\ImporterFactoryCreateFileSourceEvent;
+use HeimrichHannot\EntityImportBundle\Event\SourceFactoryCreateSourceEvent;
 use HeimrichHannot\UtilsBundle\File\FileUtil;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
 use HeimrichHannot\UtilsBundle\String\StringUtil;
@@ -62,27 +62,24 @@ class SourceFactory
             case EntityImportSourceContainer::TYPE_FILE:
                 switch ($sourceModel->fileType) {
                     case EntityImportSourceContainer::FILETYPE_JSON:
-                        $source = new JSONFileSource($this->fileUtil, $this->modelUtil, $this->stringUtil);
+                        $source = new JSONFileSource($this->fileUtil, $this->modelUtil, $this->stringUtil, $this->eventDispatcher);
 
                         break;
 
                     case EntityImportSourceContainer::FILETYPE_CSV:
-                        $source = new CSVFileSource($this->fileUtil, $this->modelUtil, $this->stringUtil);
-
-                        break;
-
-                    default:
-                        $event = $this->eventDispatcher->dispatch(ImporterFactoryCreateFileSourceEvent::NAME, new ImporterFactoryCreateFileSourceEvent($sourceModel, $this->fileUtil, $this->modelUtil));
-                        $source = $event->getFileSource();
-
-                        if (null === $source) {
-                            throw new \Exception('No file source class found for file type '.$sourceModel->fileType);
-                        }
+                        $source = new CSVFileSource($this->fileUtil, $this->modelUtil, $this->stringUtil, $this->eventDispatcher);
 
                         break;
                 }
 
                 break;
+        }
+
+        $event = $this->eventDispatcher->dispatch(SourceFactoryCreateSourceEvent::NAME, new SourceFactoryCreateSourceEvent($source, $this->fileUtil, $this->modelUtil));
+        $source = $event->getSource();
+
+        if (null === $source) {
+            throw new \Exception('No file source class found for file type '.$sourceModel->fileType);
         }
 
         $source->setFieldMapping(\Contao\StringUtil::deserialize($sourceModel->fieldMapping, true));

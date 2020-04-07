@@ -11,22 +11,19 @@ namespace HeimrichHannot\EntityImportBundle\Event;
 use Contao\Model;
 use Symfony\Component\EventDispatcher\Event;
 
-class FileSourceGetContentEvent extends Event
+class AfterFileSourceGetContentEvent extends Event
 {
-    public const NAME = 'huh.entity_import.file_source_get_content_event';
+    public const NAME = 'huh.entity_import.after_file_source_get_content_event';
 
     /**
      * @var string
      */
-    private $content;
+    protected $content = '';
     /**
      * @var Model
      */
-    private $sourceModel;
+    protected $sourceModel;
 
-    /**
-     * FileSourceGetContentEvent constructor.
-     */
     public function __construct(string $content, Model $sourceModel)
     {
         $this->content = $content;
