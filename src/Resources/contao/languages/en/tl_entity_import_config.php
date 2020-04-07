@@ -37,7 +37,7 @@ $GLOBALS['TL_LANG']['tl_entity_import_config']['importerInfo'] = 'Using the clas
  */
 $GLOBALS['TL_LANG']['tl_entity_import_config']['error']['notInitialized']     = 'Importer is not yet initialized.';
 $GLOBALS['TL_LANG']['tl_entity_import_config']['error']['error']              = 'Error: %s';
-$GLOBALS['TL_LANG']['tl_entity_import_config']['error']['tableDoNotExist']    = 'Target table does not exist.';
+$GLOBALS['TL_LANG']['tl_entity_import_config']['error']['tableDoesNotExist']  = 'Target table does not exist.';
 $GLOBALS['TL_LANG']['tl_entity_import_config']['error']['tableFieldsDiffer']  = 'Fields of target and source differ';
 $GLOBALS['TL_LANG']['tl_entity_import_config']['error']['noIdentifierFields'] = 'No unique identifier fields set.';
 $GLOBALS['TL_LANG']['tl_entity_import_config']['error']['successfulImport']   = 'Successfully imported %s records';

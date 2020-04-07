@@ -17,6 +17,7 @@ use HeimrichHannot\EntityImportBundle\Model\EntityImportSourceModel;
 use HeimrichHannot\UtilsBundle\File\FileUtil;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
 use HeimrichHannot\UtilsBundle\String\StringUtil;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 abstract class AbstractFileSource extends AbstractSource
@@ -44,17 +45,22 @@ abstract class AbstractFileSource extends AbstractSource
      * @var EventDispatcher
      */
     private $eventDispatcher;
+    /**
+     * @var FilesystemAdapter
+     */
+    private $filesystemAdapter;
 
     /**
      * AbstractFileSource constructor.
      */
-    public function __construct(FileUtil $fileUtil, ModelUtil $modelUtil, StringUtil $stringUtil, EventDispatcher $eventDispatcher)
+    public function __construct(FileUtil $fileUtil, ModelUtil $modelUtil, StringUtil $stringUtil, EventDispatcher $eventDispatcher, FilesystemAdapter $filesystemAdapter)
     {
         $this->fileUtil = $fileUtil;
         $this->modelUtil = $modelUtil;
         $this->stringUtil = $stringUtil;
         $this->eventDispatcher = $eventDispatcher;
         parent::__construct($this->modelUtil);
+        $this->filesystemAdapter = $filesystemAdapter;
     }
 
     public function getSourceModel(): EntityImportSourceModel
@@ -99,9 +105,8 @@ abstract class AbstractFileSource extends AbstractSource
 
                 if (200 === $httpResponse->getStatusCode()) {
                     $content = $httpResponse->getBody();
-                    $this->setFileCache($content);
+                    $this->setFileCache($this->sourceModel->sourceUrl, $content);
                 } else {
-                    //TODO: prevent null if file dont exist in cache
                     $content = $this->getFileFromCache($this->sourceModel->sourceUrl);
                 }
 
@@ -126,14 +131,20 @@ abstract class AbstractFileSource extends AbstractSource
         return $client->request($method, $url, $auth);
     }
 
-    protected function setFileCache($content)
+    protected function setFileCache(string $fileIdentifier, string $content)
     {
-        //TODO -> logic to cache files
+        $httpFile = $this->filesystemAdapter->getItem('entity-import-file.'.$fileIdentifier);
+        $httpFile->set($content);
     }
 
     protected function getFileFromCache(string $fileIdentifier): string
     {
-        //TODO -> logic to get cached files content
+        $httpFile = $this->filesystemAdapter->getItem('entity-import-file.'.$fileIdentifier);
+
+        if ($httpFile->isHit()) {
+            return $httpFile->get();
+        }
+
         return '';
     }
 }

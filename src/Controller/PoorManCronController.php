@@ -9,7 +9,6 @@
 namespace HeimrichHannot\EntityImportBundle\Controller;
 
 use Contao\CoreBundle\Framework\ContaoFramework;
-use Contao\Model;
 use HeimrichHannot\EntityImportBundle\Importer\ImporterFactory;
 use HeimrichHannot\EntityImportBundle\Importer\ImporterInterface;
 use HeimrichHannot\UtilsBundle\Arrays\ArrayUtil;
@@ -21,10 +20,6 @@ class PoorManCronController
      * @var ContaoFramework
      */
     private $framework;
-    /**
-     * @var Model
-     */
-    private $configModel;
     /**
      * @var ArrayUtil
      */
@@ -38,10 +33,9 @@ class PoorManCronController
      */
     private $modelUtil;
 
-    public function __construct(ContaoFramework $framework, Model $configModel, ArrayUtil $arrayUtil, ImporterFactory $importerFactory, ModelUtil $modelUtil)
+    public function __construct(ContaoFramework $framework, ImporterFactory $importerFactory, ArrayUtil $arrayUtil, ModelUtil $modelUtil)
     {
         $this->framework = $framework;
-        $this->configModel = $configModel;
         $this->arrayUtil = $arrayUtil;
         $this->importerFactory = $importerFactory;
         $this->modelUtil = $modelUtil;
@@ -94,16 +88,14 @@ class PoorManCronController
 
     protected function getConfigIds(string $interval)
     {
-        $models = $this->modelUtil->findModelInstancesBy('tl_entity_import_config', ['tl_entity_import_config.useCron'], ['1'])->getModels();
-        $result = [];
+        $models = $this->modelUtil->findModelInstancesBy('tl_entity_import_config',
+            ['tl_entity_import_config.useCron=?', 'tl_entity_import_config.cronInterval=?'], [true, $interval]);
 
-        foreach ($models as $model) {
-            if ($model->cronInterval === $interval) {
-                $result[] = $model->id;
-            }
+        if (null === $models) {
+            return [];
         }
 
-        return $result;
+        return $models->fetchEach('id');
     }
 
     protected function run(string $id)

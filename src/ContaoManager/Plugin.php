@@ -32,6 +32,7 @@ class Plugin implements BundlePluginInterface, ConfigPluginInterface
     {
         $loader->load('@HeimrichHannotEntityImportBundle/Resources/config/datacontainers.yml');
         $loader->load('@HeimrichHannotEntityImportBundle/Resources/config/commands.yml');
+        $loader->load('@HeimrichHannotEntityImportBundle/Resources/config/controllers.yml');
         $loader->load('@HeimrichHannotEntityImportBundle/Resources/config/services.yml');
         $loader->load('@HeimrichHannotEntityImportBundle/Resources/config/listeners.yml');
     }

@@ -60,7 +60,7 @@ $lang['importConfirm'] = 'Soll der Import ID %s wirklich durchgeführt werden?';
  */
 $lang['error']['errorMessage']        = 'Beim Importieren ist ein Fehler aufgetreten: %s.';
 $lang['error']['notInitialized']      = 'Importer ist noch nicht initialisiert.';
-$lang['error']['tableDoNotExist']     = 'Die Zieltabelle existiert nicht.';
+$lang['error']['tableDoesNotExist']     = 'Die Zieltabelle existiert nicht.';
 $lang['error']['tableFieldsDiffer']   = 'Die Felder vom Ziel und Quelle unterscheiden sich.';
 $lang['error']['noIdentifierFields']  = 'Identifikatorfelder nicht gesetzt.';
 $lang['error']['successfulImport']    = 'Erfolgreicher Import von %s Einträgen';

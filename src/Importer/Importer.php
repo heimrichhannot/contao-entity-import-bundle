@@ -96,7 +96,7 @@ class Importer implements ImporterInterface
         $database = Database::getInstance();
 
         if (!$database->tableExists($this->configModel->targetTable)) {
-            new Exception($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['tableDoNotExist']);
+            new Exception($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['tableDoesNotExist']);
         }
 
         try {
