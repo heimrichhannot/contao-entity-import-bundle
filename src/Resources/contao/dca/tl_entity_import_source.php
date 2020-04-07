@@ -356,6 +356,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
                             'inputType' => 'text',
                             'eval'      => [
                                 'groupStyle' => 'width: 38%',
+                                'mandatory' => true
                             ],
                         ],
                     ],

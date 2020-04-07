@@ -103,7 +103,7 @@ class ExecuteImportCommand extends AbstractLockedCommand implements FrameworkAwa
         return 0;
     }
 
-    private function import()
+    private function import(): bool
     {
         $importerConfigId = $this->input->getArgument('config-id');
         $importerDryRun = $this->input->getArgument('dry-run') ?: false;

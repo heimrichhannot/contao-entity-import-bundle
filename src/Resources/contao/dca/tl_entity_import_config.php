@@ -40,7 +40,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
         ],
         'operations'        => [
             'editheader' => [
-                'label' => &$GLOBALS['TL_LANG']['tl_entity_import_config']['edit'],
+                'label' => &$GLOBALS['TL_LANG']['tl_entity_import_config']['editheader'],
                 'href'  => 'act=edit',
                 'icon'  => 'header.gif',
             ],

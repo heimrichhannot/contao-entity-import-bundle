@@ -62,12 +62,12 @@ class SourceFactory
             case EntityImportSourceContainer::TYPE_FILE:
                 switch ($sourceModel->fileType) {
                     case EntityImportSourceContainer::FILETYPE_JSON:
-                        $source = new JSONFileSource($this->fileUtil, $this->modelUtil, $this->stringUtil, $this->eventDispatcher, $this->filesystemAdapter);
+                        $source = new JSONFileSource($this->fileUtil, $this->modelUtil, $this->stringUtil, $this->eventDispatcher);
 
                         break;
 
                     case EntityImportSourceContainer::FILETYPE_CSV:
-                        $source = new CSVFileSource($this->fileUtil, $this->modelUtil, $this->stringUtil, $this->eventDispatcher, $this->filesystemAdapter);
+                        $source = new CSVFileSource($this->fileUtil, $this->modelUtil, $this->stringUtil, $this->eventDispatcher);
 
                         break;
                 }

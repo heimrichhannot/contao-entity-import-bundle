@@ -19,15 +19,15 @@ class BeforeImportEvent extends Event
     /**
      * @var array
      */
-    private $items;
+    protected $items;
     /**
      * @var Model
      */
-    private $configModel;
+    protected $configModel;
     /**
      * @var SourceInterface
      */
-    private $source;
+    protected $source;
 
     /**
      * BeforeImportEvent constructor.

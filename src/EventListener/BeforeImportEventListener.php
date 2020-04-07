@@ -12,13 +12,10 @@ use HeimrichHannot\EntityImportBundle\Event\BeforeImportEvent;
 
 class BeforeImportEventListener
 {
-    public function __construct()
-    {
-    }
-
     public function onHuhEntityImportBeforeImportEvent(BeforeImportEvent $event)
     {
         $items = $event->getItems();
+        $test = 'test';
         $event->setItems($items);
     }
 }

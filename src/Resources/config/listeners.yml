@@ -1,5 +1,7 @@
 services:
   _defaults:
+    public: true
     autowire: true
 
-  HeimrichHannot\EntityImportBundle\EventListener\BeforeImportEventListener: ~
+  HeimrichHannot\EntityImportBundle\EventListener\:
+    resource: '../../EventListener/*'

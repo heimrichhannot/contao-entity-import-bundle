@@ -64,12 +64,12 @@ class EntityImportConfigContainer
         $this->arrayUtil = $arrayUtil;
     }
 
-    public function getAllTargetTables(DataContainer $dc): array
+    public function getAllTargetTables(?DataContainer $dc): array
     {
         return array_values(Database::getInstance()->listTables(null, true));
     }
 
-    public function getSourceFields(DataContainer $dc): array
+    public function getSourceFields(?DataContainer $dc): array
     {
         $options = [];
 
@@ -94,7 +94,7 @@ class EntityImportConfigContainer
         return $options;
     }
 
-    public function getTargetFields($dc)
+    public function getTargetFields(?DataContainer $dc): array
     {
         $options = [];
 
@@ -129,12 +129,12 @@ class EntityImportConfigContainer
         $this->runImport(true);
     }
 
-    public function listItems($row)
+    public function listItems(array $row): string
     {
         return '<div class="tl_content_left">'.$row['title'].' <span style="color:#999;padding-left:3px">['.Date::parse(Config::get('datimFormat'), $row['date']).']</span></div>';
     }
 
-    private function runImport($dry = false)
+    private function runImport(bool $dry = false)
     {
         $config = $this->request->getGet('id');
 

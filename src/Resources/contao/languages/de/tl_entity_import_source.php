@@ -37,60 +37,60 @@ $lang['fieldMapping']['staticValue'][1] = 'Geben Sie hier den Wert ein, der glei
 $lang['fileContent'][0] = 'Dateivorschau';
 $lang['fileContent'][1] = 'Hier können Sie den Inhalt der ausgewählten Datei sehen. Es wird nicht die gesammte Datei dargestellt.';
 
-$lang['retrievalType'][0]      = 'Quelle';
-$lang['retrievalType'][1]      = 'Wählen Sie hier die Art der Dateiquelle aus.';
+$lang['retrievalType'][0] = 'Quelle';
+$lang['retrievalType'][1] = 'Wählen Sie hier die Art der Dateiquelle aus.';
 
 $lang['retrievalType'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::RETRIEVAL_TYPE_HTTP]               = 'HTTP';
 $lang['retrievalType'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::RETRIEVAL_TYPE_CONTAO_FILE_SYSTEM] = 'Contao Dateiverwaltung';
 $lang['retrievalType'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::RETRIEVAL_TYPE_ABSOLUTE_PATH]      = 'Absoluter Pfad';
-$lang['type'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::TYPE_DATABASE]                        = 'Datenbank';
-$lang['type'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::TYPE_FILE]                            = 'Datei';
+$lang['type'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::TYPE_DATABASE]                              = 'Datenbank';
+$lang['type'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::TYPE_FILE]                                  = 'Datei';
 
-$lang['sourceUrl'][0]   = 'Url';
-$lang['sourceUrl'][1]   = 'Geben Sie hier die URL zur Datei ein.';
-$lang['absolutePath'][0]    = 'Absoluter Dateipfad';
-$lang['absolutePath'][1]    = 'Geben Sie hier einen absoluten Dateipfad auf dem Server ein.';
-$lang['fileSRC'][0]     = 'Datei wählen oder hochladen';
-$lang['fileSRC'][1]     = 'Wählen Sie hier eine vorhandene Datei, oder laden Sie eine neue Datei hoch.';
-$lang['dbDriver'][0]    = 'Treiber';
-$lang['dbDriver'][1]    = 'Wählen Sie hier den Datenbanktreiber aus.';
-$lang['dbHost'][0]      = 'Host';
-$lang['dbHost'][1]      = 'Geben Sie hier die Adresse des Datenbankhosts ein.';
-$lang['dbUser'][0]      = 'Nutzer';
-$lang['dbUser'][1]      = 'Geben Sie hier einen berechtigten Datenbanknutzer ein.';
-$lang['dbPass'][0]      = 'Passwort';
-$lang['dbPass'][1]      = 'Geben Sie hier das Passwort des berechtigten Datenbanknutzers ein.';
-$lang['dbDatabase'][0]  = 'Datenbankname';
-$lang['dbDatabase'][1]  = 'Geben Sie hier den Namen der Datenbank ein.';
-$lang['dbPconnect'][0]  = 'PConnect';
-$lang['dbPconnect'][1]  = 'Wählen Sie hier, ob Sie PConnect nutzen möchten.';
-$lang['dbCharset'][0]   = 'Zeichensatz';
-$lang['dbCharset'][1]   = 'Wählen Sie hier den gewünschten Zeichensatz aus.';
-$lang['dbSocket'][0]    = 'Socket';
-$lang['dbSocket'][1]    = 'Geben Sie hier einen Socket ein.';
-$lang['externalUrl'][0] = 'Url';
-$lang['externalUrl'][1] = 'Tragen Sie hier die Url ein, von der die Daten importiert werden sollen.';
-$lang['httpMethod'][0]  = 'HTTP-Methode';
-$lang['httpMethod'][1]  = 'Wählen Sie hier die HTTP-Methode mit der auf die Datei zugegriffen werden soll.';
-$lang['httpAuth'][0]    = 'Authentifizierung';
-$lang['httpAuth'][1]    = 'Traugen Sie hier die Daten für die Authentifizierung ein.';
-$lang['httpAuth']['username'][0]    = 'Benutzername';
-$lang['httpAuth']['username'][1]    = 'Traugen Sie hier Ihren Benutzernamen ein.';
-$lang['httpAuth']['password'][0]    = 'Passwort';
-$lang['httpAuth']['password'][1]    = 'Traugen Sie hier Ihr Passwort ein.';
+$lang['sourceUrl'][0]            = 'Url';
+$lang['sourceUrl'][1]            = 'Geben Sie hier die URL zur Datei ein.';
+$lang['absolutePath'][0]         = 'Absoluter Dateipfad';
+$lang['absolutePath'][1]         = 'Geben Sie hier einen absoluten Dateipfad auf dem Server ein.';
+$lang['fileSRC'][0]              = 'Datei wählen oder hochladen';
+$lang['fileSRC'][1]              = 'Wählen Sie hier eine vorhandene Datei, oder laden Sie eine neue Datei hoch.';
+$lang['dbDriver'][0]             = 'Treiber';
+$lang['dbDriver'][1]             = 'Wählen Sie hier den Datenbanktreiber aus.';
+$lang['dbHost'][0]               = 'Host';
+$lang['dbHost'][1]               = 'Geben Sie hier die Adresse des Datenbankhosts ein.';
+$lang['dbUser'][0]               = 'Nutzer';
+$lang['dbUser'][1]               = 'Geben Sie hier einen berechtigten Datenbanknutzer ein.';
+$lang['dbPass'][0]               = 'Passwort';
+$lang['dbPass'][1]               = 'Geben Sie hier das Passwort des berechtigten Datenbanknutzers ein.';
+$lang['dbDatabase'][0]           = 'Datenbankname';
+$lang['dbDatabase'][1]           = 'Geben Sie hier den Namen der Datenbank ein.';
+$lang['dbPconnect'][0]           = 'PConnect';
+$lang['dbPconnect'][1]           = 'Wählen Sie hier, ob Sie PConnect nutzen möchten.';
+$lang['dbCharset'][0]            = 'Zeichensatz';
+$lang['dbCharset'][1]            = 'Wählen Sie hier den gewünschten Zeichensatz aus.';
+$lang['dbSocket'][0]             = 'Socket';
+$lang['dbSocket'][1]             = 'Geben Sie hier einen Socket ein.';
+$lang['externalUrl'][0]          = 'Url';
+$lang['externalUrl'][1]          = 'Tragen Sie hier die Url ein, von der die Daten importiert werden sollen.';
+$lang['httpMethod'][0]           = 'HTTP-Methode';
+$lang['httpMethod'][1]           = 'Wählen Sie hier die HTTP-Methode mit der auf die Datei zugegriffen werden soll.';
+$lang['httpAuth'][0]             = 'Authentifizierung';
+$lang['httpAuth'][1]             = 'Traugen Sie hier die Daten für die Authentifizierung ein.';
+$lang['httpAuth']['username'][0] = 'Benutzername';
+$lang['httpAuth']['username'][1] = 'Traugen Sie hier Ihren Benutzernamen ein.';
+$lang['httpAuth']['password'][0] = 'Passwort';
+$lang['httpAuth']['password'][1] = 'Traugen Sie hier Ihr Passwort ein.';
 
 /**
  * Reference
  */
 $lang['reference'] = [
-    'valueType' => [
+    'valueType'  => [
         'source_value' => 'dynamisch',
-        'static_value' => 'statisch'
+        'static_value' => 'statisch',
     ],
     'httpMethod' => [
-        'get' => 'GET',
-        'post' => 'POST'
-    ]
+        'get'  => 'GET',
+        'post' => 'POST',
+    ],
 ];
 
 /**
@@ -104,13 +104,13 @@ $lang['file_legend']     = 'Datei';
 /**
  * Buttons
  */
-$lang['new'][0]    = 'Neuer Import';
-$lang['new'][1]    = 'Einen neuen Import anlegen';
-$lang['show'][0]   = 'Import-Details';
-$lang['show'][1]   = 'Details von Import ID %s anzeigen';
-$lang['edit'][0]   = 'Import bearbeiten';
-$lang['edit'][1]   = 'Import ID %s bearbeiten';
-$lang['copy'][0]   = 'Import kopieren';
-$lang['copy'][1]   = 'Import ID %s duplizieren';
-$lang['delete'][0] = 'Import löschen';
-$lang['delete'][1] = 'Import ID %s löschen';
+$lang['new'][0]        = 'Neuer Import';
+$lang['new'][1]        = 'Einen neuen Import anlegen';
+$lang['show'][0]       = 'Import-Details';
+$lang['show'][1]       = 'Details von Import ID %s anzeigen';
+$lang['editheader'][0] = 'Import bearbeiten';
+$lang['editheader'][1] = 'Import ID %s bearbeiten';
+$lang['copy'][0]       = 'Import kopieren';
+$lang['copy'][1]       = 'Import ID %s duplizieren';
+$lang['delete'][0]     = 'Import löschen';
+$lang['delete'][1]     = 'Import ID %s löschen';

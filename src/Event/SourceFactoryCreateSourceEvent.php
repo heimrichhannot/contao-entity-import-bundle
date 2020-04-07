@@ -40,7 +40,7 @@ class SourceFactoryCreateSourceEvent extends Event
         $this->source = $source;
     }
 
-    public function getSource()
+    public function getSource(): SourceInterface
     {
         return $this->source;
     }

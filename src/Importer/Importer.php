@@ -91,7 +91,7 @@ class Importer implements ImporterInterface
         $this->dryRun = $dry;
     }
 
-    protected function executeImport($items)
+    protected function executeImport(array $items)
     {
         $database = Database::getInstance();
 

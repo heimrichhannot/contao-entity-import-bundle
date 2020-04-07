@@ -47,7 +47,7 @@ class JSONFileSource extends AbstractFileSource
         return $this->getDataFromPath($data, $path);
     }
 
-    protected function getMappedValues($element, $mapping): array
+    protected function getMappedValues(array $element, array $mapping): array
     {
         $result = [];
 
@@ -64,7 +64,12 @@ class JSONFileSource extends AbstractFileSource
         return $result;
     }
 
-    protected function getValue($data, $mapping)
+    /**
+     * @param mixed $data this argument can be string or array accordingly to the recursive implementation
+     *
+     * @return mixed
+     */
+    protected function getValue($data, array $mapping)
     {
         if (\array_key_exists('sourceValue', $mapping)) {
             $mapping = explode('.', $mapping['sourceValue']);

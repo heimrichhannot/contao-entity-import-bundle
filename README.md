@@ -8,8 +8,8 @@ This bundle offers a generic importer to migrate data from various sources to co
 
 - import data from either file content or database into arbitrary contao database entities (`tl_*`)
 - support for various data types (json, csv, ...)
-- support for various source types (contao file system, http, ...)
-- cron, command, TODO
+- support for various source types (contao file system, http, absolute path)
+- executable from contao backend, cronjob, symfony command
 
 ## Impressions
 
@@ -33,17 +33,24 @@ Install via composer: `composer require heimrichhannot/contao-entity-import-bund
 ## Technical instructions
 ### Run as symfony command
 
-`huh:entity-import:execute config dry-run`
+`huh:entity-import:execute config-id dry-run`
+
+##### Arguments
+Argument | Mandatory | Type | Description
+--------|--------|-------|---
+config-id | true | integer |The ID of the importer configuration
+dry-run | false | boolean |Run importer without writing data into database
 
 ### Run as contao cron
 
-...
+Import is executable with contao PoorMansCron. The Interval of execution is similar to the contao definition. The import configuration allows to enable cron execution and picking of the cron interval.
+Possible to choose between `minutely`, `hourly`, `daily`, `weekly`, `monthly` interval.
 
 ## Events
-Name  | Description
+Event name  | Description
 ------|------------
-`BeforeImportEvent` | Configure the data before importing
-AfterImportEvent | Get imported data after finished import
-BeforeAuthenticationEvent | Configure authentication data before sending GET request to http source
-FileSourceGetContentEvent | Implement custom logic for acquiring data from new file source
-ImporterFactoryCreateFileSource | Implement custom logic for new custom file sources
+`huh.entity_import.after_file_source_get_content_event` | Configure the data after receiving from source
+`huh.entity_import.after_import_event` | Get imported data after finished import
+`huh.entity_import.before_import_event` | Configure the data before importing
+`huh.entity_import.before_authentication_event` | Configure authentication data before sending GET request to http source
+`huh.entity_import.source_factory_create_source_event` | Implement custom logic for new custom file sources

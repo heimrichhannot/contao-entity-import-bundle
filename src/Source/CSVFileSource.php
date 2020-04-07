@@ -68,7 +68,7 @@ class CSVFileSource extends AbstractFileSource
         return $settings;
     }
 
-    protected function getRowData($current, $mapping): array
+    protected function getRowData(?array $current, ?array $mapping): array
     {
         $row = [];
 

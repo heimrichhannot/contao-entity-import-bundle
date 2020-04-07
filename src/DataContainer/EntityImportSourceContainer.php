@@ -8,6 +8,7 @@
 
 namespace HeimrichHannot\EntityImportBundle\DataContainer;
 
+use Contao\DataContainer;
 use Contao\System;
 use HeimrichHannot\EntityImportBundle\Source\AbstractFileSource;
 use HeimrichHannot\EntityImportBundle\Source\CSVFileSource;
@@ -52,7 +53,7 @@ class EntityImportSourceContainer
         $this->sourceFactory = $sourceFactory;
     }
 
-    public function initPalette($dc)
+    public function initPalette(?DataContainer $dc)
     {
         if (null === ($sourceModel = $this->modelUtil->findModelInstanceByPk($dc->table, $dc->id))) {
             return;
@@ -100,7 +101,7 @@ class EntityImportSourceContainer
         }
     }
 
-    public function onLoadFileContent(?string $value, $dc)
+    public function onLoadFileContent(?string $value, ?DataContainer $dc)
     {
         if (null === ($sourceModel = $this->modelUtil->findModelInstanceByPk('tl_entity_import_source', $dc->id))) {
             return '';
