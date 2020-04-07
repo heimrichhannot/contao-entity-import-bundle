@@ -8,6 +8,7 @@
 
 namespace HeimrichHannot\EntityImportBundle\Source;
 
+use Ausi\SlugGenerator\SlugGenerator;
 use Contao\Model;
 use GuzzleHttp\Client;
 use HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer;
@@ -114,11 +115,13 @@ abstract class AbstractFileSource extends AbstractSource
                 $event = $this->eventDispatcher->dispatch(BeforeAuthenticationEvent::NAME, new BeforeAuthenticationEvent($auth, $this->sourceModel));
 
                 if ($cache) {
-                    $content = $this->getFileCache($this->sourceModel->sourceUrl);
+                    $generator = new SlugGenerator();
+                    $cacheKey = $generator->generate($this->sourceModel->sourceUrl);
+                    $content = $this->getFileCache($cacheKey);
 
-                    if (null === $content) {
-                        $this->setFileCache($this->sourceModel->sourceUrl, $this->sourceModel->httpMethod, $event->getAuth());
-                        $content = $this->getFileCache($this->sourceModel->sourceUrl);
+                    if (empty($content)) {
+                        $this->setFileCache($this->sourceModel->sourceUrl, $this->sourceModel->httpMethod, $event->getAuth(), $cacheKey);
+                        $content = $this->getFileCache($cacheKey);
                     }
 
                     break;
@@ -148,23 +151,25 @@ abstract class AbstractFileSource extends AbstractSource
         return $client->request($method, $url, $auth);
     }
 
-    protected function getFileCache(string $fileIdentifier): string
+    protected function getFileCache(string $cacheKey): string
     {
         $filesystemCache = $this->getFilesystemCache();
 
         $content = '';
 
-        return $filesystemCache->get('entity-import-file.'.$fileIdentifier, $content);
+        $cache = $filesystemCache->get('entity-import-file.'.$cacheKey, $content);
+
+        return $filesystemCache->get('entity-import-file.'.$cacheKey, $content);
     }
 
-    protected function setFileCache(string $fileIdentifier, string $method, array $auth)
+    protected function setFileCache(string $fileUrl, string $method, array $auth, string $cacheKey)
     {
         $filesystemCache = $this->getFilesystemCache();
-        $response = $this->getFileFromUrl($method, $fileIdentifier, $auth);
+        $response = $this->getFileFromUrl($method, $fileUrl, $auth);
 
         if (200 === $response->getStatusCode()) {
             $content = $response->getBody();
-            $filesystemCache->set('entity-import-file.'.$fileIdentifier, $content);
+            $filesystemCache->set('entity-import-file.'.$cacheKey, $content, 300);
         }
     }
 }
