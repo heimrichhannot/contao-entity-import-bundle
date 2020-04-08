@@ -128,7 +128,7 @@ abstract class AbstractFileSource extends AbstractSource
                 }
 
                 $httpResponse = $this->getFileFromUrl($this->sourceModel->httpMethod, $this->sourceModel->sourceUrl, $event->getAuth());
-                $content = $httpResponse->getBody();
+                $content = $httpResponse->getBody()->getContents();
 
                 break;
 
@@ -168,8 +168,8 @@ abstract class AbstractFileSource extends AbstractSource
         $response = $this->getFileFromUrl($method, $fileUrl, $auth);
 
         if (200 === $response->getStatusCode()) {
-            $content = $response->getBody();
-            $filesystemCache->set('entity-import-file.'.$cacheKey, $content, 300);
+            $content = $response->getBody()->read(4096);
+            $filesystemCache->set('entity-import-file.'.$cacheKey, $content);
         }
     }
 }

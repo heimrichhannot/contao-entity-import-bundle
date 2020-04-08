@@ -10,14 +10,16 @@ This bundle offers a generic importer to migrate data from various sources to co
 - support for various data types (json, csv, ...)
 - support for various source types (contao file system, http, absolute path)
 - executable from contao backend, cronjob, symfony command
+- possibility to define static values to be filled into the database, with support of insertTags
 
 ## Impressions
 
-source image
-...
+Importer source backend settings:
+![alt import_source_1](./docs/img/importer_source.png)
+![alt import_source_2](./docs/img/importer_source_2.png)
 
-importer config image
-....
+Importer config backend settings:
+![alt privacy config](./docs/img/importer_config.png)
 
 ## Installation
 
