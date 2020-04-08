@@ -1,0 +1,27 @@
+{
+  "name": "contao-entity-import-bundle",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:heimrichhannot/contao-entity-import-bundle.git",
+  "author": "Heimrich & Hannot GmbH <digitales@heimrich-hannot.de>",
+  "license": "LGPL-3.0-or-later",
+  "dependencies": {
+    "@hundh/contao-utils-bundle": "^1.6"
+  },
+  "devDependencies": {
+    "@symfony/webpack-encore": "^0.28",
+    "node-sass": "^4.12.0",
+    "postcss-loader": "^3.0.0",
+    "sass-loader": "^7.1.0",
+    "autoprefixer": "^9.1.5"
+  },
+  "scripts": {
+    "build-dev": "yarn encore dev",
+    "build-production": "yarn encore production"
+  },
+  "postcss": {
+    "plugins": {
+      "autoprefixer": {}
+    }
+  }
+}

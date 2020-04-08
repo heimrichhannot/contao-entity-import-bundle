@@ -24,3 +24,8 @@ $GLOBALS['TL_CRON']['hourly'][]     = [HeimrichHannot\EntityImportBundle\Control
 $GLOBALS['TL_CRON']['daily'][]       = [HeimrichHannot\EntityImportBundle\Controller\PoorManCronController::class, 'runDaily'];
 $GLOBALS['TL_CRON']['weekly'][]     = [HeimrichHannot\EntityImportBundle\Controller\PoorManCronController::class, 'runWeekly'];
 $GLOBALS['TL_CRON']['monthly'][]   = [HeimrichHannot\EntityImportBundle\Controller\PoorManCronController::class, 'runMonthly'];
+
+if ('BE' === TL_MODE) {
+    $GLOBALS['TL_CSS']['be_entityimportbundle']        = 'bundles/heimrichhannotcontaoentityimport/assets/contao-entity-import-bundle-be.css|static';
+    $GLOBALS['TL_JAVASCRIPT']['be_entityimportbundle'] = 'bundles/heimrichhannotcontaoentityimport/assets/contao-entity-import-bundle-be.js|static';
+}
