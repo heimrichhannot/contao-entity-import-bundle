@@ -18,8 +18,6 @@ Importer source backend settings:
 
 ![alt import_source_1](./docs/img/importer_source.png)
 
-![alt import_source_2](./docs/img/importer_source_2.png)
-
 Importer config backend settings:
 
 ![alt privacy config](./docs/img/importer_config.png)
