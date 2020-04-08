@@ -10,6 +10,6 @@ namespace HeimrichHannot\EntityImportBundle;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
-class HeimrichHannotEntityImportBundle extends Bundle
+class HeimrichHannotContaoEntityImportBundle extends Bundle
 {
 }

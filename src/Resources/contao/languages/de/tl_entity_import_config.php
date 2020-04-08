@@ -63,14 +63,14 @@ $lang['error']['notInitialized']      = 'Importer ist noch nicht initialisiert.'
 $lang['error']['tableDoesNotExist']     = 'Die Zieltabelle existiert nicht.';
 $lang['error']['tableFieldsDiffer']   = 'Die Felder vom Ziel und Quelle unterscheiden sich.';
 $lang['error']['noIdentifierFields']  = 'Identifikatorfelder nicht gesetzt.';
-$lang['error']['successfulImport']    = 'Erfolgreicher Import von %s Einträgen';
+$lang['error']['successfulImport']    = 'Erfolgreicher Import von %s Einträgen.';
 $lang['error']['emptyFile']           = 'Daten zum Importieren nicht vorhanden.';
 $lang['error']['errorImport']         = 'Fehlerhafter Import von %s Einträgen. Fehler: %s';
-$lang['error']['delimiter']           = 'Delimiter für csv ist nicht definiert';
-$lang['error']['enclosure']           = 'Enclosure für csv ist nicht definiert';
-$lang['error']['escape']              = 'Enclosure für csv ist nicht definiert';
-$lang['error']['filePathNotProvided'] = 'Der Pfad zur Datei wurde nicht gefunden';
-$lang['error']['modeNotSet']          = 'Der Import Modus ist nicht gesetzt';
+$lang['error']['delimiter']           = 'Delimiter für csv ist nicht definiert.';
+$lang['error']['enclosure']           = 'Enclosure für csv ist nicht definiert.';
+$lang['error']['escape']              = 'Escape für csv ist nicht definiert.';
+$lang['error']['filePathNotProvided'] = 'Der Pfad zur Datei wurde nicht gefunden.';
+$lang['error']['modeNotSet']          = 'Der Import Modus ist nicht gesetzt.';
 
 /**
  * Backend Modules
@@ -84,7 +84,7 @@ $lang['label']     = 'Klicken Sie &quot;Import ausführen&quot;, um den Importpr
  * Buttons
  */
 $lang['new'][0]    = 'Neue Konfiguration';
-$lang['new'][1]    = 'Einen neuen Konfiguration anlegen';
+$lang['new'][1]    = 'Eine neue Konfiguration anlegen';
 $lang['show'][0]   = 'Konfiguration-Details';
 $lang['show'][1]   = 'Details von Konfiguration ID %s anzeigen';
 $lang['edit'][0]   = 'Konfiguration bearbeiten';

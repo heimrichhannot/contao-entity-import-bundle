@@ -82,7 +82,7 @@ class ExecuteImportCommand extends AbstractLockedCommand implements FrameworkAwa
         $this->setName('huh:entity-import:execute');
         $this->setDescription('Runs a given importer config on the command line.');
         $this->addArgument('config-id', InputArgument::REQUIRED, 'The importer source id');
-        $this->addArgument('dry-run', InputArgument::OPTIONAL, 'Run importer without making changes to the database');
+        $this->addArgument('dry-run', InputArgument::OPTIONAL, 'Run importer without making changes to the database', false);
     }
 
     /**

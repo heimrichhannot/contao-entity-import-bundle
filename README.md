@@ -15,10 +15,13 @@ This bundle offers a generic importer to migrate data from various sources to co
 ## Impressions
 
 Importer source backend settings:
+
 ![alt import_source_1](./docs/img/importer_source.png)
+
 ![alt import_source_2](./docs/img/importer_source_2.png)
 
 Importer config backend settings:
+
 ![alt privacy config](./docs/img/importer_config.png)
 
 ## Installation
@@ -45,7 +48,8 @@ dry-run | false | boolean |Run importer without writing data into database
 
 ### Run as contao cron
 
-Import is executable with contao PoorMansCron. The Interval of execution is similar to the contao definition. The import configuration allows to enable cron execution and picking of the cron interval.
+Import is executable with contao poor man's cron. The interval of execution is similar to the contao definition.
+The import configuration allows to enable cron execution and picking of the cron interval.
 Possible to choose between `minutely`, `hourly`, `daily`, `weekly`, `monthly` interval.
 
 ## Events
@@ -56,3 +60,7 @@ Event name  | Description
 `huh.entity_import.before_import_event` | Configure the data before importing
 `huh.entity_import.before_authentication_event` | Configure authentication data before sending GET request to http source
 `huh.entity_import.source_factory_create_source_event` | Implement custom logic for new custom file sources
+
+## Todo
+
+- database import source

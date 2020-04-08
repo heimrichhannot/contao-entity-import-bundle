@@ -155,11 +155,7 @@ abstract class AbstractFileSource extends AbstractSource
     {
         $filesystemCache = $this->getFilesystemCache();
 
-        $content = '';
-
-        $cache = $filesystemCache->get('entity-import-file.'.$cacheKey, $content);
-
-        return $filesystemCache->get('entity-import-file.'.$cacheKey, $content);
+        return $filesystemCache->get('entity-import-file.'.$cacheKey, '');
     }
 
     protected function setFileCache(string $fileUrl, string $method, array $auth, string $cacheKey)

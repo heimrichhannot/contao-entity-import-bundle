@@ -21,12 +21,28 @@ class EntityImportSourceContainer
     const TYPE_DATABASE = 'db';
     const TYPE_FILE = 'file';
 
+    const TYPES = [
+//        self::TYPE_DATABASE,
+        self::TYPE_FILE,
+    ];
+
     const RETRIEVAL_TYPE_HTTP = 'http';
     const RETRIEVAL_TYPE_CONTAO_FILE_SYSTEM = 'contao_file_system';
     const RETRIEVAL_TYPE_ABSOLUTE_PATH = 'absolute_path';
 
+    const RETRIEVAL_TYPES = [
+        self::RETRIEVAL_TYPE_HTTP,
+        self::RETRIEVAL_TYPE_CONTAO_FILE_SYSTEM,
+        self::RETRIEVAL_TYPE_ABSOLUTE_PATH,
+    ];
+
     const FILETYPE_CSV = 'csv';
     const FILETYPE_JSON = 'json';
+
+    const FILETYPES = [
+        self::FILETYPE_CSV,
+        self::FILETYPE_JSON,
+    ];
 
     protected $activeBundles;
     protected $database;

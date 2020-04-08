@@ -9,11 +9,11 @@ $lang['title'][0]    = 'Titel';
 $lang['title'][1]    = 'Geben Sie hier den Titel der Quelle ein.';
 $lang['type'][0]     = 'Typ';
 $lang['type'][1]     = 'Wählen Sie hier den Typ des Imports aus.';
-$lang['fileType'][0] = 'Typ';
+$lang['fileType'][0] = 'Dateityp';
 $lang['fileType'][1] = 'Wählen Sie hier den Typ der Datei aus.';
 
 $lang['csvHeaderRow'][0] = 'Kopfdatensatz';
-$lang['csvHeaderRow'][1] = 'Der erste Datensatz enthält die Spaltennamen';
+$lang['csvHeaderRow'][1] = 'Der erste Datensatz enthält die Spaltennamen.';
 $lang['csvDelimiter'][0] = 'Feld-Trennzeichen';
 $lang['csvDelimiter'][1] = 'Geben Sie hier das Feld-Trennzeichen ein.';
 $lang['csvEnclosure'][0] = 'Text-Trennzeichen';
