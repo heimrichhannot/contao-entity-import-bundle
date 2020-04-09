@@ -182,7 +182,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'exclude'   => true,
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['externalUrl'],
             'inputType' => 'text',
-            'eval'      => ['tl_class' => 'w50', 'rgxp' => 'url'],
+            'eval'      => ['tl_class' => 'w50', 'rgxp' => 'url', 'decodeEntities' => true],
             'sql'       => "varchar(64) NOT NULL default ''",
         ],
         'retrievalType'   => [
@@ -210,7 +210,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'exclude'   => true,
             'filter'    => true,
             'inputType' => 'text',
-            'eval'      => ['submitOnChange' => true, 'includeBlankOption' => true, 'tl_class' => 'clr w50'],
+            'eval'      => ['submitOnChange' => true, 'includeBlankOption' => true, 'tl_class' => 'clr w50', 'rgxp' =>'url'],
             'sql'       => "varchar(255) NOT NULL default ''",
         ],
         'httpMethod'      => [

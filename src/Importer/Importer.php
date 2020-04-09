@@ -19,7 +19,7 @@ use HeimrichHannot\EntityImportBundle\Source\SourceInterface;
 use HeimrichHannot\UtilsBundle\Database\DatabaseUtil;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
 use Symfony\Component\Config\Definition\Exception\Exception;
-use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class Importer implements ImporterInterface
 {
@@ -39,7 +39,7 @@ class Importer implements ImporterInterface
     protected $dryRun = false;
 
     /**
-     * @var EventDispatcher
+     * @var EventDispatcherInterface
      */
     protected $eventDispatcher;
 
@@ -56,7 +56,7 @@ class Importer implements ImporterInterface
     /**
      * Importer constructor.
      */
-    public function __construct(Model $configModel, SourceInterface $source, EventDispatcher $eventDispatcher, DatabaseUtil $databaseUtil, ModelUtil $modelUtil)
+    public function __construct(Model $configModel, SourceInterface $source, EventDispatcherInterface $eventDispatcher, DatabaseUtil $databaseUtil, ModelUtil $modelUtil)
     {
         $this->configModel = $configModel;
         $this->source = $source;

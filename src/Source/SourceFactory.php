@@ -10,10 +10,11 @@ namespace HeimrichHannot\EntityImportBundle\Source;
 
 use HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer;
 use HeimrichHannot\EntityImportBundle\Event\SourceFactoryCreateSourceEvent;
+use HeimrichHannot\TwigTemplatesBundle\FrontendFramework\ContaoFramework;
 use HeimrichHannot\UtilsBundle\File\FileUtil;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
 use HeimrichHannot\UtilsBundle\String\StringUtil;
-use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class SourceFactory
 {
@@ -27,7 +28,7 @@ class SourceFactory
     private $fileUtil;
 
     /**
-     * @var EventDispatcher
+     * @var EventDispatcherInterface
      */
     private $eventDispatcher;
     /**
@@ -38,7 +39,7 @@ class SourceFactory
     /**
      * SourceFactory constructor.
      */
-    public function __construct(ModelUtil $modelUtil, FileUtil $fileUtil, EventDispatcher $eventDispatcher, StringUtil $stringUtil)
+    public function __construct(ModelUtil $modelUtil, FileUtil $fileUtil, EventDispatcherInterface $eventDispatcher, StringUtil $stringUtil)
     {
         $this->modelUtil = $modelUtil;
         $this->fileUtil = $fileUtil;
@@ -76,6 +77,8 @@ class SourceFactory
         }
 
         $event = $this->eventDispatcher->dispatch(SourceFactoryCreateSourceEvent::NAME, new SourceFactoryCreateSourceEvent($source, $this->fileUtil, $this->modelUtil));
+
+
         $source = $event->getSource();
 
         if (null === $source) {

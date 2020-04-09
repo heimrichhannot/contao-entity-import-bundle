@@ -42,4 +42,14 @@ class BeforeAuthenticationEvent extends Event
     {
         $this->auth = $auth;
     }
+
+    public function getSourceModel()
+    {
+        return $this->sourceModel;
+    }
+
+    public function setSourceModel(Model $sourceModel)
+    {
+        $this->sourceModel = $sourceModel;
+    }
 }

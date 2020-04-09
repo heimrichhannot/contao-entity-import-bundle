@@ -9,8 +9,6 @@
 namespace HeimrichHannot\EntityImportBundle\Command;
 
 use Contao\CoreBundle\Command\AbstractLockedCommand;
-use Contao\CoreBundle\Framework\ContaoFrameworkInterface;
-use Contao\CoreBundle\Framework\FrameworkAwareInterface;
 use HeimrichHannot\EntityImportBundle\Importer\ImporterFactory;
 use HeimrichHannot\EntityImportBundle\Importer\ImporterInterface;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
@@ -19,7 +17,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-class ExecuteImportCommand extends AbstractLockedCommand implements FrameworkAwareInterface
+class ExecuteImportCommand extends AbstractLockedCommand
 {
     /**
      * @var string
@@ -35,11 +33,6 @@ class ExecuteImportCommand extends AbstractLockedCommand implements FrameworkAwa
      * @var string
      */
     private $rootDir;
-
-    /**
-     * @var object|null
-     */
-    private $framework;
 
     /**
      * @var SymfonyStyle
@@ -61,17 +54,9 @@ class ExecuteImportCommand extends AbstractLockedCommand implements FrameworkAwa
      */
     public function __construct(ModelUtil $modelUtil, ImporterFactory $importerFactory)
     {
-        parent::__construct(null);
         $this->modelUtil = $modelUtil;
         $this->importerFactory = $importerFactory;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function setFramework(ContaoFrameworkInterface $framework = null)
-    {
-        $this->framework = $framework;
+        parent::__construct(null);
     }
 
     /**

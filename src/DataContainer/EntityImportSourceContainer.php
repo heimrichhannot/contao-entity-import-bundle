@@ -134,6 +134,12 @@ class EntityImportSourceContainer
             return $source->getLinesFromFile(5, true);
         }
 
+        if ($sourceModel->fileType === static::FILETYPE_JSON) {
+            $string = json_decode($source->getFileContent(false));
+
+            return json_encode($string,JSON_PRETTY_PRINT);
+        }
+
         return $source->getFileContent(true);
     }
 }

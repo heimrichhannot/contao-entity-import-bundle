@@ -20,7 +20,7 @@ use HeimrichHannot\UtilsBundle\Model\ModelUtil;
 use HeimrichHannot\UtilsBundle\String\StringUtil;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Cache\Simple\FilesystemCache;
-use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 abstract class AbstractFileSource extends AbstractSource
 {
@@ -45,7 +45,7 @@ abstract class AbstractFileSource extends AbstractSource
     protected $stringUtil;
 
     /**
-     * @var EventDispatcher
+     * @var EventDispatcherInterface
      */
     private $eventDispatcher;
 
@@ -57,7 +57,7 @@ abstract class AbstractFileSource extends AbstractSource
     /**
      * AbstractFileSource constructor.
      */
-    public function __construct(FileUtil $fileUtil, ModelUtil $modelUtil, StringUtil $stringUtil, EventDispatcher $eventDispatcher)
+    public function __construct(FileUtil $fileUtil, ModelUtil $modelUtil, StringUtil $stringUtil, EventDispatcherInterface $eventDispatcher)
     {
         $this->fileUtil = $fileUtil;
         $this->modelUtil = $modelUtil;
@@ -148,7 +148,7 @@ abstract class AbstractFileSource extends AbstractSource
     {
         $client = new Client();
 
-        return $client->request($method, $url, $auth);
+        return $client->request($method, \Contao\StringUtil::decodeEntities($url), $auth);
     }
 
     protected function getFileCache(string $cacheKey): string

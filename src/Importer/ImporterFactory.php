@@ -11,7 +11,7 @@ namespace HeimrichHannot\EntityImportBundle\Importer;
 use HeimrichHannot\EntityImportBundle\Source\SourceFactory;
 use HeimrichHannot\UtilsBundle\Database\DatabaseUtil;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
-use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class ImporterFactory
 {
@@ -21,7 +21,7 @@ class ImporterFactory
     private $databaseUtil;
 
     /**
-     * @var EventDispatcher
+     * @var EventDispatcherInterface
      */
     private $eventDispatcher;
 
@@ -38,7 +38,7 @@ class ImporterFactory
     /**
      * Importer constructor.
      */
-    public function __construct(DatabaseUtil $databaseUtil, EventDispatcher $eventDispatcher, ModelUtil $modelUtil, SourceFactory $sourceFactory)
+    public function __construct(DatabaseUtil $databaseUtil, EventDispatcherInterface $eventDispatcher, ModelUtil $modelUtil, SourceFactory $sourceFactory)
     {
         $this->databaseUtil = $databaseUtil;
         $this->eventDispatcher = $eventDispatcher;
