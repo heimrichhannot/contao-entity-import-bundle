@@ -94,17 +94,18 @@ class Importer implements ImporterInterface
     protected function executeImport(array $items)
     {
         $database = Database::getInstance();
+        $table = $this->configModel->targetTable;
 
-        if (!$database->tableExists($this->configModel->targetTable)) {
+        if (!$database->tableExists($table)) {
             new Exception($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['tableDoesNotExist']);
         }
 
         try {
             $count = 0;
-            $targetTableColumns = $database->getFieldNames($this->configModel->targetTable);
+            $targetTableColumns = $database->getFieldNames($table);
 
             if ($this->configModel->purgeBeforeImport) {
-                $this->databaseUtil->delete($this->configModel->targetTable, $this->configModel->purgeWhereClause);
+                $this->databaseUtil->delete($table, $this->configModel->purgeWhereClause);
             }
 
             $mode = $this->configModel->importMode;
@@ -123,14 +124,29 @@ class Importer implements ImporterInterface
                 }
 
                 if ('insert' === $mode) {
-                    $this->databaseUtil->insert($this->configModel->targetTable, $item);
+                    $this->databaseUtil->insert($table, $item);
                 } elseif ('merge' === $mode) {
-                    $mergeIdentifier = StringUtil::deserialize($this->configModel->mergeIdentifierFields, true)[0];
+                    $mergeIdentifiers = StringUtil::deserialize($this->configModel->mergeIdentifierFields, true);
 
-                    if (empty($mergeIdentifier)) {
+                    if (empty($mergeIdentifiers)) {
                         throw new Exception($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['noIdentifierFields']);
                     }
-                    $this->databaseUtil->update($this->configModel->targetTable, $item, $mergeIdentifier['target'].'=?', [$mergeIdentifier['source']]);
+
+                    $columns = [];
+                    $values = [];
+
+                    foreach ($mergeIdentifiers as $mergeIdentifier) {
+                        $columns[] = '('.$table.'.'.$mergeIdentifier['target'].'=?)';
+                        $values[] = $item[$mergeIdentifier['source']];
+                    }
+
+                    $existing = $this->databaseUtil->select($table, '*', implode(' AND ', $columns), $values);
+
+                    if ($existing->numRows > 0) {
+                        $this->databaseUtil->update($table, $item, implode(' AND ', $columns), $values);
+                    } else {
+                        $this->databaseUtil->insert($table, $item);
+                    }
                 } else {
                     throw new Exception($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['modeNotSet']);
                 }

@@ -104,13 +104,13 @@ $lang['file_legend']     = 'File';
 /**
  * Buttons
  */
-$lang['new'][0]        = 'New import';
-$lang['new'][1]        = 'Creating a new import';
-$lang['show'][0]       = 'Import-Details';
-$lang['show'][1]       = 'Show details of Import ID %s';
-$lang['editheader'][0] = 'Edit Import';
-$lang['editheader'][1] = 'Edit Import ID %s';
-$lang['copy'][0]       = 'Copy import';
-$lang['copy'][1]       = 'Duplicate Import ID %s';
-$lang['delete'][0]     = 'Delete import';
-$lang['delete'][1]     = 'Delete Import ID %s';
+$lang['new'][0]        = 'New import source';
+$lang['new'][1]        = 'Creating a new import source';
+$lang['show'][0]       = 'Import source-Details';
+$lang['show'][1]       = 'Show details of import source ID %s';
+$lang['editheader'][0] = 'Edit import source';
+$lang['editheader'][1] = 'Edit import source ID %s';
+$lang['copy'][0]       = 'Copy import source';
+$lang['copy'][1]       = 'Duplicate import source ID %s';
+$lang['delete'][0]     = 'Delete import source';
+$lang['delete'][1]     = 'Delete import source ID %s';

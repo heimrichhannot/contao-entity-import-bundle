@@ -83,15 +83,15 @@ $lang['label']     = 'Click &quot;Perform Import&quot; to start the import proce
 /**
  * Buttons
  */
-$lang['new'][0]    = 'New configuration';
-$lang['new'][1]    = 'Create a new configuration';
-$lang['show'][0]   = 'Configuration details';
-$lang['show'][1]   = 'Show details of Configuration ID %s';
-$lang['edit'][0]   = 'Edit configuration';
-$lang['edit'][1]   = 'Edit configuration ID %s';
-$lang['copy'][0]   = 'Copy configuration';
-$lang['copy'][1]   = 'Duplicate configuration ID %s';
-$lang['delete'][0] = 'Delete configuration';
-$lang['delete'][1] = 'Delete configuration ID %s';
+$lang['new'][0]    = 'New importer';
+$lang['new'][1]    = 'Create a new importer';
+$lang['show'][0]   = 'Importer details';
+$lang['show'][1]   = 'Show details of importer ID %s';
+$lang['edit'][0]   = 'Edit importer';
+$lang['edit'][1]   = 'Edit importer ID %s';
+$lang['copy'][0]   = 'Copy importer';
+$lang['copy'][1]   = 'Duplicate importer ID %s';
+$lang['delete'][0] = 'Delete importer';
+$lang['delete'][1] = 'Delete importer ID %s';
 $lang['dryRun'][0] = 'Test run';
 $lang['dryRun'][1] = 'Execute test run';

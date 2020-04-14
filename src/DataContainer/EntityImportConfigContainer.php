@@ -131,7 +131,7 @@ class EntityImportConfigContainer
 
     public function listItems(array $row): string
     {
-        return '<div class="tl_content_left">'.$row['title'].' <span style="color:#999;padding-left:3px">['.Date::parse(Config::get('datimFormat'), $row['date']).']</span></div>';
+        return '<div class="tl_content_left">'.$row['title'].' <span style="color:#999;padding-left:3px">['.Date::parse(Config::get('datimFormat'), $row['dateAdded']).']</span></div>';
     }
 
     private function runImport(bool $dry = false)

@@ -100,7 +100,11 @@ abstract class AbstractFileSource extends AbstractSource
 
         switch ($this->sourceModel->retrievalType) {
             case EntityImportSourceContainer::RETRIEVAL_TYPE_CONTAO_FILE_SYSTEM:
-                $content = file_get_contents($this->fileUtil->getPathFromUuid($this->sourceModel->fileSRC));
+                $path = $this->fileUtil->getPathFromUuid($this->sourceModel->fileSRC);
+
+                if (file_exists($path)) {
+                    $content = file_get_contents($path);
+                }
 
                 break;
 
@@ -133,7 +137,11 @@ abstract class AbstractFileSource extends AbstractSource
                 break;
 
             case EntityImportSourceContainer::RETRIEVAL_TYPE_ABSOLUTE_PATH:
-                $content = file_get_contents($this->sourceModel->absolutePath);
+                $path = $this->sourceModel->absolutePath;
+
+                if (file_exists($path)) {
+                    $content = file_get_contents($path);
+                }
 
                 break;
         }

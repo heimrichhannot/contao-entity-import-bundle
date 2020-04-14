@@ -127,17 +127,21 @@ class EntityImportSourceContainer
             return '';
         }
 
+        if (!$sourceModel->fileType) {
+            return '';
+        }
+
         /** @var AbstractFileSource $source */
         $source = $this->sourceFactory->createInstance($dc->id);
 
         if ($sourceModel->fileType === static::FILETYPE_CSV) {
-            return $source->getLinesFromFile(5, true);
+            return $source->getLinesFromFile(25, true)."\n...";
         }
 
         if ($sourceModel->fileType === static::FILETYPE_JSON) {
             $string = json_decode($source->getFileContent(false));
 
-            return json_encode($string,JSON_PRETTY_PRINT);
+            return json_encode($string, JSON_PRETTY_PRINT);
         }
 
         return $source->getFileContent(true);

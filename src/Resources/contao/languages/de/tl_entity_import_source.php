@@ -37,7 +37,7 @@ $lang['fieldMapping']['staticValue'][1] = 'Geben Sie hier den Wert ein, der glei
 $lang['fileContent'][0] = 'Dateivorschau';
 $lang['fileContent'][1] = 'Hier können Sie den Inhalt der ausgewählten Datei sehen. Es wird nicht die gesammte Datei dargestellt.';
 
-$lang['retrievalType'][0] = 'Quelle';
+$lang['retrievalType'][0] = 'Dateiquelle';
 $lang['retrievalType'][1] = 'Wählen Sie hier die Art der Dateiquelle aus.';
 
 $lang['retrievalType'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::RETRIEVAL_TYPE_HTTP]               = 'HTTP';
@@ -104,13 +104,15 @@ $lang['file_legend']     = 'Datei';
 /**
  * Buttons
  */
-$lang['new'][0]        = 'Neuer Import';
-$lang['new'][1]        = 'Einen neuen Import anlegen';
-$lang['show'][0]       = 'Import-Details';
-$lang['show'][1]       = 'Details von Import ID %s anzeigen';
-$lang['editheader'][0] = 'Import bearbeiten';
-$lang['editheader'][1] = 'Import ID %s bearbeiten';
-$lang['copy'][0]       = 'Import kopieren';
-$lang['copy'][1]       = 'Import ID %s duplizieren';
-$lang['delete'][0]     = 'Import löschen';
-$lang['delete'][1]     = 'Import ID %s löschen';
+$lang['new'][0]        = 'Neue Importquelle';
+$lang['new'][1]        = 'Eine neue Importquelle anlegen';
+$lang['show'][0]       = 'Importquelle-Details';
+$lang['show'][1]       = 'Details von Importquelle ID %s anzeigen';
+$lang['editheader'][0] = 'Importquelle bearbeiten';
+$lang['editheader'][1] = 'Importquelle ID %s bearbeiten';
+$lang['edit'][0]       = 'Importer von Importquelle bearbeiten';
+$lang['edit'][1]       = 'Importer von Importquelle ID %s bearbeiten';
+$lang['copy'][0]       = 'Importquelle kopieren';
+$lang['copy'][1]       = 'Importquelle ID %s duplizieren';
+$lang['delete'][0]     = 'Importquelle löschen';
+$lang['delete'][1]     = 'Importquelle ID %s löschen';

@@ -81,17 +81,22 @@ $lang['headline']  = 'Import ID %s';
 $lang['label']     = 'Klicken Sie &quot;Import ausführen&quot;, um den Importprozess zu starten.';
 
 /**
+ * Legends
+ */
+$lang['general_legend']    = 'Allgemeine Einstellungen';
+
+/**
  * Buttons
  */
-$lang['new'][0]    = 'Neue Konfiguration';
-$lang['new'][1]    = 'Eine neue Konfiguration anlegen';
-$lang['show'][0]   = 'Konfiguration-Details';
-$lang['show'][1]   = 'Details von Konfiguration ID %s anzeigen';
-$lang['edit'][0]   = 'Konfiguration bearbeiten';
-$lang['edit'][1]   = 'Konfiguration ID %s bearbeiten';
-$lang['copy'][0]   = 'Konfiguration kopieren';
-$lang['copy'][1]   = 'Konfiguration ID %s duplizieren';
-$lang['delete'][0] = 'Konfiguration löschen';
-$lang['delete'][1] = 'Konfiguration ID %s löschen';
+$lang['new'][0]    = 'Neuer Importer';
+$lang['new'][1]    = 'Einen neuen Importer anlegen';
+$lang['show'][0]   = 'Importer-Details';
+$lang['show'][1]   = 'Details von Importer ID %s anzeigen';
+$lang['edit'][0]   = 'Importer bearbeiten';
+$lang['edit'][1]   = 'Importer ID %s bearbeiten';
+$lang['copy'][0]   = 'Importer kopieren';
+$lang['copy'][1]   = 'Importer ID %s duplizieren';
+$lang['delete'][0] = 'Importer löschen';
+$lang['delete'][1] = 'Importer ID %s löschen';
 $lang['dryRun'][0] = 'Testlauf';
 $lang['dryRun'][1] = 'Testlauf ausführen';

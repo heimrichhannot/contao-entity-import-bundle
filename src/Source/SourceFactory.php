@@ -10,7 +10,6 @@ namespace HeimrichHannot\EntityImportBundle\Source;
 
 use HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer;
 use HeimrichHannot\EntityImportBundle\Event\SourceFactoryCreateSourceEvent;
-use HeimrichHannot\TwigTemplatesBundle\FrontendFramework\ContaoFramework;
 use HeimrichHannot\UtilsBundle\File\FileUtil;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
 use HeimrichHannot\UtilsBundle\String\StringUtil;
@@ -77,7 +76,6 @@ class SourceFactory
         }
 
         $event = $this->eventDispatcher->dispatch(SourceFactoryCreateSourceEvent::NAME, new SourceFactoryCreateSourceEvent($source, $this->fileUtil, $this->modelUtil));
-
 
         $source = $event->getSource();
 

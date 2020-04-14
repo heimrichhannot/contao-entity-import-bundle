@@ -40,9 +40,9 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
         ],
         'operations'        => [
             'editheader' => [
-                'label' => &$GLOBALS['TL_LANG']['tl_entity_import_config']['editheader'],
+                'label' => &$GLOBALS['TL_LANG']['tl_entity_import_config']['edit'],
                 'href'  => 'act=edit',
-                'icon'  => 'header.gif',
+                'icon'  => 'edit.gif',
             ],
             'copy'       => [
                 'label' => &$GLOBALS['TL_LANG']['tl_entity_import_config']['copy'],
@@ -75,7 +75,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
     ],
     'palettes'    => [
         '__selector__' => ['importMode', 'purgeBeforeImport', 'useCron'],
-        'default'      => '{title_legend},title,targetTable,importMode,useCron;',
+        'default'      => '{general_legend},title,targetTable,importMode,useCron;',
     ],
     'subpalettes' => [
         'importMode_insert' => 'purgeBeforeImport',
@@ -117,7 +117,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'inputType'        => 'select',
             'eval'             => ['mandatory' => true, 'submitOnChange' => true, 'tl_class' => 'w50', 'chosen' => true, 'includeBlankOption' => true],
             'options_callback' => [\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::class, 'getAllTargetTables'],
-            'sql'              => "varchar(255) NOT NULL default ''",
+            'sql'              => "varchar(64) NOT NULL default ''",
         ],
         'importMode'            => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['importMode'],
@@ -129,7 +129,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             ],
             'reference' => &$GLOBALS['TL_LANG']['tl_entity_import_config']['reference']['importMode'],
             'eval'      => ['tl_class' => 'w50', 'submitOnChange' => true, 'mandatory' => true],
-            'sql'       => "varchar(255) NOT NULL default ''",
+            'sql'       => "varchar(16) NOT NULL default ''",
         ],
         'purgeBeforeImport'       => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['purgeBeforeImport'],
