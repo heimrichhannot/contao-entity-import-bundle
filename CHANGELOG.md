@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.1.3] - 2020-04-09
+- added fieldMapping to Importer config
+
 ## [0.1.2] - 2020-04-14
 - fixed merge mode
 - fixed labels
