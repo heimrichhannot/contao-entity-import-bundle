@@ -110,6 +110,8 @@ class Importer implements ImporterInterface
             $mode = $this->configModel->importMode;
 
             foreach ($items as $item) {
+                $item = $this->applyFieldMappingToSourceItem($item);
+
                 $columnsNotExisting = array_diff(array_keys($item), $targetTableColumns);
 
                 if (!empty($columnsNotExisting)) {
@@ -144,5 +146,22 @@ class Importer implements ImporterInterface
         } catch (\Exception $e) {
             Message::addError(sprintf($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['errorImport'], $count, $e->getMessage()));
         }
+    }
+
+    public function applyFieldMappingToSourceItem(array $item): array
+    {
+        $fields = StringUtil::deserialize($this->configModel->fieldMapping);
+
+        $mapped = [];
+
+        foreach ($fields as $field) {
+            if ('source_value' === $field['valueType']){
+                $mapped[$field['columnName']] = $item[$field['mappingValue']];
+            }elseif ('static_value' === $field['valueType']){
+                $mapped[$field['columnName']] = $field['staticValue'];
+            }
+        }
+
+        return $mapped;
     }
 }

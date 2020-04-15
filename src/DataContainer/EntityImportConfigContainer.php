@@ -88,7 +88,11 @@ class EntityImportConfigContainer
         }
 
         foreach ($mapping as $field) {
-            $options[$field['name']] = $field['name'].' ['.$field['sourceValue'].']';
+            if (null === $field['sourceValue']) {
+                $options[$field['name']] = $field['name'];
+            } else {
+                $options[$field['name']] = $field['name'].' ['.$field['sourceValue'].']';
+            }
         }
 
         return $options;

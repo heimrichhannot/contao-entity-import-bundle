@@ -17,11 +17,22 @@ $lang['purgeWhereClause'][0]  = 'WHERE-Bedingungen für das Löschen';
 $lang['purgeWhereClause'][1]  = 'Geben Sie hier SQL-Bedingungen in der Form "pid=27 AND id=1" ein, die für das Löschen von Datensätzen vor jedem Import gelten sollen.';
 
 $lang['mergeIdentifierFields'][0]           = 'Merge-Identifikationsfelder';
-$lang['mergeIdentifierFields'][0]           = 'Wählen Sie hier die Felder aus, die für das Auffinden bestehender Datensätze genutzt werden sollen (bspw. E-Mail, ID, Vorname + Nachname, ...).';
+$lang['mergeIdentifierFields'][1]           = 'Wählen Sie hier die Felder aus, die für das Auffinden bestehender Datensätze genutzt werden sollen (bspw. E-Mail, ID, Vorname + Nachname, ...).';
 $lang['mergeIdentifierFields']['source'][0] = 'Quellfeld';
 $lang['mergeIdentifierFields']['source'][1] = 'Wählen Sie hier das Quellfeld aus der externen Quelle aus.';
 $lang['mergeIdentifierFields']['target'][0] = 'Feld in Zieltabelle';
 $lang['mergeIdentifierFields']['target'][1] = 'Wählen Sie hier das Zielfeld in das importiert wird.';
+
+$lang['fieldMapping'][0] = 'Feldabbildung';
+$lang['fieldMapping'][1] = 'Geben Sie hier die Zuordnung der ausgewählten Felder der Quelle mit den vorhandenen Tabelenspalten.';
+$lang['fieldMapping']['columnName'][0] = 'Spaltenname';
+$lang['fieldMapping']['columnName'][1] = 'Wählen Sie hier die Spalte der gewählten Tabelle aus.';
+$lang['fieldMapping']['valueType'][0] = 'Typ des Wertes';
+$lang['fieldMapping']['valueType'][1] = 'Wählen Sie hier den Typ des Wertes aus. Bei dynamisch wird der Wert aus der Feldabbildung der Quelle genommen. Bei statisch wird der Inhalt des Feldes als Wert genommen.';
+$lang['fieldMapping']['mappingValue'][0] = 'Quellfeld Wert';
+$lang['fieldMapping']['mappingValue'][1] = 'Wählen Sie hier ein Feld aus der Feldabbildung der Quelle aus.';
+$lang['fieldMapping']['staticValue'][0] = 'Statischer Wert';
+$lang['fieldMapping']['staticValue'][1] = 'Geben Sie hier einen Wert ein. Dieser wird in alle Datensätze eingetragen.';
 
 $lang['importMode'][0] = 'Importeinstellungen';
 $lang['importMode'][1] = 'Wählen Sie hier die Einstellungen für dem Import.';
@@ -47,6 +58,10 @@ $lang['reference'] = [
         'daily' => 'Täglich',
         'weekly' => 'Wöchentlich',
         'monthly' => 'Monatlich'
+    ],
+    'valueType' =>  [
+        'source_value' => 'dynamisch',
+        'static_value' => 'statisch',
     ]
 ];
 
