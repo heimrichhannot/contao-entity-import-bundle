@@ -26,8 +26,8 @@ $lang['mergeIdentifierFields']['target'][1] = 'Select the target field into whic
 $lang['importMode'][0] = 'Import settings';
 $lang['importMode'][1] = 'Select the settings for the import here.';
 
-$lang['useCron'][0] = 'Use cronjob';
-$lang['useCron'][1] = 'Select this option to trigger the importer by cronjob.';
+$lang['useCron'][0]      = 'Use cronjob';
+$lang['useCron'][1]      = 'Select this option to trigger the importer by cronjob.';
 $lang['cronInterval'][0] = 'Cron-Interval';
 $lang['cronInterval'][1] = 'Select the interval at which the import is to be performed.';
 
@@ -35,17 +35,17 @@ $lang['cronInterval'][1] = 'Select the interval at which the import is to be per
  * Reference
  */
 $lang['reference'] = [
-    'importMode' => [
+    'importMode'   => [
         'insert' => 'Create new records when importing',
         'merge'  => 'Merge records when importing',
         'purge'  => 'Delete the records in the target table before importing',
     ],
     'cronInterval' => [
         'minutely' => 'minutely',
-        'hourly' => 'hourly',
-        'daily' => 'daily',
-        'weekly' => 'weekly',
-        'monthly' => 'monthly'
+        'hourly'   => 'hourly',
+        'daily'    => 'daily',
+        'weekly'   => 'weekly',
+        'monthly'  => 'monthly'
     ]
 ];
 
@@ -58,8 +58,7 @@ $lang['importConfirm'] = 'Should the import ID %s really be performed?';
  * Errors
  */
 $lang['error']['errorMessage']        = 'An error occurred during import: %s.';
-$lang['error']['notInitialized']      = 'Importer is not yet initialized.';
-$lang['error']['tableDoesNotExist']     = 'The target table does not exist.';
+$lang['error']['tableDoesNotExist']   = 'The target table does not exist.';
 $lang['error']['tableFieldsDiffer']   = 'The destination and source fields are different.';
 $lang['error']['noIdentifierFields']  = 'Identifier fields not set.';
 $lang['error']['successfulImport']    = 'Successful import of %s entries.';

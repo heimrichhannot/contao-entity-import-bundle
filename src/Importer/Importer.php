@@ -11,13 +11,15 @@ namespace HeimrichHannot\EntityImportBundle\Importer;
 use Contao\Database;
 use Contao\Message;
 use Contao\Model;
-use Contao\StringUtil;
+use Database\Result;
 use HeimrichHannot\EntityImportBundle\Event\AfterImportEvent;
 use HeimrichHannot\EntityImportBundle\Event\BeforeImportEvent;
 use HeimrichHannot\EntityImportBundle\Model\EntityImportConfigModel;
 use HeimrichHannot\EntityImportBundle\Source\SourceInterface;
 use HeimrichHannot\UtilsBundle\Database\DatabaseUtil;
+use HeimrichHannot\UtilsBundle\Dca\DcaUtil;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
+use HeimrichHannot\UtilsBundle\String\StringUtil;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
@@ -52,17 +54,27 @@ class Importer implements ImporterInterface
      * @var ModelUtil
      */
     private $modelUtil;
+    /**
+     * @var StringUtil
+     */
+    private $stringUtil;
+    /**
+     * @var DcaUtil
+     */
+    private $dcaUtil;
 
     /**
      * Importer constructor.
      */
-    public function __construct(Model $configModel, SourceInterface $source, EventDispatcherInterface $eventDispatcher, DatabaseUtil $databaseUtil, ModelUtil $modelUtil)
+    public function __construct(Model $configModel, SourceInterface $source, EventDispatcherInterface $eventDispatcher, DatabaseUtil $databaseUtil, ModelUtil $modelUtil, StringUtil $stringUtil, DcaUtil $dcaUtil)
     {
         $this->configModel = $configModel;
         $this->source = $source;
         $this->databaseUtil = $databaseUtil;
         $this->eventDispatcher = $eventDispatcher;
         $this->modelUtil = $modelUtil;
+        $this->stringUtil = $stringUtil;
+        $this->dcaUtil = $dcaUtil;
     }
 
     /**
@@ -93,7 +105,7 @@ class Importer implements ImporterInterface
 
     public function applyFieldMappingToSourceItem(array $item): array
     {
-        $fields = StringUtil::deserialize($this->configModel->fieldMapping);
+        $fields = \Contao\StringUtil::deserialize($this->configModel->fieldMapping);
 
         $mapped = [];
 
@@ -101,7 +113,7 @@ class Importer implements ImporterInterface
             if ('source_value' === $field['valueType']) {
                 $mapped[$field['columnName']] = $item[$field['mappingValue']];
             } elseif ('static_value' === $field['valueType']) {
-                $mapped[$field['columnName']] = $field['staticValue'];
+                $mapped[$field['columnName']] = $this->stringUtil->replaceInsertTags($field['staticValue']);
             }
         }
 
@@ -121,11 +133,11 @@ class Importer implements ImporterInterface
             $count = 0;
             $targetTableColumns = $database->getFieldNames($table);
 
-            if ($this->configModel->purgeBeforeImport) {
+            $mode = $this->configModel->importMode;
+
+            if ('insert' === $mode && $this->configModel->purgeBeforeImport) {
                 $this->databaseUtil->delete($table, $this->configModel->purgeWhereClause);
             }
-
-            $mode = $this->configModel->importMode;
 
             foreach ($items as $item) {
                 $item = $this->applyFieldMappingToSourceItem($item);
@@ -138,14 +150,18 @@ class Importer implements ImporterInterface
 
                 ++$count;
 
-                if ($this->dryRun) {
-                    continue;
-                }
-
                 if ('insert' === $mode) {
-                    $this->databaseUtil->insert($table, $item);
+                    if (!$this->dryRun) {
+                        $statement = $this->databaseUtil->insert($table, $item);
+
+                        if (null !== ($record = $this->databaseUtil->findResultByPk($table, $statement->insertId))) {
+                            $this->generateAlias($record);
+                            $this->setDateAdded($record);
+                            $this->setTstamp($record);
+                        }
+                    }
                 } elseif ('merge' === $mode) {
-                    $mergeIdentifiers = StringUtil::deserialize($this->configModel->mergeIdentifierFields, true);
+                    $mergeIdentifiers = \Contao\StringUtil::deserialize($this->configModel->mergeIdentifierFields, true);
 
                     if (empty($mergeIdentifiers)) {
                         throw new Exception($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['noIdentifierFields']);
@@ -159,12 +175,26 @@ class Importer implements ImporterInterface
                         $values[] = $item[$mergeIdentifier['source']];
                     }
 
-                    $existing = $this->databaseUtil->select($table, '*', implode(' AND ', $columns), $values);
+                    $existing = $this->databaseUtil->findOneResultBy($table, $columns, $values);
 
                     if ($existing->numRows > 0) {
-                        $this->databaseUtil->update($table, $item, implode(' AND ', $columns), $values);
+                        if (!$this->dryRun) {
+                            $this->databaseUtil->update($table, $item, implode(' AND ', $columns), $values);
+                        }
+
+                        $this->generateAlias($existing);
+                        $this->setDateAdded($existing);
+                        $this->setTstamp($existing);
                     } else {
-                        $this->databaseUtil->insert($table, $item);
+                        if (!$this->dryRun) {
+                            $statement = $this->databaseUtil->insert($table, $item);
+
+                            if (null !== ($record = $this->databaseUtil->findResultByPk($table, $statement->insertId))) {
+                                $this->generateAlias($record);
+                                $this->setDateAdded($record);
+                                $this->setTstamp($record);
+                            }
+                        }
                     }
                 } else {
                     throw new Exception($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['modeNotSet']);
@@ -178,6 +208,70 @@ class Importer implements ImporterInterface
             }
         } catch (\Exception $e) {
             Message::addError(sprintf($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['errorImport'], $count, $e->getMessage()));
+        }
+    }
+
+    protected function setDateAdded(Result $record)
+    {
+        $table = $this->configModel->targetTable;
+        $field = $this->configModel->dateAddedField;
+
+        if (!$this->configModel->setDateAdded || !$field || $record->{$field} || !$record->id) {
+            return;
+        }
+
+        if (!$this->dryRun) {
+            $this->databaseUtil->update($table, [
+                $field => time(),
+            ], "$table.id=?", [$record->id]);
+        }
+    }
+
+    protected function setTstamp(Result $record)
+    {
+        $table = $this->configModel->targetTable;
+        $field = $this->configModel->tstampField;
+
+        if (!$this->configModel->setTstamp || !$field || !$record->id) {
+            return;
+        }
+
+        if (!$this->dryRun) {
+            $this->databaseUtil->update($table, [
+                $field => time(),
+            ], "$table.id=?", [$record->id]);
+        }
+    }
+
+    protected function generateAlias(Result $record)
+    {
+        $table = $this->configModel->targetTable;
+        $field = $this->configModel->aliasField;
+        $fieldPattern = $this->configModel->aliasFieldPattern;
+
+        if (!$this->configModel->generateAlias || !$field || !$fieldPattern || !$record->id) {
+            return;
+        }
+
+        $aliasBase = preg_replace_callback(
+            '@%([^%]+)%@i',
+            function ($matches) use ($record) {
+                return $record->{$matches[1]};
+            },
+            $fieldPattern
+        );
+
+        $alias = $this->dcaUtil->generateAlias(
+            $record->{$field},
+            $record->id,
+            $table,
+            $aliasBase
+        );
+
+        if (!$this->dryRun) {
+            $this->databaseUtil->update($table, [
+                $field => $alias,
+            ], "$table.id=?", [$record->id]);
         }
     }
 }

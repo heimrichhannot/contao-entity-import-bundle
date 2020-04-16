@@ -10,7 +10,9 @@ namespace HeimrichHannot\EntityImportBundle\Importer;
 
 use HeimrichHannot\EntityImportBundle\Source\SourceFactory;
 use HeimrichHannot\UtilsBundle\Database\DatabaseUtil;
+use HeimrichHannot\UtilsBundle\Dca\DcaUtil;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
+use HeimrichHannot\UtilsBundle\String\StringUtil;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class ImporterFactory
@@ -34,16 +36,26 @@ class ImporterFactory
      * @var SourceFactory
      */
     private $sourceFactory;
+    /**
+     * @var StringUtil
+     */
+    private $stringUtil;
+    /**
+     * @var DcaUtil
+     */
+    private $dcaUtil;
 
     /**
      * Importer constructor.
      */
-    public function __construct(DatabaseUtil $databaseUtil, EventDispatcherInterface $eventDispatcher, ModelUtil $modelUtil, SourceFactory $sourceFactory)
+    public function __construct(DatabaseUtil $databaseUtil, EventDispatcherInterface $eventDispatcher, ModelUtil $modelUtil, StringUtil $stringUtil, DcaUtil $dcaUtil, SourceFactory $sourceFactory)
     {
         $this->databaseUtil = $databaseUtil;
         $this->eventDispatcher = $eventDispatcher;
         $this->modelUtil = $modelUtil;
         $this->sourceFactory = $sourceFactory;
+        $this->stringUtil = $stringUtil;
+        $this->dcaUtil = $dcaUtil;
     }
 
     public function createInstance(int $configModel): ?ImporterInterface
@@ -58,6 +70,6 @@ class ImporterFactory
 
         $source = $this->sourceFactory->createInstance($sourceModel->id);
 
-        return new Importer($configModel, $source, $this->eventDispatcher, $this->databaseUtil, $this->modelUtil);
+        return new Importer($configModel, $source, $this->eventDispatcher, $this->databaseUtil, $this->modelUtil, $this->stringUtil, $this->dcaUtil);
     }
 }

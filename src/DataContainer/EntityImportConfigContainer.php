@@ -102,8 +102,8 @@ class EntityImportConfigContainer
     {
         $options = [];
 
-        if (null === ($configModel = $this->modelUtil->findModelInstanceByPk('tl_entity_import_config', $dc->id))) {
-            throw new \Exception(sprintf('Entity config model of ID %s not found', $dc->id));
+        if (null === ($configModel = $this->modelUtil->findModelInstanceByPk('tl_entity_import_config', $dc->id)) || !$configModel->targetTable) {
+            return $options;
         }
 
         $fields = Database::getInstance()->listFields($configModel->targetTable);
