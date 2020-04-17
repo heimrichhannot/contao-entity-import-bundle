@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [0.2.0] - 2020-04-09
+## [0.2.0] - 2020-04-17
 - refactoring
 - added logic for sorting, field setting (dateAdded, tstamp, alias)
 - added deletion logic
