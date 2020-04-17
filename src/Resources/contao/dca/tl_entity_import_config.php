@@ -83,7 +83,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
         'sortingMode_' . \HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::SORTING_MODE_TARGET_FIELDS
                             => 'targetSortingField,targetSortingOrder,targetSortingContextWhere',
         'deletionMode_' . \HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::DELETION_MODE_MIRROR =>
-            'deletionIdentifierFields',
+            'deletionIdentifierFields,targetDeletionAdditionalWhere',
         'deletionMode_' . \HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::DELETION_MODE_TARGET_FIELDS =>
             'targetDeletionWhere',
         'setDateAdded'      => 'targetDateAddedField',
@@ -411,6 +411,14 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
                 ],
             ],
             'sql'       => "blob NULL",
+        ],
+        'targetDeletionAdditionalWhere'      => [
+            'label'       => &$GLOBALS['TL_LANG']['tl_entity_import_config']['targetDeletionAdditionalWhere'],
+            'inputType'   => 'textarea',
+            'exclude'     => true,
+            'eval'        => ['class' => 'monospace', 'rte' => 'ace|sql', 'tl_class' => 'w50', 'decodeEntities' => true],
+            'explanation' => 'insertTags',
+            'sql'         => "text NULL",
         ],
         'targetDeletionWhere'      => [
             'label'       => &$GLOBALS['TL_LANG']['tl_entity_import_config']['targetDeletionWhere'],

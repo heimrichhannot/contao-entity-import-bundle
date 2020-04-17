@@ -16,7 +16,7 @@ $lang['deleteBeforeImport'][1]      = 'Wählen Sie diese Option wenn vor dem Imp
 $lang['deleteBeforeImportWhere'][0] = 'WHERE-Bedingungen für das Löschen';
 $lang['deleteBeforeImportWhere'][1] = 'Geben Sie hier SQL-Bedingungen in der Form "pid=27 AND id=1" ein, die für das Löschen von Datensätzen vor jedem Import gelten sollen.';
 
-$lang['mergeIdentifierFields'][0]           = 'Merge-Identifikationsfelder';
+$lang['mergeIdentifierFields'][0]           = 'Identifikationsfelder';
 $lang['mergeIdentifierFields'][1]           = 'Wählen Sie hier die Felder aus, die für das Auffinden bestehender Datensätze genutzt werden sollen (bspw. E-Mail, ID, Vorname + Nachname, ...).';
 $lang['mergeIdentifierFields']['source'][0] = 'Quellfeld';
 $lang['mergeIdentifierFields']['source'][1] = 'Wählen Sie hier das Quellfeld aus der externen Quelle aus.';
@@ -73,11 +73,14 @@ $lang['aliasFieldPattern'][1] = 'Geben Sie hier ein Zielfeld-Muster der Form "%t
 $lang['deletionMode'][0] = 'Löschmodus (nach dem Import)';
 $lang['deletionMode'][1] = 'Wählen Sie hier aus, auf welche Weise nach dem Import Datensätze gelöscht werden sollen.';
 
-$lang['deletionIdentifierFields'][0] = 'Merge-Identifikationsfelder';
+$lang['deletionIdentifierFields'][0] = 'Identifikationsfelder';
 $lang['deletionIdentifierFields'][1] = 'Wählen Sie hier die Felder aus, die für das Auffinden bestehender Datensätze genutzt werden sollen (bspw. E-Mail, ID, Vorname + Nachname, ...).';
 
+$lang['targetDeletionAdditionalWhere'][0] = 'Zusätzliche WHERE-Bedingung für das Löschen';
+$lang['targetDeletionAdditionalWhere'][1] = 'Geben Sie hier zusätzlich zu den Identifikationsfelder Bedingungen an, die für das Löschen erfüllt sein müssen.';
+
 $lang['targetDeletionWhere'][0] = 'WHERE-Bedingung für das Löschen';
-$lang['targetDeletionWhere'][1] = 'Geben Sie hier Bedingungen an unter denen.';
+$lang['targetDeletionWhere'][1] = 'Geben Sie hier Bedingungen an, die für das Löschen erfüllt sein müssen.';
 
 $lang['useCron'][0]      = 'Cronjob nutzen';
 $lang['useCron'][1]      = 'Wählen Sie diese Option, um den Importer per Cronjob auszulösen.';

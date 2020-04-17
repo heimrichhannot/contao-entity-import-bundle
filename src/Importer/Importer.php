@@ -252,7 +252,7 @@ class Importer implements ImporterInterface
         $table = $this->configModel->targetTable;
 
         if ($this->configModel->deleteBeforeImport && !$this->dryRun) {
-            $this->databaseUtil->delete($table, $this->configModel->deletionWhereClause);
+            $this->databaseUtil->delete($table, $this->configModel->targetDeletionWhere);
         }
     }
 
@@ -278,6 +278,8 @@ class Importer implements ImporterInterface
                     $conditions[] = '('.$table.'.'.$deletionIdentifier['target'].' NOT IN ('.implode(',', $sourceValues).'))';
                 }
 
+                $conditions[] = '('.$this->configModel->targetDeletionAdditionalWhere.')';
+
                 if (!$this->dryRun) {
                     $this->databaseUtil->delete($table, implode(' AND ', $conditions), []);
                 }
@@ -286,7 +288,7 @@ class Importer implements ImporterInterface
 
             case EntityImportConfigContainer::DELETION_MODE_TARGET_FIELDS:
                 if ($this->configModel->deleteBeforeImport && !$this->dryRun) {
-                    $this->databaseUtil->delete($table, $this->configModel->deletionWhereClause);
+                    $this->databaseUtil->delete($table, $this->configModel->targetDeletionWhere);
                 }
 
                 break;
