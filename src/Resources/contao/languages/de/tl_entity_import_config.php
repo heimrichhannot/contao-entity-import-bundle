@@ -43,26 +43,29 @@ $lang['sortingMode'][1] = 'Wählen Sie hier aus, auf welche Weise sortiert werde
 $lang['targetSortingField'][0] = 'Sortierfeld';
 $lang['targetSortingField'][1] = 'Achtung: Das Feld muss Contaos Sortierlogik entsprechen (Integer als Vielfache von 2).';
 
-$lang['targetSortingPidField'][0] = 'PID-Feld';
-$lang['targetSortingPidField'][1] = 'Wählen Sie hier, sofern vorhanden, ein PID-Feld aus, damit die Sortierlogik sich in diesem Kontext bewegt.';
+$lang['targetSortingOrder'][0] = 'ORDER-Anweisung';
+$lang['targetSortingOrder'][1] = 'Geben Sie hier an, wie die Datensätze sortiert werden sollen (Beispiel: title ASC, date DESC).';
+
+$lang['targetSortingContextWhere'][0] = 'Kontext-WHERE-Bedingungen für die Sortierung';
+$lang['targetSortingContextWhere'][1] = 'Sie können hier bei Bedarf eine Bedingung definieren, um den Kontext für die Berechnung der Sortierreihenfolge festzulegen (Beispiel: "pid=3").';
 
 $lang['setDateAdded'][0] = 'Erstelldatum setzen';
 $lang['setDateAdded'][1] = 'Wählen Sie diese Option, damit automatisch das Erstelldatum als Unix-Timestamp gesetzt wird.';
 
-$lang['dateAddedField'][0] = 'Feld für das Erstelldatum (dateAdded)';
-$lang['dateAddedField'][1] = 'Wählen Sie hier das Feld aus, in dem der Unix-Timestamp zum Zeitpunkt der Erstellung des Datensatzes gespeichert wird.';
+$lang['targetDateAddedField'][0] = 'Feld für das Erstelldatum (dateAdded)';
+$lang['targetDateAddedField'][1] = 'Wählen Sie hier das Feld aus, in dem der Unix-Timestamp zum Zeitpunkt der Erstellung des Datensatzes gespeichert wird.';
 
 $lang['setTstamp'][0] = 'Datum der letzten Änderung setzen';
 $lang['setTstamp'][1] = 'Wählen Sie diese Option, damit automatisch das Datum der letzten Änderung als Unix-Timestamp gesetzt wird.';
 
-$lang['tstampField'][0] = 'Zeitstempel-Feld (tstamp)';
-$lang['tstampField'][1] = 'Wählen Sie hier das Feld aus, in dem der Unix-Timestamp der letzten Änderung gespeichert wird.';
+$lang['targetTstampField'][0] = 'Zeitstempel-Feld (tstamp)';
+$lang['targetTstampField'][1] = 'Wählen Sie hier das Feld aus, in dem der Unix-Timestamp der letzten Änderung gespeichert wird.';
 
 $lang['generateAlias'][0] = 'Alias generieren';
 $lang['generateAlias'][1] = 'Wählen Sie diese Option, damit automatisch ein Alias generiert wird.';
 
-$lang['aliasField'][0] = 'Alias-Feld (alias)';
-$lang['aliasField'][1] = 'Wählen Sie hier das Feld aus, in dem der generierte Alias gespeichert wird.';
+$lang['targetAliasField'][0] = 'Alias-Feld (alias)';
+$lang['targetAliasField'][1] = 'Wählen Sie hier das Feld aus, in dem der generierte Alias gespeichert wird.';
 
 $lang['aliasFieldPattern'][0] = 'Feldmuster für die Aliasgenerierung (Zielfelder!)';
 $lang['aliasFieldPattern'][1] = 'Geben Sie hier ein Zielfeld-Muster der Form "%title%" ein, welches für die Aliasgenerierung genutzt wird (Verkettungen wie "%fieldname1%-%fieldname2%" sind auch möglich).';
@@ -82,7 +85,7 @@ $lang['reference'] = [
         'merge'  => 'Beim Importieren Datensätze zusammenführen (Merge)',
     ],
     'sortingMode'  => [
-        \HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::SORTING_MODE_SOURCE_ORDER => 'Reihenfolge in der Quelle beibehalten'
+        \HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::SORTING_MODE_TARGET_FIELDS => 'Nach Zielfeld(ern) sortieren'
     ],
     'cronInterval' => [
         'minutely' => 'Minütlich',
@@ -129,9 +132,12 @@ $lang['label']     = 'Klicken Sie &quot;Import ausführen&quot;, um den Importpr
 /**
  * Legends
  */
-$lang['general_legend'] = 'Allgemeines';
-$lang['fields_legend']  = 'Felder';
-$lang['cron_legend']    = 'Cron';
+$lang['general_legend']    = 'Allgemeines';
+$lang['mapping_legend']    = 'Felderabbildung';
+$lang['fields_legend']     = 'Felderbearbeitung';
+$lang['sorting_legend']    = 'Sortierung';
+$lang['deletetion_legend'] = 'Löschen';
+$lang['cron_legend']       = 'Cron';
 
 /**
  * Buttons

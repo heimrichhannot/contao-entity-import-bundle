@@ -23,10 +23,10 @@ use HeimrichHannot\UtilsBundle\Url\UrlUtil;
 
 class EntityImportConfigContainer
 {
-    const SORTING_MODE_SOURCE_ORDER = 'source_order';
+    const SORTING_MODE_TARGET_FIELDS = 'target_fields';
 
     const SORTING_MODES = [
-        self::SORTING_MODE_SOURCE_ORDER,
+        self::SORTING_MODE_TARGET_FIELDS,
     ];
 
     /**
@@ -68,6 +68,15 @@ class EntityImportConfigContainer
         $this->importerFactory = $importerFactory;
         $this->databaseUtil = $databaseUtil;
         $this->arrayUtil = $arrayUtil;
+    }
+
+    public function initPalette(?DataContainer $dc)
+    {
+        if (null === ($sourceModel = $this->modelUtil->findModelInstanceByPk($dc->table, $dc->id)) || !$sourceModel->targetTable) {
+            return;
+        }
+
+        $dca = &$GLOBALS['TL_DCA']['tl_entity_import_config'];
     }
 
     public function getAllTargetTables(?DataContainer $dc): array

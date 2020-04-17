@@ -17,8 +17,9 @@
     "ausi/slug-generator": "^1.1",
     "contao/core-bundle": "^4.4",
     "codefog/contao-haste": "^4.24",
-    "heimrichhannot/contao-utils-bundle": "^2.135",
-    "heimrichhannot/contao-multi-column-editor-bundle": "^2.4"
+    "heimrichhannot/contao-field-value-copier-bundle": "^1.1",
+    "heimrichhannot/contao-multi-column-editor-bundle": "^2.4",
+    "heimrichhannot/contao-utils-bundle": "^2.135"
   },
   "require-dev": {
     "contao/test-case": "1.1.*",

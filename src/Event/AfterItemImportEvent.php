@@ -32,6 +32,7 @@ class AfterItemImportEvent extends Event
      * @var array
      */
     private $item;
+
     private $importedRecord;
 
     /**

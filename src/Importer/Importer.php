@@ -175,7 +175,6 @@ class Importer implements ImporterInterface
                         if (null !== ($record = $this->databaseUtil->findResultByPk($table, $statement->insertId))) {
                             $this->setDateAdded($record);
                             $this->generateAlias($record);
-                            $this->applySorting($record, $count * 128);
                             $this->setTstamp($record);
                         }
 
@@ -205,7 +204,6 @@ class Importer implements ImporterInterface
 
                         $this->setDateAdded($existing);
                         $this->generateAlias($existing);
-                        $this->applySorting($existing, $count * 128);
                         $this->setTstamp($existing);
 
                         $importedRecord = $existing;
@@ -216,7 +214,6 @@ class Importer implements ImporterInterface
                             if (null !== ($record = $this->databaseUtil->findResultByPk($table, $statement->insertId))) {
                                 $this->setDateAdded($record);
                                 $this->generateAlias($record);
-                                $this->applySorting($record, $count * 128);
                                 $this->setTstamp($record);
                             }
 
@@ -237,6 +234,8 @@ class Importer implements ImporterInterface
                 ));
             }
 
+            $this->applySorting();
+
             if ($count > 0) {
                 Message::addConfirmation(sprintf($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['successfulImport'], $count));
             } else {
@@ -250,7 +249,7 @@ class Importer implements ImporterInterface
     protected function setDateAdded(Result $record)
     {
         $table = $this->configModel->targetTable;
-        $field = $this->configModel->dateAddedField;
+        $field = $this->configModel->targetDateAddedField;
 
         if (!$this->configModel->setDateAdded || !$field || $record->{$field} || !$record->id) {
             return;
@@ -266,7 +265,7 @@ class Importer implements ImporterInterface
     protected function setTstamp(Result $record)
     {
         $table = $this->configModel->targetTable;
-        $field = $this->configModel->tstampField;
+        $field = $this->configModel->targetTstampField;
 
         if (!$this->configModel->setTstamp || !$field || !$record->id) {
             return;
@@ -282,7 +281,7 @@ class Importer implements ImporterInterface
     protected function generateAlias(Result $record)
     {
         $table = $this->configModel->targetTable;
-        $field = $this->configModel->aliasField;
+        $field = $this->configModel->targetAliasField;
         $fieldPattern = $this->configModel->aliasFieldPattern;
 
         if (!$this->configModel->generateAlias || !$field || !$fieldPattern || !$record->id) {
@@ -311,18 +310,39 @@ class Importer implements ImporterInterface
         }
     }
 
-    protected function applySorting(Result $record, int $sorting)
+    protected function applySorting()
     {
-        $field = $this->configModel->tstampField;
+        $field = $this->configModel->targetSortingField;
+        $where = $this->stringUtil->replaceInsertTags($this->configModel->targetSortingContextWhere, false);
+        $order = $this->configModel->targetSortingOrder;
 
-        if (!$this->configModel->sortingMode || !$record->id) {
+        if (!$this->configModel->sortingMode || !$field || !$where || !$order) {
             return;
         }
 
         $table = $this->configModel->targetTable;
 
         switch ($this->configModel->sortingMode) {
-            case EntityImportConfigContainer::SORTING_MODE_SOURCE_ORDER:
+            case EntityImportConfigContainer::SORTING_MODE_TARGET_FIELDS:
+                $results = $this->databaseUtil->findResultsBy($table, [$where], [], [
+                    'order' => $order,
+                ]);
+
+                if (null === $where || $results->numRows < 1) {
+                    return;
+                }
+
+                $count = 1;
+
+                while ($results->next()) {
+                    if ($this->dryRun) {
+                        continue;
+                    }
+
+                    $this->databaseUtil->update($table, [
+                        $field => $count++ * 128,
+                    ], "$table.id=?", [$results->id]);
+                }
 
                 break;
         }
