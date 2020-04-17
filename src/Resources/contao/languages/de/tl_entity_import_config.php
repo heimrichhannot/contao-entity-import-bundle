@@ -5,23 +5,23 @@ $lang = &$GLOBALS['TL_LANG']['tl_entity_import_config'];
 /**
  * Fields
  */
-$lang['title'][0]             = 'Titel';
-$lang['title'][1]             = 'Geben Sie hier den Titel des Imports ein.';
-$lang['targetTable'][0]       = 'Zieltabelle';
-$lang['targetTable'][1]       = 'Wählen Sie hier die Tabelle, in die importiert werden soll.';
-$lang['mergeTable'][0]        = 'Beim Importieren zusammenführen (Merge)';
-$lang['mergeTable'][1]        = 'Wählen Sie diese Option, wenn beim Importieren bereits bestehende Datensätze mit den zu importierenden Datensätzen zusammengeführt werden sollen.';
-$lang['purgeBeforeImport'][0] = 'Daten vor dem Import löschen';
-$lang['purgeBeforeImport'][1] = 'Wählen Sie diese Option wenn die vorhandenen Daten vor dem Import gelöscht werden sollen.';
-$lang['purgeWhereClause'][0]  = 'WHERE-Bedingungen für das Löschen';
-$lang['purgeWhereClause'][1]  = 'Geben Sie hier SQL-Bedingungen in der Form "pid=27 AND id=1" ein, die für das Löschen von Datensätzen vor jedem Import gelten sollen.';
+$lang['title'][0]                   = 'Titel';
+$lang['title'][1]                   = 'Geben Sie hier den Titel des Imports ein.';
+$lang['targetTable'][0]             = 'Zieltabelle';
+$lang['targetTable'][1]             = 'Wählen Sie hier die Tabelle, in die importiert werden soll.';
+$lang['mergeTable'][0]              = 'Beim Importieren zusammenführen (Merge)';
+$lang['mergeTable'][1]              = 'Wählen Sie diese Option, wenn beim Importieren bereits bestehende Datensätze mit den zu importierenden Datensätzen zusammengeführt werden sollen.';
+$lang['deleteBeforeImport'][0]      = 'Datensätze vor dem Import löschen';
+$lang['deleteBeforeImport'][1]      = 'Wählen Sie diese Option wenn vor dem Import vorhandene Datensätze gelöscht werden sollen.';
+$lang['deleteBeforeImportWhere'][0] = 'WHERE-Bedingungen für das Löschen';
+$lang['deleteBeforeImportWhere'][1] = 'Geben Sie hier SQL-Bedingungen in der Form "pid=27 AND id=1" ein, die für das Löschen von Datensätzen vor jedem Import gelten sollen.';
 
 $lang['mergeIdentifierFields'][0]           = 'Merge-Identifikationsfelder';
 $lang['mergeIdentifierFields'][1]           = 'Wählen Sie hier die Felder aus, die für das Auffinden bestehender Datensätze genutzt werden sollen (bspw. E-Mail, ID, Vorname + Nachname, ...).';
 $lang['mergeIdentifierFields']['source'][0] = 'Quellfeld';
 $lang['mergeIdentifierFields']['source'][1] = 'Wählen Sie hier das Quellfeld aus der externen Quelle aus.';
 $lang['mergeIdentifierFields']['target'][0] = 'Feld in Zieltabelle';
-$lang['mergeIdentifierFields']['target'][1] = 'Wählen Sie hier das Zielfeld in das importiert wird.';
+$lang['mergeIdentifierFields']['target'][1] = 'Wählen Sie hier ein Feld aus der Zieltabelle aus.';
 
 $lang['fieldMapping'][0]                 = 'Feldabbildung';
 $lang['fieldMapping'][1]                 = 'Geben Sie hier die Zuordnung der ausgewählten Felder der Quelle mit den vorhandenen Tabellenspalten.';
@@ -46,7 +46,7 @@ $lang['targetSortingField'][1] = 'Achtung: Das Feld muss Contaos Sortierlogik en
 $lang['targetSortingOrder'][0] = 'ORDER-Anweisung';
 $lang['targetSortingOrder'][1] = 'Geben Sie hier an, wie die Datensätze sortiert werden sollen (Beispiel: title ASC, date DESC).';
 
-$lang['targetSortingContextWhere'][0] = 'Kontext-WHERE-Bedingungen für die Sortierung';
+$lang['targetSortingContextWhere'][0] = 'WHERE-Kontextbedingungen für die Sortierung';
 $lang['targetSortingContextWhere'][1] = 'Sie können hier bei Bedarf eine Bedingung definieren, um den Kontext für die Berechnung der Sortierreihenfolge festzulegen (Beispiel: "pid=3").';
 
 $lang['setDateAdded'][0] = 'Erstelldatum setzen';
@@ -70,6 +70,15 @@ $lang['targetAliasField'][1] = 'Wählen Sie hier das Feld aus, in dem der generi
 $lang['aliasFieldPattern'][0] = 'Feldmuster für die Aliasgenerierung (Zielfelder!)';
 $lang['aliasFieldPattern'][1] = 'Geben Sie hier ein Zielfeld-Muster der Form "%title%" ein, welches für die Aliasgenerierung genutzt wird (Verkettungen wie "%fieldname1%-%fieldname2%" sind auch möglich).';
 
+$lang['deletionMode'][0] = 'Löschmodus (nach dem Import)';
+$lang['deletionMode'][1] = 'Wählen Sie hier aus, auf welche Weise nach dem Import Datensätze gelöscht werden sollen.';
+
+$lang['deletionIdentifierFields'][0] = 'Merge-Identifikationsfelder';
+$lang['deletionIdentifierFields'][1] = 'Wählen Sie hier die Felder aus, die für das Auffinden bestehender Datensätze genutzt werden sollen (bspw. E-Mail, ID, Vorname + Nachname, ...).';
+
+$lang['targetDeletionWhere'][0] = 'WHERE-Bedingung für das Löschen';
+$lang['targetDeletionWhere'][1] = 'Geben Sie hier Bedingungen an unter denen.';
+
 $lang['useCron'][0]      = 'Cronjob nutzen';
 $lang['useCron'][1]      = 'Wählen Sie diese Option, um den Importer per Cronjob auszulösen.';
 $lang['cronInterval'][0] = 'Cron-Interval';
@@ -85,7 +94,11 @@ $lang['reference'] = [
         'merge'  => 'Beim Importieren Datensätze zusammenführen (Merge)',
     ],
     'sortingMode'  => [
-        \HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::SORTING_MODE_TARGET_FIELDS => 'Nach Zielfeld(ern) sortieren'
+        \HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::SORTING_MODE_TARGET_FIELDS => 'Nach Zielfeld(ern) sortieren',
+    ],
+    'deletionMode' => [
+        \HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::DELETION_MODE_MIRROR        => 'In der Quelle nicht mehr vorhandene Datensätze löschen (Spiegelung)',
+        \HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::DELETION_MODE_TARGET_FIELDS => 'Nach Zielfeldbedingungen löschen'
     ],
     'cronInterval' => [
         'minutely' => 'Minütlich',
@@ -111,7 +124,7 @@ $lang['importConfirm'] = 'Soll der Import ID %s wirklich durchgeführt werden?';
 $lang['error']['errorMessage']        = 'Beim Importieren ist ein Fehler aufgetreten: %s.';
 $lang['error']['tableDoesNotExist']   = 'Die Zieltabelle existiert nicht.';
 $lang['error']['tableFieldsDiffer']   = 'Die Felder vom Quelle und Ziel unterscheiden sich.';
-$lang['error']['noIdentifierFields']  = 'Das Identifikatorfelder wurde nicht gesetzt.';
+$lang['error']['noIdentifierFields']  = 'Die Identifikatorfelder wurden nicht gesetzt.';
 $lang['error']['successfulImport']    = 'Es wurden %s Einträge erfolgreich importiert bzw. aktualisiert.';
 $lang['error']['emptyFile']           = 'Es wurden keine Daten zum Importieren gefunden.';
 $lang['error']['errorImport']         = 'Bei %s Einträgen sind beim Import Fehler aufgetreten. Fehler: %s';
@@ -132,12 +145,12 @@ $lang['label']     = 'Klicken Sie &quot;Import ausführen&quot;, um den Importpr
 /**
  * Legends
  */
-$lang['general_legend']    = 'Allgemeines';
-$lang['mapping_legend']    = 'Felderabbildung';
-$lang['fields_legend']     = 'Felderbearbeitung';
-$lang['sorting_legend']    = 'Sortierung';
-$lang['deletetion_legend'] = 'Löschen';
-$lang['cron_legend']       = 'Cron';
+$lang['general_legend']  = 'Allgemeines';
+$lang['mapping_legend']  = 'Felderabbildung';
+$lang['fields_legend']   = 'Felderbearbeitung';
+$lang['sorting_legend']  = 'Sortierung';
+$lang['deletion_legend'] = 'Löschen';
+$lang['cron_legend']     = 'Cron';
 
 /**
  * Buttons

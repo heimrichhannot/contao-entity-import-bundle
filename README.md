@@ -9,8 +9,9 @@ This bundle offers a generic importer to migrate data from various sources to co
 - import data from either file content or database into arbitrary contao database entities (`tl_*`)
 - support for various data types (json, csv, ...)
 - support for various source types (contao file system, http, absolute path)
-- executable from contao backend, cronjob, symfony command
-- possibility to define static values to be filled into the database, with support of insertTags
+- executable from contao backend, as cronjob and symfony command
+- automatic field manipulation (sorting, alias, dateAdded, tstamp)
+- merge and insert mode
 
 ## Impressions
 

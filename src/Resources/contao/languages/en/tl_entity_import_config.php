@@ -5,16 +5,16 @@ $lang = &$GLOBALS['TL_LANG']['tl_entity_import_config'];
 /**
  * Fields
  */
-$lang['title'][0]             = 'Title';
-$lang['title'][1]             = 'Enter the title of the import here.';
-$lang['targetTable'][0]       = 'Target table';
-$lang['targetTable'][1]       = 'Select the table into which you want to import.';
-$lang['mergeTable'][0]        = 'Merge during import';
-$lang['mergeTable'][1]        = 'Select this option if you want the import to merge existing records with the records being imported.';
-$lang['purgeBeforeImport'][0] = 'Delete data before import';
-$lang['purgeBeforeImport'][1] = 'Select this option if the existing data should be deleted before import.';
-$lang['purgeWhereClause'][0]  = 'WHERE conditions for deletion';
-$lang['purgeWhereClause'][1]  = 'Enter SQL conditions in the form "pid=27 AND id=1" that should apply to the deletion of records before each import.';
+$lang['title'][0]                   = 'Title';
+$lang['title'][1]                   = 'Enter the title of the import here.';
+$lang['targetTable'][0]             = 'Target table';
+$lang['targetTable'][1]             = 'Select the table into which you want to import.';
+$lang['mergeTable'][0]              = 'Merge during import';
+$lang['mergeTable'][1]              = 'Select this option if you want the import to merge existing records with the records being imported.';
+$lang['deleteBeforeImport'][0]      = 'Delete data before import';
+$lang['deleteBeforeImport'][1]      = 'Select this option if the existing data should be deleted before import.';
+$lang['deleteBeforeImportWhere'][0] = 'WHERE conditions for deletion';
+$lang['deleteBeforeImportWhere'][1] = 'Enter SQL conditions in the form "pid=27 AND id=1" that should apply to the deletion of records before each import.';
 
 $lang['mergeIdentifierFields'][0]           = 'Merge identification fields';
 $lang['mergeIdentifierFields'][0]           = 'Select the fields to be used for finding existing records (e.g. e-mail, ID, first name + lastname, ...).';

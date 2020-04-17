@@ -135,15 +135,15 @@ class Importer implements ImporterInterface
         try {
             $count = 0;
             $targetTableColumns = $database->getFieldNames($table);
+            $mappedItems = [];
 
             $mode = $this->configModel->importMode;
 
-            if ('insert' === $mode && $this->configModel->purgeBeforeImport) {
-                $this->databaseUtil->delete($table, $this->configModel->purgeWhereClause);
-            }
+            $this->deleteBeforeImport();
 
             foreach ($items as $item) {
                 $mappedItem = $this->applyFieldMappingToSourceItem($item);
+                $mappedItems[] = $mappedItem;
 
                 $columnsNotExisting = array_diff(array_keys($mappedItem), $targetTableColumns);
 
@@ -234,6 +234,7 @@ class Importer implements ImporterInterface
                 ));
             }
 
+            $this->deleteAfterImport($mappedItems);
             $this->applySorting();
 
             if ($count > 0) {
@@ -243,6 +244,52 @@ class Importer implements ImporterInterface
             }
         } catch (\Exception $e) {
             Message::addError(sprintf($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['errorImport'], $count, $e->getMessage()));
+        }
+    }
+
+    protected function deleteBeforeImport()
+    {
+        $table = $this->configModel->targetTable;
+
+        if ($this->configModel->deleteBeforeImport && !$this->dryRun) {
+            $this->databaseUtil->delete($table, $this->configModel->deletionWhereClause);
+        }
+    }
+
+    protected function deleteAfterImport(array $mappedSourceItems)
+    {
+        $table = $this->configModel->targetTable;
+
+        switch ($this->configModel->deletionMode) {
+            case EntityImportConfigContainer::DELETION_MODE_MIRROR:
+                $deletionIdentifiers = \Contao\StringUtil::deserialize($this->configModel->deletionIdentifierFields, true);
+
+                if (empty($deletionIdentifiers)) {
+                    throw new Exception($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['noIdentifierFields']);
+                }
+
+                $conditions = [];
+
+                foreach ($deletionIdentifiers as $deletionIdentifier) {
+                    $sourceValues = array_map(function ($item) use ($deletionIdentifier) {
+                        return '"'.$item[$deletionIdentifier['source']].'"';
+                    }, $mappedSourceItems);
+
+                    $conditions[] = '('.$table.'.'.$deletionIdentifier['target'].' NOT IN ('.implode(',', $sourceValues).'))';
+                }
+
+                if (!$this->dryRun) {
+                    $this->databaseUtil->delete($table, implode(' AND ', $conditions), []);
+                }
+
+                break;
+
+            case EntityImportConfigContainer::DELETION_MODE_TARGET_FIELDS:
+                if ($this->configModel->deleteBeforeImport && !$this->dryRun) {
+                    $this->databaseUtil->delete($table, $this->configModel->deletionWhereClause);
+                }
+
+                break;
         }
     }
 

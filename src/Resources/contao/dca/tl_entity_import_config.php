@@ -75,18 +75,21 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
         ],
     ],
     'palettes'    => [
-        '__selector__' => ['importMode', 'purgeBeforeImport', 'sortingMode', 'setDateAdded', 'setTstamp', 'generateAlias', 'useCron'],
-        'default'      => '{general_legend},title,targetTable,importMode;{mapping_legend},fieldMapping;{fields_legend},setDateAdded,setTstamp,generateAlias;{sorting_legend},sortingMode;{deletion_legend},;{cron_legend},useCron;',
+        '__selector__' => ['importMode', 'deleteBeforeImport', 'sortingMode', 'setDateAdded', 'setTstamp', 'generateAlias', 'deletionMode', 'useCron'],
+        'default'      => '{general_legend},title,targetTable,importMode;{mapping_legend},fieldMapping;{fields_legend},setDateAdded,setTstamp,generateAlias;{sorting_legend},sortingMode;{deletion_legend},deleteBeforeImport,deletionMode;{cron_legend},useCron;',
     ],
     'subpalettes' => [
-        'importMode_insert' => 'purgeBeforeImport',
         'importMode_merge'  => 'mergeIdentifierFields',
         'sortingMode_' . \HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::SORTING_MODE_TARGET_FIELDS
                             => 'targetSortingField,targetSortingOrder,targetSortingContextWhere',
+        'deletionMode_' . \HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::DELETION_MODE_MIRROR =>
+            'deletionIdentifierFields',
+        'deletionMode_' . \HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::DELETION_MODE_TARGET_FIELDS =>
+            'targetDeletionWhere',
         'setDateAdded'      => 'targetDateAddedField',
         'setTstamp'         => 'targetTstampField',
         'generateAlias'     => 'targetAliasField,aliasFieldPattern',
-        'purgeBeforeImport' => 'purgeWhereClause',
+        'deleteBeforeImport' => 'deleteBeforeImportWhere',
         'useCron'           => 'cronInterval'
     ],
     'fields'      => [
@@ -203,15 +206,15 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'eval'      => ['tl_class' => 'w50', 'submitOnChange' => true, 'mandatory' => true],
             'sql'       => "varchar(16) NOT NULL default ''",
         ],
-        'purgeBeforeImport'     => [
-            'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['purgeBeforeImport'],
+        'deleteBeforeImport'     => [
+            'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['deleteBeforeImport'],
             'exclude'   => true,
             'inputType' => 'checkbox',
             'eval'      => ['submitOnChange' => true, 'tl_class' => 'clr w50'],
             'sql'       => "char(1) NOT NULL default ''",
         ],
-        'purgeWhereClause'      => [
-            'label'       => &$GLOBALS['TL_LANG']['tl_entity_import_config']['purgeWhereClause'],
+        'deleteBeforeImportWhere'      => [
+            'label'       => &$GLOBALS['TL_LANG']['tl_entity_import_config']['deleteBeforeImportWhere'],
             'inputType'   => 'textarea',
             'exclude'     => true,
             'eval'        => ['class' => 'monospace', 'rte' => 'ace|sql', 'tl_class' => 'long clr', 'decodeEntities' => true],
@@ -364,6 +367,58 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'reference' => &$GLOBALS['TL_LANG']['tl_entity_import_config']['reference']['cronInterval'],
             'eval'      => ['tl_class' => 'w50 clr', 'includeBlankOption' => true, 'mandatory' => true],
             'sql'       => "varchar(12) NOT NULL default ''",
+        ],
+        'deletionMode'           => [
+            'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['deletionMode'],
+            'exclude'   => true,
+            'filter'    => true,
+            'inputType' => 'select',
+            'options'   => \HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::DELETION_MODES,
+            'reference' => &$GLOBALS['TL_LANG']['tl_entity_import_config']['reference']['deletionMode'],
+            'eval'      => ['tl_class' => 'w50', 'includeBlankOption' => true, 'submitOnChange' => true],
+            'sql'       => "varchar(16) NOT NULL default ''"
+        ],
+        'deletionIdentifierFields' => [
+            'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['deletionIdentifierFields'],
+            'inputType' => 'multiColumnEditor',
+            'exclude'   => true,
+            'eval'      => [
+                'multiColumnEditor' => [
+                    'fields' => [
+                        'source' => [
+                            'label'            => &$GLOBALS['TL_LANG']['tl_entity_import_config']['mergeIdentifierFields']['source'],
+                            'inputType'        => 'select',
+                            'options_callback' => [\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::class, 'getSourceFields'],
+                            'eval'             => [
+                                'groupStyle'         => 'width: 49%',
+                                'includeBlankOption' => true,
+                                'chosen'             => true,
+                                'mandatory'          => true,
+                            ],
+                        ],
+                        'target' => [
+                            'label'            => &$GLOBALS['TL_LANG']['tl_entity_import_config']['mergeIdentifierFields']['target'],
+                            'inputType'        => 'select',
+                            'options_callback' => [\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::class, 'getTargetFields'],
+                            'eval'             => [
+                                'groupStyle'         => 'width: 49%',
+                                'includeBlankOption' => true,
+                                'chosen'             => true,
+                                'mandatory'          => true,
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            'sql'       => "blob NULL",
+        ],
+        'targetDeletionWhere'      => [
+            'label'       => &$GLOBALS['TL_LANG']['tl_entity_import_config']['targetDeletionWhere'],
+            'inputType'   => 'textarea',
+            'exclude'     => true,
+            'eval'        => ['class' => 'monospace', 'rte' => 'ace|sql', 'tl_class' => 'w50', 'decodeEntities' => true],
+            'explanation' => 'insertTags',
+            'sql'         => "text NULL",
         ],
     ],
 ];

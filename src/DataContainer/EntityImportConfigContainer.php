@@ -29,6 +29,14 @@ class EntityImportConfigContainer
         self::SORTING_MODE_TARGET_FIELDS,
     ];
 
+    const DELETION_MODE_MIRROR = 'mirror';
+    const DELETION_MODE_TARGET_FIELDS = 'target_fields';
+
+    const DELETION_MODES = [
+        self::DELETION_MODE_MIRROR,
+        self::DELETION_MODE_TARGET_FIELDS,
+    ];
+
     /**
      * @var Request
      */

@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.2.0] - 2020-04-09
+- refactoring
+- added logic for sorting, field setting (dateAdded, tstamp, alias)
+- added deletion logic
+- added new events
+
 ## [0.1.3] - 2020-04-09
 - added fieldMapping to Importer config
 
