@@ -255,9 +255,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'exclude'   => true,
             'filter'    => true,
             'inputType' => 'select',
-            'options'   => [
-                'source_order',
-            ],
+            'options'   => \HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::SORTING_MODES,
             'reference' => &$GLOBALS['TL_LANG']['tl_entity_import_config']['reference']['sortingMode'],
             'eval'      => ['tl_class' => 'w50', 'includeBlankOption' => true],
             'sql'       => "varchar(16) NOT NULL default ''"

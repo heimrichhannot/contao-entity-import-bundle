@@ -51,13 +51,16 @@ The import configuration allows to enable cron execution and picking of the cron
 Possible to choose between `minutely`, `hourly`, `daily`, `weekly`, `monthly` interval.
 
 ## Events
-Event name  | Description
-------|------------
-`huh.entity_import.after_file_source_get_content_event` | Configure the data after receiving from source
-`huh.entity_import.after_import_event` | Get imported data after finished import
-`huh.entity_import.before_import_event` | Configure the data before importing
-`huh.entity_import.before_authentication_event` | Configure authentication data before sending GET request to http source
-`huh.entity_import.source_factory_create_source_event` | Implement custom logic for new custom file sources
+
+Name | Description
+-----|------------
+`AfterFileSourceGetContentEvent` | Configure the data after receiving from source
+`AfterImportEvent` | Get imported data after finished import
+`AfterItemImportEvent` | Get imported item data after finished import
+`BeforeAuthenticationEvent` | Configure authentication data before sending GET request to http source
+`BeforeImportEvent` | Configure the data before importing
+`BeforeItemImportEvent` | Configure the item data before importing; call `setSkipped(true)` in order to skip the import
+`SourceFactoryCreateSourceEvent` | Implement custom logic for new custom file sources
 
 ## Todo
 

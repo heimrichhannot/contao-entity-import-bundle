@@ -82,7 +82,7 @@ $lang['reference'] = [
         'merge'  => 'Beim Importieren Datensätze zusammenführen (Merge)',
     ],
     'sortingMode'  => [
-        'source_order' => 'Reihenfolge in der Quelle beibehalten'
+        \HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::SORTING_MODE_SOURCE_ORDER => 'Reihenfolge in der Quelle beibehalten'
     ],
     'cronInterval' => [
         'minutely' => 'Minütlich',

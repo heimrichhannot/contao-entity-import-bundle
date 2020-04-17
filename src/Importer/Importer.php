@@ -12,8 +12,11 @@ use Contao\Database;
 use Contao\Message;
 use Contao\Model;
 use Database\Result;
+use HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer;
 use HeimrichHannot\EntityImportBundle\Event\AfterImportEvent;
+use HeimrichHannot\EntityImportBundle\Event\AfterItemImportEvent;
 use HeimrichHannot\EntityImportBundle\Event\BeforeImportEvent;
+use HeimrichHannot\EntityImportBundle\Event\BeforeItemImportEvent;
 use HeimrichHannot\EntityImportBundle\Model\EntityImportConfigModel;
 use HeimrichHannot\EntityImportBundle\Source\SourceInterface;
 use HeimrichHannot\UtilsBundle\Database\DatabaseUtil;
@@ -103,7 +106,7 @@ class Importer implements ImporterInterface
         $this->dryRun = $dry;
     }
 
-    public function applyFieldMappingToSourceItem(array $item): array
+    protected function applyFieldMappingToSourceItem(array $item): array
     {
         $fields = \Contao\StringUtil::deserialize($this->configModel->fieldMapping);
 
@@ -140,25 +143,43 @@ class Importer implements ImporterInterface
             }
 
             foreach ($items as $item) {
-                $item = $this->applyFieldMappingToSourceItem($item);
+                $mappedItem = $this->applyFieldMappingToSourceItem($item);
 
-                $columnsNotExisting = array_diff(array_keys($item), $targetTableColumns);
+                $columnsNotExisting = array_diff(array_keys($mappedItem), $targetTableColumns);
 
                 if (!empty($columnsNotExisting)) {
                     throw new Exception($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['tableFieldsDiffer']);
                 }
 
+                /** @var BeforeItemImportEvent $event */
+                $event = $this->eventDispatcher->dispatch(BeforeItemImportEvent::NAME, new BeforeItemImportEvent(
+                    $mappedItem,
+                    $item,
+                    $this->configModel,
+                    $this->source,
+                    false
+                ));
+
+                // developer can decide to skip the item in an event listener if certain criteria is met
+                if ($event->isSkipped()) {
+                    continue;
+                }
+
                 ++$count;
+                $importedRecord = null;
 
                 if ('insert' === $mode) {
                     if (!$this->dryRun) {
-                        $statement = $this->databaseUtil->insert($table, $item);
+                        $statement = $this->databaseUtil->insert($table, $mappedItem);
 
                         if (null !== ($record = $this->databaseUtil->findResultByPk($table, $statement->insertId))) {
-                            $this->generateAlias($record);
                             $this->setDateAdded($record);
+                            $this->generateAlias($record);
+                            $this->applySorting($record, $count * 128);
                             $this->setTstamp($record);
                         }
+
+                        $importedRecord = $record;
                     }
                 } elseif ('merge' === $mode) {
                     $mergeIdentifiers = \Contao\StringUtil::deserialize($this->configModel->mergeIdentifierFields, true);
@@ -172,33 +193,48 @@ class Importer implements ImporterInterface
 
                     foreach ($mergeIdentifiers as $mergeIdentifier) {
                         $columns[] = '('.$table.'.'.$mergeIdentifier['target'].'=?)';
-                        $values[] = $item[$mergeIdentifier['source']];
+                        $values[] = $mappedItem[$mergeIdentifier['source']];
                     }
 
                     $existing = $this->databaseUtil->findOneResultBy($table, $columns, $values);
 
                     if ($existing->numRows > 0) {
                         if (!$this->dryRun) {
-                            $this->databaseUtil->update($table, $item, implode(' AND ', $columns), $values);
+                            $this->databaseUtil->update($table, $mappedItem, implode(' AND ', $columns), $values);
                         }
 
-                        $this->generateAlias($existing);
                         $this->setDateAdded($existing);
+                        $this->generateAlias($existing);
+                        $this->applySorting($existing, $count * 128);
                         $this->setTstamp($existing);
+
+                        $importedRecord = $existing;
                     } else {
                         if (!$this->dryRun) {
-                            $statement = $this->databaseUtil->insert($table, $item);
+                            $statement = $this->databaseUtil->insert($table, $mappedItem);
 
                             if (null !== ($record = $this->databaseUtil->findResultByPk($table, $statement->insertId))) {
-                                $this->generateAlias($record);
                                 $this->setDateAdded($record);
+                                $this->generateAlias($record);
+                                $this->applySorting($record, $count * 128);
                                 $this->setTstamp($record);
                             }
+
+                            $importedRecord = $record;
                         }
                     }
                 } else {
                     throw new Exception($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['modeNotSet']);
                 }
+
+                /* @var AfterItemImportEvent $event */
+                $this->eventDispatcher->dispatch(AfterItemImportEvent::NAME, new AfterItemImportEvent(
+                    $importedRecord,
+                    $mappedItem,
+                    $item,
+                    $this->configModel,
+                    $this->source
+                ));
             }
 
             if ($count > 0) {
@@ -272,6 +308,23 @@ class Importer implements ImporterInterface
             $this->databaseUtil->update($table, [
                 $field => $alias,
             ], "$table.id=?", [$record->id]);
+        }
+    }
+
+    protected function applySorting(Result $record, int $sorting)
+    {
+        $field = $this->configModel->tstampField;
+
+        if (!$this->configModel->sortingMode || !$record->id) {
+            return;
+        }
+
+        $table = $this->configModel->targetTable;
+
+        switch ($this->configModel->sortingMode) {
+            case EntityImportConfigContainer::SORTING_MODE_SOURCE_ORDER:
+
+                break;
         }
     }
 }

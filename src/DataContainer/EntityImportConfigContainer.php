@@ -23,6 +23,12 @@ use HeimrichHannot\UtilsBundle\Url\UrlUtil;
 
 class EntityImportConfigContainer
 {
+    const SORTING_MODE_SOURCE_ORDER = 'source_order';
+
+    const SORTING_MODES = [
+        self::SORTING_MODE_SOURCE_ORDER,
+    ];
+
     /**
      * @var Request
      */
