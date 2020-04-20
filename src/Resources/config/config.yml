@@ -1,0 +1,4 @@
+huh_entity_import:
+  debug:
+    contao_log: true
+    email: true

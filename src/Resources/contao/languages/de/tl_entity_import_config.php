@@ -117,6 +117,7 @@ $lang['error']['enclosure']           = 'Das Text-Trennzeichen für die CSV-Quel
 $lang['error']['escape']              = 'Escape für csv ist nicht definiert.';
 $lang['error']['filePathNotProvided'] = 'Der Pfad zur Datei wurde nicht gefunden.';
 $lang['error']['modeNotSet']          = 'Der Import Modus ist nicht gesetzt.';
+$lang['error']['configFieldMapping']  = 'Die Feldabbildung des Importes ist nicht gesetzt';
 
 /**
  * Backend Modules

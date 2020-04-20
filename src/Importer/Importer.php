@@ -9,8 +9,10 @@
 namespace HeimrichHannot\EntityImportBundle\Importer;
 
 use Contao\Database;
+use Contao\Email;
 use Contao\Message;
 use Contao\Model;
+use Contao\System;
 use Database\Result;
 use HeimrichHannot\EntityImportBundle\Event\AfterImportEvent;
 use HeimrichHannot\EntityImportBundle\Event\BeforeImportEvent;
@@ -20,8 +22,13 @@ use HeimrichHannot\UtilsBundle\Database\DatabaseUtil;
 use HeimrichHannot\UtilsBundle\Dca\DcaUtil;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
 use HeimrichHannot\UtilsBundle\String\StringUtil;
+use Psr\Log\LogLevel;
 use Symfony\Component\Config\Definition\Exception\Exception;
+use Symfony\Component\Config\FileLocator;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\Lock\Key;
+use Symfony\Component\Lock\Store\FlockStore;
+use Symfony\Component\Yaml\Yaml;
 
 class Importer implements ImporterInterface
 {
@@ -105,7 +112,9 @@ class Importer implements ImporterInterface
 
     public function applyFieldMappingToSourceItem(array $item): array
     {
-        $fields = \Contao\StringUtil::deserialize($this->configModel->fieldMapping);
+        if (null === $fields = \Contao\StringUtil::deserialize($this->configModel->fieldMapping)) {
+            return [];
+        }
 
         $mapped = [];
 
@@ -141,6 +150,10 @@ class Importer implements ImporterInterface
 
             foreach ($items as $item) {
                 $item = $this->applyFieldMappingToSourceItem($item);
+
+                if (empty($item)) {
+                    throw new Exception($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['configFieldMapping']);
+                }
 
                 $columnsNotExisting = array_diff(array_keys($item), $targetTableColumns);
 
@@ -206,8 +219,81 @@ class Importer implements ImporterInterface
             } else {
                 Message::addInfo(sprintf($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['emptyFile']));
             }
+
+            $this->removeFlocks();
         } catch (\Exception $e) {
+            $config = $this->getDebugConfig();
+
+            foreach ($config as $item => $key) {
+                if ($key) {
+                    if (!$this->getFlockState($item)) {
+                        $this->setFlock($item);
+
+                        switch ($item) {
+                            case 'contao_log':
+                                System::getContainer()->get('monolog.logger.contao')->log(LogLevel::ERROR, $e->getMessage());
+
+                                break;
+
+                            case 'email':
+                                $email = new Email();
+                                $email->subject = $GLOBALS['TL_LANG']['MSG']['entityImport']['exceptionEmailSubject'];
+                                $email->text = 'Exception: '.$e->getMessage();
+                                $email->sendTo($GLOBALS['TL_CONFIG']['adminEmail']);
+
+                                break;
+
+                            default:
+                                break;
+                        }
+                    }
+                }
+            }
+
             Message::addError(sprintf($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['errorImport'], $count, $e->getMessage()));
+        }
+    }
+
+    protected function getDebugConfig(): array
+    {
+        $locator = new FileLocator(__DIR__.'/../Resources/config');
+        $configFile = $locator->locate('config.yml');
+        $config = Yaml::parseFile($configFile);
+
+        return $config['huh_entity_import']['debug'];
+    }
+
+    protected function getFlockStore(): FlockStore
+    {
+        $basePath = System::getContainer()->getParameter('kernel.project_dir');
+
+        return new FlockStore($basePath.'/var');
+    }
+
+    protected function getFlockState(string $item): bool
+    {
+        $flock = $this->getFlockStore();
+        $flockKey = new Key('contao_entity_import_bundle.'.$item);
+
+        return $flock->exists($flockKey);
+    }
+
+    protected function setFlock(string $item): void
+    {
+        $flock = $this->getFlockStore();
+        $flockKey = new Key('contao_entity_import_bundle.'.$item);
+
+        $flock->save($flockKey);
+    }
+
+    protected function removeFlocks(): void
+    {
+        $config = $this->getDebugConfig();
+        $flock = $this->getFlockStore();
+
+        foreach ($config as $item => $key) {
+            $flockKey = new Key('contao_entity_import_bundle.'.$item);
+            $flock->exists($flockKey) ?: $flock->delete($flockKey);
         }
     }
 

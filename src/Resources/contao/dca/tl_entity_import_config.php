@@ -357,6 +357,6 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'reference' => &$GLOBALS['TL_LANG']['tl_entity_import_config']['reference']['cronInterval'],
             'eval'      => ['tl_class' => 'w50 clr', 'includeBlankOption' => true, 'mandatory' => true],
             'sql'       => "varchar(12) NOT NULL default ''",
-        ],
+        ]
     ],
 ];
