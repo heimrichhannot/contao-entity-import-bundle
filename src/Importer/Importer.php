@@ -182,7 +182,7 @@ class Importer implements ImporterInterface
 
             $this->deleteBeforeImport();
 
-            Database::getInstance()->beginTransaction();
+            $this->databaseUtil->beginTransaction();
 
             foreach ($items as $item) {
                 $mappedItem = $this->applyFieldMappingToSourceItem($item);
@@ -289,10 +289,10 @@ class Importer implements ImporterInterface
                 $mappedItems[] = $event->getMappedItem();
             }
 
-            Database::getInstance()->commitTransaction();
-
             $this->deleteAfterImport($mappedItems);
             $this->applySorting();
+
+            $this->databaseUtil->commitTransaction();
 
             $event = $stopwatch->stop('contao-entity-import-bundle.id'.$this->configModel->id);
 
