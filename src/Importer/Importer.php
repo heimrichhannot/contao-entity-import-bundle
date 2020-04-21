@@ -287,27 +287,23 @@ class Importer implements ImporterInterface
             }
 
             if ($this->configModel->errorNotificationLock) {
-                $this->databaseUtil->update('tl_entity_import_config', ['errorNotificationLock' => '0'], 'tl_entity_import_config.id=?', [$this->configModel->id]);
+                $this->databaseUtil->update('tl_entity_import_config', ['errorNotificationLock' => ''], 'tl_entity_import_config.id=?', [$this->configModel->id]);
             }
         } catch (\Exception $e) {
             $config = $this->getDebugConfig();
 
-            if (isset($config['contao_log']) && $config['contao_log']) {
-                if (!$this->configModel->errorNotificationLock) {
+            if (!$this->configModel->errorNotificationLock && !$this->dryRun) {
+                if (isset($config['contao_log']) && $config['contao_log']) {
                     $this->containerUtil->log($e, 'executeImport', LogLevel::ERROR);
                 }
-            }
 
-            if (isset($config['email']) && $config['email']) {
-                if (!$this->configModel->errorNotificationLock) {
+                if (isset($config['email']) && $config['email']) {
                     $email = new Email();
                     $email->subject = sprintf($GLOBALS['TL_LANG']['MSG']['entityImport']['exceptionEmailSubject'], $this->configModel->title);
                     $email->text = sprintf('An error occurred on domain "%s"', $this->configModel->cronDomain).' : '.$e->getMessage();
                     $email->sendTo($GLOBALS['TL_CONFIG']['adminEmail']);
                 }
-            }
 
-            if (!$this->configModel->errorNotificationLock) {
                 $this->databaseUtil->update('tl_entity_import_config', ['errorNotificationLock' => '1'], 'tl_entity_import_config.id=?', [$this->configModel->id]);
             }
 

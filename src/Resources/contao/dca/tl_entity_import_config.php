@@ -450,7 +450,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'sql'         => "text NULL",
         ],
         'errorNotificationLock' => [
-            'sql' => "char(1) NOT NULL default '0'"
+            'sql' => "char(1) NOT NULL default ''"
         ],
     ],
 ];
