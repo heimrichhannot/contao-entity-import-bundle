@@ -36,17 +36,22 @@ class BeforeItemImportEvent extends Event
      * @var bool
      */
     private $skipped;
+    /**
+     * @var bool
+     */
+    private $dryRun;
 
     /**
      * BeforeImportEvent constructor.
      */
-    public function __construct(array $mappedItem, array $item, Model $configModel, SourceInterface $source, bool $skipped)
+    public function __construct(array $mappedItem, array $item, Model $configModel, SourceInterface $source, bool $skipped = false, bool $dryRun = false)
     {
         $this->configModel = $configModel;
         $this->source = $source;
         $this->mappedItem = $mappedItem;
         $this->item = $item;
         $this->skipped = $skipped;
+        $this->dryRun = $dryRun;
     }
 
     public function getConfigModel(): Model
@@ -97,5 +102,10 @@ class BeforeItemImportEvent extends Event
     public function setSkipped(bool $skipped): void
     {
         $this->skipped = $skipped;
+    }
+
+    public function isDryRun(): bool
+    {
+        return $this->dryRun;
     }
 }

@@ -12,7 +12,6 @@ use Contao\Database;
 use Contao\Email;
 use Contao\Message;
 use Contao\Model;
-use Database\Result;
 use HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer;
 use HeimrichHannot\EntityImportBundle\Event\AfterImportEvent;
 use HeimrichHannot\EntityImportBundle\Event\AfterItemImportEvent;
@@ -80,6 +79,11 @@ class Importer implements ImporterInterface
     private $containerUtil;
 
     /**
+     * @var array|null
+     */
+    private $dbMergeCache;
+
+    /**
      * Importer constructor.
      */
     public function __construct(ContainerInterface $container, Model $configModel, SourceInterface $source, EventDispatcherInterface $eventDispatcher, DatabaseUtil $databaseUtil, ModelUtil $modelUtil, StringUtil $stringUtil, DcaUtil $dcaUtil, ContainerUtil $containerUtil)
@@ -102,11 +106,11 @@ class Importer implements ImporterInterface
     {
         $items = $this->getDataFromSource();
 
-        $event = $this->eventDispatcher->dispatch(BeforeImportEvent::NAME, new BeforeImportEvent($items, $this->configModel, $this->source));
+        $event = $this->eventDispatcher->dispatch(BeforeImportEvent::NAME, new BeforeImportEvent($items, $this->configModel, $this->source, $this->dryRun));
 
         $this->executeImport($event->getItems());
 
-        $this->eventDispatcher->dispatch(AfterImportEvent::NAME, new AfterImportEvent($items, $this->configModel, $this->source));
+        $this->eventDispatcher->dispatch(AfterImportEvent::NAME, new AfterImportEvent($items, $this->configModel, $this->source, $this->dryRun));
 
         return true;
     }
@@ -160,6 +164,22 @@ class Importer implements ImporterInterface
 
             $mode = $this->configModel->importMode;
 
+            if ('merge' === $mode) {
+                $mergeIdentifiers = \Contao\StringUtil::deserialize($this->configModel->mergeIdentifierFields, true);
+
+                if (empty(array_filter($mergeIdentifiers))) {
+                    throw new Exception($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['noIdentifierFields']);
+                }
+
+                $this->initDbCacheForMerge($mergeIdentifiers);
+
+                $identifierFields = [];
+
+                foreach ($mergeIdentifiers as $mergeIdentifier) {
+                    $identifierFields[] = $mergeIdentifier['source'];
+                }
+            }
+
             $this->deleteBeforeImport();
 
             foreach ($items as $item) {
@@ -183,7 +203,8 @@ class Importer implements ImporterInterface
                     $item,
                     $this->configModel,
                     $this->source,
-                    false
+                    false,
+                    $this->dryRun
                 ));
 
                 $item = $event->getItem();
@@ -214,23 +235,13 @@ class Importer implements ImporterInterface
                         $importedRecord = $record;
                     }
                 } elseif ('merge' === $mode) {
-                    $mergeIdentifiers = \Contao\StringUtil::deserialize($this->configModel->mergeIdentifierFields, true);
+                    $key = implode('||', array_map(function ($field) use ($mappedItem) {
+                        return $mappedItem[$field];
+                    }, $identifierFields));
 
-                    if (empty(array_filter($mergeIdentifiers))) {
-                        throw new Exception($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['noIdentifierFields']);
-                    }
+                    if ($key && isset($this->dbMergeCache[$key])) {
+                        $existing = (object) $this->dbMergeCache[$key];
 
-                    $columns = [];
-                    $values = [];
-
-                    foreach ($mergeIdentifiers as $mergeIdentifier) {
-                        $columns[] = '('.$table.'.'.$mergeIdentifier['target'].'=?)';
-                        $values[] = $mappedItem[$mergeIdentifier['source']];
-                    }
-
-                    $existing = $this->databaseUtil->findOneResultBy($table, $columns, $values);
-
-                    if ($existing->numRows > 0) {
                         $set = $this->setDateAdded($existing);
                         $set = array_merge($set, $this->generateAlias($existing));
                         $set = array_merge($set, $this->setTstamp($existing));
@@ -267,7 +278,8 @@ class Importer implements ImporterInterface
                     $mappedItem,
                     $item,
                     $this->configModel,
-                    $this->source
+                    $this->source,
+                    $this->dryRun
                 ));
 
                 $mappedItems[] = $event->getMappedItem();
@@ -310,6 +322,41 @@ class Importer implements ImporterInterface
             Message::addError(sprintf($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['errorImport'], $count,
                 $this->containerUtil->isDev() ? str_replace("\n", '<br>', $e) : $e->getMessage()));
         }
+    }
+
+    protected function initDbCacheForMerge(array $mergeIdentifiers)
+    {
+        $table = $this->configModel->targetTable;
+
+        if (null === ($records = $this->databaseUtil->findResultsBy($table, null, null)) || $records->numRows < 1) {
+            $this->dbMergeCache = [];
+
+            return;
+        }
+
+        $identifierFields = [];
+
+        foreach ($mergeIdentifiers as $mergeIdentifier) {
+            $identifierFields[] = $mergeIdentifier['target'];
+        }
+
+        $key = implode('||', array_map(function ($field) use ($records) {
+            return $records->{$field};
+        }, $identifierFields));
+
+        if (!$key) {
+            $this->dbMergeCache = [];
+
+            return;
+        }
+
+        $cache = [];
+
+        while ($records->next()) {
+            $cache[$key] = $records->id;
+        }
+
+        $this->dbMergeCache = $cache;
     }
 
     protected function getDebugConfig(): array
@@ -367,7 +414,7 @@ class Importer implements ImporterInterface
         }
     }
 
-    protected function setDateAdded(Result $record): array
+    protected function setDateAdded($record): array
     {
         $table = $this->configModel->targetTable;
         $field = $this->configModel->targetDateAddedField;
@@ -385,7 +432,7 @@ class Importer implements ImporterInterface
         ];
     }
 
-    protected function setTstamp(Result $record): array
+    protected function setTstamp($record): array
     {
         $table = $this->configModel->targetTable;
         $field = $this->configModel->targetTstampField;
@@ -403,7 +450,7 @@ class Importer implements ImporterInterface
         ];
     }
 
-    protected function generateAlias(Result $record): array
+    protected function generateAlias($record): array
     {
         $table = $this->configModel->targetTable;
         $field = $this->configModel->targetAliasField;
