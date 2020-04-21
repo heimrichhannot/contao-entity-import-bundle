@@ -86,7 +86,8 @@ $lang['useCron'][0]      = 'Cronjob nutzen';
 $lang['useCron'][1]      = 'Wählen Sie diese Option, um den Importer per Cronjob auszulösen.';
 $lang['cronInterval'][0] = 'Cron-Interval';
 $lang['cronInterval'][1] = 'Wählen Sie hier das Interval aus, in dem der Import ausgeführt werden soll.';
-
+$lang['cronDomain'][0] = 'Domainname';
+$lang['cronDomain'][1] = 'Geben Sie hier die Domain ein auf welcher der Cronjob ausgeführt wird. Das dient der besseren zuordnung falls beim Cronjob Fehler auftretten sollten.';
 
 /**
  * Reference
@@ -130,12 +131,13 @@ $lang['error']['tableFieldsDiffer']   = 'Die Felder vom Quelle und Ziel untersch
 $lang['error']['noIdentifierFields']  = 'Die Identifikatorfelder wurden nicht gesetzt.';
 $lang['error']['successfulImport']    = 'Es wurden %s Einträge erfolgreich importiert bzw. aktualisiert.';
 $lang['error']['emptyFile']           = 'Es wurden keine Daten zum Importieren gefunden.';
-$lang['error']['errorImport']         = 'Bei %s Einträgen sind beim Import Fehler aufgetreten. Fehler: %s';
+$lang['error']['errorImport']         = 'Bei %s Einträgen sind beim Import Fehler aufgetreten.<br><br>Fehler:<br><br>%s';
 $lang['error']['delimiter']           = 'Das Feld-Trennzeichen für die CSV-Quelle wurde nicht gesetzt.';
 $lang['error']['enclosure']           = 'Das Text-Trennzeichen für die CSV-Quelle wurde nicht gesetzt.';
 $lang['error']['escape']              = 'Escape für csv ist nicht definiert.';
 $lang['error']['filePathNotProvided'] = 'Der Pfad zur Datei wurde nicht gefunden.';
 $lang['error']['modeNotSet']          = 'Der Import Modus ist nicht gesetzt.';
+$lang['error']['configFieldMapping']  = 'Die Feldabbildung des Importes ist nicht gesetzt';
 
 /**
  * Backend Modules
@@ -153,7 +155,7 @@ $lang['mapping_legend']  = 'Felderabbildung';
 $lang['fields_legend']   = 'Felderbearbeitung';
 $lang['sorting_legend']  = 'Sortierung';
 $lang['deletion_legend'] = 'Löschen';
-$lang['cron_legend']     = 'Cron';
+$lang['cron_legend']     = 'Cronjob/Command';
 
 /**
  * Buttons

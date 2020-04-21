@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.3.0] - 2020-04-20
+- added config logging
+- added logic for logging exceptions from importer
+- added FieldValueCopier source and config dca
+
 ## [0.2.1] - 2020-04-17
 - fixed deletion bugs
 

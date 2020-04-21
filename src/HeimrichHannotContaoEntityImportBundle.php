@@ -8,8 +8,13 @@
 
 namespace HeimrichHannot\EntityImportBundle;
 
+use HeimrichHannot\EntityImportBundle\DependencyInjection\HeimrichHannotEntityImportExtension;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 class HeimrichHannotContaoEntityImportBundle extends Bundle
 {
+    public function getContainerExtension()
+    {
+        return new HeimrichHannotEntityImportExtension();
+    }
 }

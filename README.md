@@ -12,6 +12,8 @@ This bundle offers a generic importer to migrate data from various sources to co
 - executable from contao backend, as cronjob and symfony command
 - automatic field manipulation (sorting, alias, dateAdded, tstamp)
 - merge and insert mode
+- email and contao_log notifications while executing import with exceptions (will be sent once per importer 
+configuration, will be reset after next successful import)
 
 ## Impressions
 
@@ -28,11 +30,18 @@ Importer config backend settings:
 Install via composer: `composer require heimrichhannot/contao-entity-import-bundle` and update your database.
 
 ## Configuration
-
 1. Navigate to "Import" in the Contao backend in the section "system".
 1. Create an importer source to your needs.
 1. Create an importer using the source created in the step before.
 1. Run the importer either using dry-run or the normal mode.
+
+#####config.yml
+```yaml
+huh_entity_import:
+  debug:
+    contao_log: true
+    email: false
+```
 
 ## Technical instructions
 ### Run as symfony command
@@ -49,7 +58,8 @@ dry-run | false | boolean |Run importer without writing data into database
 
 Import is executable with contao poor man's cron. The interval of execution is similar to the contao definition.
 The import configuration allows to enable cron execution and picking of the cron interval.
-Possible to choose between `minutely`, `hourly`, `daily`, `weekly`, `monthly` interval.
+Possible to choose between `minutely`, `hourly`, `daily`, `weekly`, `monthly` interval. It is recommended to setup
+ the debug options in config.yml before importing via cronjob.
 
 ## Events
 

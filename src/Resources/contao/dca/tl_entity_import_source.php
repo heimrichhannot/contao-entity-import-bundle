@@ -78,8 +78,8 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
         'retrievalType_http'               => 'sourceUrl,httpMethod,httpAuth,fileType',
         'retrievalType_contao_file_system' => 'fileSRC,fileType',
         'retrievalType_absolute_path'      => 'absolutePath',
-        'fileType_csv'                     => 'fileContent,csvHeaderRow,csvDelimiter,csvEnclosure,csvEscape,fieldMapping',
-        'fileType_json'                    => 'fileContent,pathToDataArray,fieldMapping',
+        'fileType_csv'                     => 'fileContent,csvHeaderRow,csvDelimiter,csvEnclosure,csvEscape,fieldMappingCopier,fieldMapping',
+        'fileType_json'                    => 'fileContent,pathToDataArray,fieldMappingCopier,fieldMapping',
     ],
     // Fields
     'fields'      => [
@@ -291,8 +291,22 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'exclude'   => true,
             'search'    => true,
             'inputType' => 'text',
-            'eval'      => ['maxlength' => 255, 'tl_class' => 'w50'],
+            'eval'      => ['maxlength' => 255, 'tl_class' => 'clr w50'],
             'sql'       => "varchar(255) NOT NULL default ''",
+        ],
+        'fieldMappingCopier' => [
+            'inputType' => 'fieldValueCopier',
+            'eval'      => [
+                'fieldValueCopier' => [
+                    'table'            => 'tl_entity_import_source',
+                    'field'            => 'fieldMapping',
+                    'config' => [
+                        'labelPattern' => '%title% (ID %id%)'
+                    ],
+                    'options_callback' => ['huh.field_value_copier.util.field_value_copier_util', 'getOptions']
+                ],
+                'tl_class' => 'clr w50'
+            ]
         ],
         'fieldMapping'    => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['fieldMapping'],

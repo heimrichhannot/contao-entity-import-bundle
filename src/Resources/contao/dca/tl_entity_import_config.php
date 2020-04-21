@@ -76,7 +76,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
     ],
     'palettes'    => [
         '__selector__' => ['importMode', 'deleteBeforeImport', 'sortingMode', 'setDateAdded', 'setTstamp', 'generateAlias', 'deletionMode', 'useCron'],
-        'default'      => '{general_legend},title,targetTable,importMode;{mapping_legend},fieldMapping;{fields_legend},setDateAdded,setTstamp,generateAlias;{sorting_legend},sortingMode;{deletion_legend},deleteBeforeImport,deletionMode;{cron_legend},useCron;',
+        'default'      => '{general_legend},title,targetTable,importMode;{mapping_legend},fieldMappingCopier,fieldMapping;{fields_legend},setDateAdded,setTstamp,generateAlias;{sorting_legend},sortingMode;{deletion_legend},deleteBeforeImport,deletionMode;{cron_legend},useCron;',
     ],
     'subpalettes' => [
         'importMode_merge'  => 'mergeIdentifierFields',
@@ -90,7 +90,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
         'setTstamp'         => 'targetTstampField',
         'generateAlias'     => 'targetAliasField,aliasFieldPattern',
         'deleteBeforeImport' => 'deleteBeforeImportWhere',
-        'useCron'           => 'cronInterval'
+        'useCron'           => 'cronInterval,cronDomain'
     ],
     'fields'      => [
         'id'                    => [
@@ -127,6 +127,19 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'eval'             => ['mandatory' => true, 'submitOnChange' => true, 'tl_class' => 'w50', 'chosen' => true, 'includeBlankOption' => true],
             'options_callback' => [\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::class, 'getAllTargetTables'],
             'sql'              => "varchar(64) NOT NULL default ''",
+        ],
+        'fieldMappingCopier' => [
+            'inputType' => 'fieldValueCopier',
+            'eval'      => [
+                'fieldValueCopier' => [
+                    'table'            => 'tl_entity_import_config',
+                    'field'            => 'fieldMapping',
+                    'config' => [
+                        'labelPattern' => '%title% (ID %id%)'
+                    ],
+                    'options_callback' => ['huh.field_value_copier.util.field_value_copier_util', 'getOptions']
+                ]
+            ]
         ],
         'fieldMapping'          => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['fieldMapping'],
@@ -368,6 +381,14 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'eval'      => ['tl_class' => 'w50 clr', 'includeBlankOption' => true, 'mandatory' => true],
             'sql'       => "varchar(12) NOT NULL default ''",
         ],
+        'cronDomain' => [
+            'label'                   => &$GLOBALS['TL_LANG']['tl_entity_import_config']['cronDomain'],
+            'exclude'                 => true,
+            'search'                  => true,
+            'inputType'               => 'text',
+            'eval'                    => ['maxlength' => 64, 'tl_class' => 'w50', 'mandatory' => true],
+            'sql'                     => "varchar(64) NOT NULL default ''"
+        ],
         'deletionMode'           => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['deletionMode'],
             'exclude'   => true,
@@ -427,6 +448,9 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'eval'        => ['class' => 'monospace', 'rte' => 'ace|sql', 'tl_class' => 'w50', 'decodeEntities' => true],
             'explanation' => 'insertTags',
             'sql'         => "text NULL",
+        ],
+        'errorNotificationLock' => [
+            'sql' => "char(1) NOT NULL default '0'"
         ],
     ],
 ];

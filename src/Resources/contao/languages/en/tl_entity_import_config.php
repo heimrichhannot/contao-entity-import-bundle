@@ -30,6 +30,8 @@ $lang['useCron'][0]      = 'Use cronjob';
 $lang['useCron'][1]      = 'Select this option to trigger the importer by cronjob.';
 $lang['cronInterval'][0] = 'Cron-Interval';
 $lang['cronInterval'][1] = 'Select the interval at which the import is to be performed.';
+$lang['cronDomain'][0] = 'Domain name';
+$lang['cronDomain'][1] = 'Enter the domain on which the cronjob is executed. This is for a better allocation in case errors occur during the cronjob.';
 
 /**
  * Reference

@@ -9,6 +9,7 @@
 namespace HeimrichHannot\EntityImportBundle\Importer;
 
 use Contao\Database;
+use Contao\Email;
 use Contao\Message;
 use Contao\Model;
 use Database\Result;
@@ -19,11 +20,14 @@ use HeimrichHannot\EntityImportBundle\Event\BeforeImportEvent;
 use HeimrichHannot\EntityImportBundle\Event\BeforeItemImportEvent;
 use HeimrichHannot\EntityImportBundle\Model\EntityImportConfigModel;
 use HeimrichHannot\EntityImportBundle\Source\SourceInterface;
+use HeimrichHannot\UtilsBundle\Container\ContainerUtil;
 use HeimrichHannot\UtilsBundle\Database\DatabaseUtil;
 use HeimrichHannot\UtilsBundle\Dca\DcaUtil;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
 use HeimrichHannot\UtilsBundle\String\StringUtil;
+use Psr\Log\LogLevel;
 use Symfony\Component\Config\Definition\Exception\Exception;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class Importer implements ImporterInterface
@@ -65,12 +69,21 @@ class Importer implements ImporterInterface
      * @var DcaUtil
      */
     private $dcaUtil;
+    /**
+     * @var ContainerInterface
+     */
+    private $container;
+    /**
+     * @var ContainerUtil
+     */
+    private $containerUtil;
 
     /**
      * Importer constructor.
      */
-    public function __construct(Model $configModel, SourceInterface $source, EventDispatcherInterface $eventDispatcher, DatabaseUtil $databaseUtil, ModelUtil $modelUtil, StringUtil $stringUtil, DcaUtil $dcaUtil)
+    public function __construct(ContainerInterface $container, Model $configModel, SourceInterface $source, EventDispatcherInterface $eventDispatcher, DatabaseUtil $databaseUtil, ModelUtil $modelUtil, StringUtil $stringUtil, DcaUtil $dcaUtil, ContainerUtil $containerUtil)
     {
+        $this->container = $container;
         $this->configModel = $configModel;
         $this->source = $source;
         $this->databaseUtil = $databaseUtil;
@@ -78,6 +91,7 @@ class Importer implements ImporterInterface
         $this->modelUtil = $modelUtil;
         $this->stringUtil = $stringUtil;
         $this->dcaUtil = $dcaUtil;
+        $this->containerUtil = $containerUtil;
     }
 
     /**
@@ -106,9 +120,11 @@ class Importer implements ImporterInterface
         $this->dryRun = $dry;
     }
 
-    protected function applyFieldMappingToSourceItem(array $item): array
+    protected function applyFieldMappingToSourceItem(array $item): ?array
     {
-        $fields = \Contao\StringUtil::deserialize($this->configModel->fieldMapping);
+        if (null === $fields = \Contao\StringUtil::deserialize($this->configModel->fieldMapping)) {
+            return null;
+        }
 
         $mapped = [];
 
@@ -143,6 +159,11 @@ class Importer implements ImporterInterface
 
             foreach ($items as $item) {
                 $mappedItem = $this->applyFieldMappingToSourceItem($item);
+
+                if (!\is_array($mappedItem)) {
+                    throw new Exception($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['configFieldMapping']);
+                }
+
                 $mappedItems[] = $mappedItem;
 
                 $columnsNotExisting = array_diff(array_keys($mappedItem), $targetTableColumns);
@@ -183,7 +204,7 @@ class Importer implements ImporterInterface
                 } elseif ('merge' === $mode) {
                     $mergeIdentifiers = \Contao\StringUtil::deserialize($this->configModel->mergeIdentifierFields, true);
 
-                    if (empty($mergeIdentifiers)) {
+                    if (empty(array_filter($mergeIdentifiers))) {
                         throw new Exception($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['noIdentifierFields']);
                     }
 
@@ -242,9 +263,42 @@ class Importer implements ImporterInterface
             } else {
                 Message::addInfo(sprintf($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['emptyFile']));
             }
+
+            if ($this->configModel->errorNotificationLock) {
+                $this->databaseUtil->update('tl_entity_import_config', ['errorNotificationLock' => '0'], 'tl_entity_import_config.id=?', [$this->configModel->id]);
+            }
         } catch (\Exception $e) {
-            Message::addError(sprintf($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['errorImport'], $count, $e->getMessage()));
+            $config = $this->getDebugConfig();
+
+            if (isset($config['contao_log']) && $config['contao_log']) {
+                if (!$this->configModel->errorNotificationLock) {
+                    $this->containerUtil->log($e, 'executeImport', LogLevel::ERROR);
+                }
+            }
+
+            if (isset($config['email']) && $config['email']) {
+                if (!$this->configModel->errorNotificationLock) {
+                    $email = new Email();
+                    $email->subject = sprintf($GLOBALS['TL_LANG']['MSG']['entityImport']['exceptionEmailSubject'], $this->configModel->title);
+                    $email->text = sprintf('An error occurred on domain "%s"', $this->configModel->cronDomain).' : '.$e->getMessage();
+                    $email->sendTo($GLOBALS['TL_CONFIG']['adminEmail']);
+                }
+            }
+
+            if (!$this->configModel->errorNotificationLock) {
+                $this->databaseUtil->update('tl_entity_import_config', ['errorNotificationLock' => '1'], 'tl_entity_import_config.id=?', [$this->configModel->id]);
+            }
+
+            Message::addError(sprintf($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['errorImport'], $count,
+                $this->containerUtil->isDev() ? str_replace("\n", '<br>', $e) : $e->getMessage()));
         }
+    }
+
+    protected function getDebugConfig(): array
+    {
+        $config = $this->container->getParameter('huh_entity_import');
+
+        return $config['debug'];
     }
 
     protected function deleteBeforeImport()

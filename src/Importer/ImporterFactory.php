@@ -9,10 +9,12 @@
 namespace HeimrichHannot\EntityImportBundle\Importer;
 
 use HeimrichHannot\EntityImportBundle\Source\SourceFactory;
+use HeimrichHannot\UtilsBundle\Container\ContainerUtil;
 use HeimrichHannot\UtilsBundle\Database\DatabaseUtil;
 use HeimrichHannot\UtilsBundle\Dca\DcaUtil;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
 use HeimrichHannot\UtilsBundle\String\StringUtil;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class ImporterFactory
@@ -44,11 +46,19 @@ class ImporterFactory
      * @var DcaUtil
      */
     private $dcaUtil;
+    /**
+     * @var ContainerInterface
+     */
+    private $container;
+    /**
+     * @var ContainerUtil
+     */
+    private $containerUtil;
 
     /**
      * Importer constructor.
      */
-    public function __construct(DatabaseUtil $databaseUtil, EventDispatcherInterface $eventDispatcher, ModelUtil $modelUtil, StringUtil $stringUtil, DcaUtil $dcaUtil, SourceFactory $sourceFactory)
+    public function __construct(ContainerInterface $container, DatabaseUtil $databaseUtil, EventDispatcherInterface $eventDispatcher, ModelUtil $modelUtil, StringUtil $stringUtil, DcaUtil $dcaUtil, SourceFactory $sourceFactory, ContainerUtil $containerUtil)
     {
         $this->databaseUtil = $databaseUtil;
         $this->eventDispatcher = $eventDispatcher;
@@ -56,6 +66,8 @@ class ImporterFactory
         $this->sourceFactory = $sourceFactory;
         $this->stringUtil = $stringUtil;
         $this->dcaUtil = $dcaUtil;
+        $this->container = $container;
+        $this->containerUtil = $containerUtil;
     }
 
     public function createInstance(int $configModel): ?ImporterInterface
@@ -70,6 +82,6 @@ class ImporterFactory
 
         $source = $this->sourceFactory->createInstance($sourceModel->id);
 
-        return new Importer($configModel, $source, $this->eventDispatcher, $this->databaseUtil, $this->modelUtil, $this->stringUtil, $this->dcaUtil);
+        return new Importer($this->container, $configModel, $source, $this->eventDispatcher, $this->databaseUtil, $this->modelUtil, $this->stringUtil, $this->dcaUtil, $this->containerUtil);
     }
 }

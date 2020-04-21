@@ -80,11 +80,13 @@ class EntityImportConfigContainer
 
     public function initPalette(?DataContainer $dc)
     {
-        if (null === ($sourceModel = $this->modelUtil->findModelInstanceByPk($dc->table, $dc->id)) || !$sourceModel->targetTable) {
+        $dca = &$GLOBALS['TL_DCA'][$dc->table];
+
+        if (null === ($configModel = $this->modelUtil->findModelInstanceByPk($dc->table, $dc->id)) || !$configModel->targetTable) {
+            $dca['palettes']['default'] = '{general_legend},title,targetTable';
+
             return;
         }
-
-        $dca = &$GLOBALS['TL_DCA']['tl_entity_import_config'];
     }
 
     public function getAllTargetTables(?DataContainer $dc): array
