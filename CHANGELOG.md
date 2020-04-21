@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 - added config logging
 - added logic for logging exceptions from importer
 - added FieldValueCopier source and config dca
+- added stopwatch
 
 ## [0.2.1] - 2020-04-17
 - fixed deletion bugs

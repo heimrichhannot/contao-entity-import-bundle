@@ -10,6 +10,7 @@ namespace HeimrichHannot\EntityImportBundle\Source;
 
 use HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer;
 use HeimrichHannot\EntityImportBundle\Event\SourceFactoryCreateSourceEvent;
+use HeimrichHannot\UtilsBundle\Container\ContainerUtil;
 use HeimrichHannot\UtilsBundle\File\FileUtil;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
 use HeimrichHannot\UtilsBundle\String\StringUtil;
@@ -34,16 +35,21 @@ class SourceFactory
      * @var StringUtil
      */
     private $stringUtil;
+    /**
+     * @var ContainerUtil
+     */
+    private $containerUtil;
 
     /**
      * SourceFactory constructor.
      */
-    public function __construct(ModelUtil $modelUtil, FileUtil $fileUtil, EventDispatcherInterface $eventDispatcher, StringUtil $stringUtil)
+    public function __construct(ModelUtil $modelUtil, FileUtil $fileUtil, EventDispatcherInterface $eventDispatcher, StringUtil $stringUtil, ContainerUtil $containerUtil)
     {
         $this->modelUtil = $modelUtil;
         $this->fileUtil = $fileUtil;
         $this->eventDispatcher = $eventDispatcher;
         $this->stringUtil = $stringUtil;
+        $this->containerUtil = $containerUtil;
     }
 
     public function createInstance(int $sourceModel): ?SourceInterface
@@ -62,12 +68,12 @@ class SourceFactory
             case EntityImportSourceContainer::TYPE_FILE:
                 switch ($sourceModel->fileType) {
                     case EntityImportSourceContainer::FILETYPE_JSON:
-                        $source = new JSONFileSource($this->fileUtil, $this->modelUtil, $this->stringUtil, $this->eventDispatcher);
+                        $source = new JSONFileSource($this->eventDispatcher, $this->fileUtil, $this->modelUtil, $this->stringUtil, $this->containerUtil);
 
                         break;
 
                     case EntityImportSourceContainer::FILETYPE_CSV:
-                        $source = new CSVFileSource($this->fileUtil, $this->modelUtil, $this->stringUtil, $this->eventDispatcher);
+                        $source = new CSVFileSource($this->eventDispatcher, $this->fileUtil, $this->modelUtil, $this->stringUtil, $this->containerUtil);
 
                         break;
                 }

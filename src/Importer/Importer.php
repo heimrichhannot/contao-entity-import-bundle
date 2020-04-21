@@ -29,6 +29,7 @@ use Psr\Log\LogLevel;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\Stopwatch\Stopwatch;
 
 class Importer implements ImporterInterface
 {
@@ -141,6 +142,10 @@ class Importer implements ImporterInterface
 
     protected function executeImport(array $items)
     {
+        $stopwatch = new Stopwatch();
+
+        $stopwatch->start('contao-entity-import-bundle.id'.$this->configModel->id);
+
         $database = Database::getInstance();
         $table = $this->configModel->targetTable;
 
@@ -181,6 +186,9 @@ class Importer implements ImporterInterface
                     false
                 ));
 
+                $item = $event->getItem();
+                $mappedItem = $event->getMappedItem();
+
                 // developer can decide to skip the item in an event listener if certain criteria is met
                 if ($event->isSkipped()) {
                     continue;
@@ -194,9 +202,13 @@ class Importer implements ImporterInterface
                         $statement = $this->databaseUtil->insert($table, $mappedItem);
 
                         if (null !== ($record = $this->databaseUtil->findResultByPk($table, $statement->insertId))) {
-                            $this->setDateAdded($record);
-                            $this->generateAlias($record);
-                            $this->setTstamp($record);
+                            $set = $this->setDateAdded($record);
+                            $set = array_merge($set, $this->generateAlias($record));
+                            $set = array_merge($set, $this->setTstamp($record));
+
+                            if (!empty($set) && !$this->dryRun) {
+                                $this->databaseUtil->update($table, $set, "$table.id=?", [$record->id]);
+                            }
                         }
 
                         $importedRecord = $record;
@@ -219,13 +231,13 @@ class Importer implements ImporterInterface
                     $existing = $this->databaseUtil->findOneResultBy($table, $columns, $values);
 
                     if ($existing->numRows > 0) {
-                        if (!$this->dryRun) {
-                            $this->databaseUtil->update($table, $mappedItem, implode(' AND ', $columns), $values);
-                        }
+                        $set = $this->setDateAdded($existing);
+                        $set = array_merge($set, $this->generateAlias($existing));
+                        $set = array_merge($set, $this->setTstamp($existing));
 
-                        $this->setDateAdded($existing);
-                        $this->generateAlias($existing);
-                        $this->setTstamp($existing);
+                        if (!empty($set) && !$this->dryRun) {
+                            $this->databaseUtil->update($table, $set, "$table.id=?", [$existing->id]);
+                        }
 
                         $importedRecord = $existing;
                     } else {
@@ -233,9 +245,13 @@ class Importer implements ImporterInterface
                             $statement = $this->databaseUtil->insert($table, $mappedItem);
 
                             if (null !== ($record = $this->databaseUtil->findResultByPk($table, $statement->insertId))) {
-                                $this->setDateAdded($record);
-                                $this->generateAlias($record);
-                                $this->setTstamp($record);
+                                $set = $this->setDateAdded($record);
+                                $set = array_merge($set, $this->generateAlias($record));
+                                $set = array_merge($set, $this->setTstamp($record));
+
+                                if (!empty($set) && !$this->dryRun) {
+                                    $this->databaseUtil->update($table, $set, "$table.id=?", [$record->id]);
+                                }
                             }
 
                             $importedRecord = $record;
@@ -253,13 +269,19 @@ class Importer implements ImporterInterface
                     $this->configModel,
                     $this->source
                 ));
+
+                $mappedItems[] = $event->getMappedItem();
             }
 
             $this->deleteAfterImport($mappedItems);
             $this->applySorting();
 
+            $event = $stopwatch->stop('contao-entity-import-bundle.id'.$this->configModel->id);
+
             if ($count > 0) {
-                Message::addConfirmation(sprintf($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['successfulImport'], $count));
+                $duration = str_replace('.', ',', round($event->getDuration() / 1000, 2));
+
+                Message::addConfirmation(sprintf($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['successfulImport'], $count, $duration));
             } else {
                 Message::addInfo(sprintf($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['emptyFile']));
             }
@@ -349,46 +371,50 @@ class Importer implements ImporterInterface
         }
     }
 
-    protected function setDateAdded(Result $record)
+    protected function setDateAdded(Result $record): array
     {
         $table = $this->configModel->targetTable;
         $field = $this->configModel->targetDateAddedField;
 
         if (!$this->configModel->setDateAdded || !$field || $record->{$field} || !$record->id) {
-            return;
+            return [];
         }
 
-        if (!$this->dryRun) {
-            $this->databaseUtil->update($table, [
-                $field => time(),
-            ], "$table.id=?", [$record->id]);
-        }
+        $time = time();
+
+        $record->{$field} = $time;
+
+        return [
+            $field => $time,
+        ];
     }
 
-    protected function setTstamp(Result $record)
+    protected function setTstamp(Result $record): array
     {
         $table = $this->configModel->targetTable;
         $field = $this->configModel->targetTstampField;
 
         if (!$this->configModel->setTstamp || !$field || !$record->id) {
-            return;
+            return [];
         }
 
-        if (!$this->dryRun) {
-            $this->databaseUtil->update($table, [
-                $field => time(),
-            ], "$table.id=?", [$record->id]);
-        }
+        $time = time();
+
+        $record->{$field} = $time;
+
+        return [
+            $field => time(),
+        ];
     }
 
-    protected function generateAlias(Result $record)
+    protected function generateAlias(Result $record): array
     {
         $table = $this->configModel->targetTable;
         $field = $this->configModel->targetAliasField;
         $fieldPattern = $this->configModel->aliasFieldPattern;
 
         if (!$this->configModel->generateAlias || !$field || !$fieldPattern || !$record->id) {
-            return;
+            return [];
         }
 
         $aliasBase = preg_replace_callback(
@@ -406,11 +432,11 @@ class Importer implements ImporterInterface
             $aliasBase
         );
 
-        if (!$this->dryRun) {
-            $this->databaseUtil->update($table, [
-                $field => $alias,
-            ], "$table.id=?", [$record->id]);
-        }
+        $record->{$field} = $alias;
+
+        return [
+            $field => $alias,
+        ];
     }
 
     protected function applySorting()

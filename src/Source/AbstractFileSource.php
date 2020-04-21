@@ -15,6 +15,7 @@ use HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer;
 use HeimrichHannot\EntityImportBundle\Event\AfterFileSourceGetContentEvent;
 use HeimrichHannot\EntityImportBundle\Event\BeforeAuthenticationEvent;
 use HeimrichHannot\EntityImportBundle\Model\EntityImportSourceModel;
+use HeimrichHannot\UtilsBundle\Container\ContainerUtil;
 use HeimrichHannot\UtilsBundle\File\FileUtil;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
 use HeimrichHannot\UtilsBundle\String\StringUtil;
@@ -55,13 +56,19 @@ abstract class AbstractFileSource extends AbstractSource
     private $filesystemCache;
 
     /**
+     * @var ContainerUtil
+     */
+    private $containerUtil;
+
+    /**
      * AbstractFileSource constructor.
      */
-    public function __construct(FileUtil $fileUtil, ModelUtil $modelUtil, StringUtil $stringUtil, EventDispatcherInterface $eventDispatcher)
+    public function __construct(EventDispatcherInterface $eventDispatcher, FileUtil $fileUtil, ModelUtil $modelUtil, StringUtil $stringUtil, ContainerUtil $containerUtil)
     {
         $this->fileUtil = $fileUtil;
         $this->modelUtil = $modelUtil;
         $this->stringUtil = $stringUtil;
+        $this->containerUtil = $containerUtil;
         $this->eventDispatcher = $eventDispatcher;
 
         parent::__construct($this->modelUtil);
@@ -97,10 +104,11 @@ abstract class AbstractFileSource extends AbstractSource
     public function getFileContent(bool $cache = false): string
     {
         $content = '';
+        $projectDir = $this->containerUtil->getProjectDir();
 
         switch ($this->sourceModel->retrievalType) {
             case EntityImportSourceContainer::RETRIEVAL_TYPE_CONTAO_FILE_SYSTEM:
-                $path = $this->fileUtil->getPathFromUuid($this->sourceModel->fileSRC);
+                $path = $projectDir.'/'.$this->fileUtil->getPathFromUuid($this->sourceModel->fileSRC);
 
                 if (file_exists($path)) {
                     $content = file_get_contents($path);
