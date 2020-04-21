@@ -182,6 +182,8 @@ class Importer implements ImporterInterface
 
             $this->deleteBeforeImport();
 
+            Database::getInstance()->beginTransaction();
+
             foreach ($items as $item) {
                 $mappedItem = $this->applyFieldMappingToSourceItem($item);
 
@@ -222,14 +224,15 @@ class Importer implements ImporterInterface
                     if (!$this->dryRun) {
                         $statement = $this->databaseUtil->insert($table, $mappedItem);
 
-                        if (null !== ($record = $this->databaseUtil->findResultByPk($table, $statement->insertId))) {
-                            $set = $this->setDateAdded($record);
-                            $set = array_merge($set, $this->generateAlias($record));
-                            $set = array_merge($set, $this->setTstamp($record));
+                        $record = (object) $mappedItem;
+                        $record->id = $statement->insertId;
 
-                            if (!empty($set) && !$this->dryRun) {
-                                $this->databaseUtil->update($table, $set, "$table.id=?", [$record->id]);
-                            }
+                        $set = $this->setDateAdded($record);
+                        $set = array_merge($set, $this->generateAlias($record));
+                        $set = array_merge($set, $this->setTstamp($record));
+
+                        if (!empty($set) && !$this->dryRun) {
+                            $this->databaseUtil->update($table, $set, "$table.id=?", [$record->id]);
                         }
 
                         $importedRecord = $record;
@@ -255,14 +258,15 @@ class Importer implements ImporterInterface
                         if (!$this->dryRun) {
                             $statement = $this->databaseUtil->insert($table, $mappedItem);
 
-                            if (null !== ($record = $this->databaseUtil->findResultByPk($table, $statement->insertId))) {
-                                $set = $this->setDateAdded($record);
-                                $set = array_merge($set, $this->generateAlias($record));
-                                $set = array_merge($set, $this->setTstamp($record));
+                            $record = (object) $mappedItem;
+                            $record->id = $statement->insertId;
 
-                                if (!empty($set) && !$this->dryRun) {
-                                    $this->databaseUtil->update($table, $set, "$table.id=?", [$record->id]);
-                                }
+                            $set = $this->setDateAdded($record);
+                            $set = array_merge($set, $this->generateAlias($record));
+                            $set = array_merge($set, $this->setTstamp($record));
+
+                            if (!empty($set) && !$this->dryRun) {
+                                $this->databaseUtil->update($table, $set, "$table.id=?", [$record->id]);
                             }
 
                             $importedRecord = $record;
@@ -284,6 +288,8 @@ class Importer implements ImporterInterface
 
                 $mappedItems[] = $event->getMappedItem();
             }
+
+            Database::getInstance()->commitTransaction();
 
             $this->deleteAfterImport($mappedItems);
             $this->applySorting();
@@ -340,20 +346,18 @@ class Importer implements ImporterInterface
             $identifierFields[] = $mergeIdentifier['target'];
         }
 
-        $key = implode('||', array_map(function ($field) use ($records) {
-            return $records->{$field};
-        }, $identifierFields));
-
-        if (!$key) {
-            $this->dbMergeCache = [];
-
-            return;
-        }
-
         $cache = [];
 
         while ($records->next()) {
-            $cache[$key] = $records->id;
+            $key = implode('||', array_map(function ($field) use ($records) {
+                return $records->{$field};
+            }, $identifierFields));
+
+            if (!$key) {
+                continue;
+            }
+
+            $cache[$key] = $records->row();
         }
 
         $this->dbMergeCache = $cache;
