@@ -250,7 +250,7 @@ class Importer implements ImporterInterface
                         $set = array_merge($set, $this->setTstamp($existing));
 
                         if (!empty($set) && !$this->dryRun) {
-                            $this->databaseUtil->update($table, $set, "$table.id=?", [$existing->id]);
+                            $this->databaseUtil->update($table, array_merge($mappedItem, $set), "$table.id=?", [$existing->id]);
                         }
 
                         $importedRecord = $existing;
