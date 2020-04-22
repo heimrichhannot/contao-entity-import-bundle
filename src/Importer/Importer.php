@@ -238,8 +238,8 @@ class Importer implements ImporterInterface
                         $importedRecord = $record;
                     }
                 } elseif ('merge' === $mode) {
-                    $key = implode('||', array_map(function ($field) use ($mappedItem) {
-                        return $mappedItem[$field];
+                    $key = implode('||', array_map(function ($field) use ($item) {
+                        return $item[$field];
                     }, $identifierFields));
 
                     if ($key && isset($this->dbMergeCache[$key])) {
