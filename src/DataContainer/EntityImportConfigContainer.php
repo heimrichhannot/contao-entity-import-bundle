@@ -83,7 +83,7 @@ class EntityImportConfigContainer
         $dca = &$GLOBALS['TL_DCA'][$dc->table];
 
         if (null === ($configModel = $this->modelUtil->findModelInstanceByPk($dc->table, $dc->id)) || !$configModel->targetTable) {
-            $dca['palettes']['default'] = '{general_legend},title,targetTable';
+            $dca['palettes']['default'] = '{general_legend},title,targetTable;';
 
             return;
         }

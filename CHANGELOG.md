@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.3.1] - 2020-04-23
+- fixed jsonFileSource
+
 ## [0.3.0] - 2020-04-20
 - added config logging
 - added logic for logging exceptions from importer

@@ -20,7 +20,7 @@ class JSONFileSource extends AbstractFileSource
 
         $fileData = json_decode($fileContent, true);
 
-        if (empty($path)) {
+        if (!empty($path)) {
             $fileData = $this->getDataFromPath($fileData, $path);
         }
 
@@ -42,7 +42,7 @@ class JSONFileSource extends AbstractFileSource
             return $data;
         }
 
-        $data = $data[array_pop($path)];
+        $data = $data[array_shift($path)];
 
         return $this->getDataFromPath($data, $path);
     }
