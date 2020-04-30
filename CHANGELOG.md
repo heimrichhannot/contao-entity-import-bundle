@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.3.2] - 2020-04-30
+- added getter and setter to AfterFileSourceGetContentEvent
+
 ## [0.3.1] - 2020-04-23
 - fixed jsonFileSource
 

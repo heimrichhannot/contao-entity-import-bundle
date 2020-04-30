@@ -39,4 +39,14 @@ class AfterFileSourceGetContentEvent extends Event
     {
         $this->content = $content;
     }
+
+    public function getSourceModel(): Model
+    {
+        return $this->sourceModel;
+    }
+
+    public function setSourceModel(Model $sourceModel): void
+    {
+        $this->sourceModel = $sourceModel;
+    }
 }
