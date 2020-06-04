@@ -2,7 +2,7 @@
 
 This bundle offers a generic importer to migrate data from various sources to contao database entities.
 
-**This Bundle is still on development.**
+**This Bundle is still in development.**
 
 ## Features
 
@@ -14,6 +14,7 @@ This bundle offers a generic importer to migrate data from various sources to co
 - merge and insert mode
 - email and contao_log notifications while executing import with exceptions (will be sent once per importer 
 configuration, will be reset after next successful import)
+- (optional) support for [DC_Multilingual](https://github.com/terminal42/contao-DC_Multilingual) if installed
 
 ## Impressions
 
@@ -46,7 +47,7 @@ huh_entity_import:
 ## Technical instructions
 ### Run as symfony command
 
-`huh:entity-import:execute config-id dry-run`
+`huh:entity-import:execute config-id [--dry-run]`
 
 ##### Arguments
 Argument | Mandatory | Type | Description
@@ -72,7 +73,3 @@ Name | Description
 `BeforeImportEvent` | Configure the data before importing
 `BeforeItemImportEvent` | Configure the item data before importing; call `setSkipped(true)` in order to skip the import
 `SourceFactoryCreateSourceEvent` | Implement custom logic for new custom file sources
-
-## Todo
-
-- database import source

@@ -8,7 +8,7 @@
 
 namespace HeimrichHannot\EntityImportBundle\Source;
 
-use HeimrichHannot\UtilsBundle\Model\ModelUtil;
+use Contao\Model;
 
 abstract class AbstractSource implements SourceInterface
 {
@@ -18,13 +18,12 @@ abstract class AbstractSource implements SourceInterface
     protected $fieldMapping;
 
     /**
-     * @var ModelUtil
+     * @var Model
      */
-    private $modelUtil;
+    protected $sourceModel;
 
-    public function __construct(ModelUtil $modelUtil)
+    public function __construct()
     {
-        $this->modelUtil = $modelUtil;
     }
 
     public function getMapping(): array
@@ -35,5 +34,15 @@ abstract class AbstractSource implements SourceInterface
     public function setFieldMapping(array $mapping)
     {
         $this->fieldMapping = $mapping;
+    }
+
+    public function getSourceModel(): Model
+    {
+        return $this->sourceModel;
+    }
+
+    public function setSourceModel(Model $sourceModel)
+    {
+        $this->sourceModel = $sourceModel;
     }
 }

@@ -106,17 +106,17 @@ class EntityImportConfigContainer
             return $options;
         }
 
-        $mapping = StringUtil::deserialize($sourceModel->fieldMapping);
+        $mapping = StringUtil::deserialize($sourceModel->fieldMapping, true);
 
         if (!\is_array($mapping) || empty($mapping)) {
             return $options;
         }
 
-        foreach ($mapping as $field) {
-            if (null === $field['sourceValue']) {
-                $options[$field['name']] = $field['name'];
+        foreach ($mapping as $data) {
+            if (null === $data['sourceValue']) {
+                $options[$data['name']] = $data['name'];
             } else {
-                $options[$field['name']] = $field['name'].' ['.$field['sourceValue'].']';
+                $options[$data['name']] = $data['name'].' ['.$data['sourceValue'].']';
             }
         }
 

@@ -18,6 +18,7 @@
     "contao/core-bundle": "^4.4",
     "codefog/contao-haste": "^4.24",
     "heimrichhannot/contao-field-value-copier-bundle": "^1.1",
+    "heimrichhannot/contao-be_explanation-bundle": "^2.3",
     "heimrichhannot/contao-multi-column-editor-bundle": "^2.4",
     "heimrichhannot/contao-utils-bundle": "^2.135",
     "symfony/stopwatch": "^3.4 || ^4.4"
@@ -33,6 +34,9 @@
     "php-http/message-factory": "^1.0.2",
     "satooshi/php-coveralls": "^2.0",
     "symfony/phpunit-bridge": "^3.2"
+  },
+  "conflict": {
+    "heimrichhannot/contao-entity_import": "*"
   },
   "autoload": {
     "psr-4": {

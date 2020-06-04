@@ -76,7 +76,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
     ],
     'palettes'    => [
         '__selector__' => ['importMode', 'deleteBeforeImport', 'sortingMode', 'setDateAdded', 'setTstamp', 'generateAlias', 'deletionMode', 'useCron'],
-        'default'      => '{general_legend},title,targetTable,importMode;{mapping_legend},fieldMappingCopier,fieldMapping;{fields_legend},setDateAdded,setTstamp,generateAlias;{sorting_legend},sortingMode;{deletion_legend},deleteBeforeImport,deletionMode;{cron_legend},useCron;',
+        'default'      => '{general_legend},title,targetTable,importMode;{mapping_legend},fieldMappingCopier,fieldMapping;{fields_legend},setDateAdded,setTstamp,generateAlias;{sorting_legend},sortingMode;{deletion_legend},deleteBeforeImport,deletionMode;{misc_legend},addDcMultilingualSupport;{cron_legend},useCron;',
     ],
     'subpalettes' => [
         'importMode_merge'  => 'mergeIdentifierFields',
@@ -454,3 +454,16 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
         ],
     ],
 ];
+
+$dca = &$GLOBALS['TL_DCA']['tl_entity_import_config'];
+
+// DC_Multilingual
+if (class_exists('\Terminal42\DcMultilingualBundle\Terminal42DcMultilingualBundle')) {
+    $dca['fields']['addDcMultilingualSupport'] = [
+        'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['addDcMultilingualSupport'],
+        'exclude'   => true,
+        'inputType' => 'checkbox',
+        'eval'      => ['tl_class' => 'w50'],
+        'sql'       => "char(1) NOT NULL default ''"
+    ];
+}

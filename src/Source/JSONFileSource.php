@@ -25,7 +25,7 @@ class JSONFileSource extends AbstractFileSource
         }
 
         $data = [];
-        $mapping = StringUtil::deserialize($this->sourceModel->fieldMapping);
+        $mapping = StringUtil::deserialize($this->sourceModel->fieldMapping, true);
 
         if (null !== $fileData) {
             foreach ($fileData as $index => $element) {

@@ -1,6 +1,1 @@
-#tl_entity_import_source .ace_hidpi {
-  height: 500px !important;
-}
-
-
-/*# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIndlYnBhY2s6Ly8vY29udGFvLWVudGl0eS1pbXBvcnQtYnVuZGxlLWJlLnNjc3MiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUE7RUFFSSx3QkFBd0I7QUFBNUIiLCJmaWxlIjoiY29udGFvLWVudGl0eS1pbXBvcnQtYnVuZGxlLWJlLmNzcyIsInNvdXJjZXNDb250ZW50IjpbIiN0bF9lbnRpdHlfaW1wb3J0X3NvdXJjZXtcbiAgLmFjZV9oaWRwaSB7XG4gICAgaGVpZ2h0OiA1MDBweCAhaW1wb3J0YW50O1xuICB9XG59Il0sInNvdXJjZVJvb3QiOiIifQ==*/
+#tl_entity_import_source .fileContent+.ace_editor{height:500px !important}

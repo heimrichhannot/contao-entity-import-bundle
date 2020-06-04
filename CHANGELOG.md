@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.4.0] - 2020-04-30
+- added database source in order to import from one database entity into another (cms database or other)
+- added support for DC_Multilingual
+- fixed bug in merge mode when none of dateAdded, tstamp and alias is generated automatically
+- fixed translations
+- fixed state return in command
+
 ## [0.3.2] - 2020-04-30
 - added getter and setter to AfterFileSourceGetContentEvent
 

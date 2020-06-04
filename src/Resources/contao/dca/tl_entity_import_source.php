@@ -69,7 +69,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
     'palettes'    => [
         '__selector__'                                                                             => ['type', 'retrievalType', 'fileType'],
         'default'                                                                                  => '{title_legend},title,type;',
-        HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::TYPE_DATABASE => '{title_legend},title,type;{db_legend},dbDriver,dbHost,dbUser,dbPass,dbDatabase,dbPconnect,dbCharset,dbPort,dbSocket;',
+        HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::TYPE_DATABASE => '{title_legend},title,type;{db_legend},dbDriver,dbHost,dbUser,dbPass,dbDatabase,dbPconnect,dbCharset,dbPort,dbSocket,dbSourceTableExplanation,dbSourceTable,dbSourceTableWhere,addDcMultilingualSupport,fieldMappingCopier,fieldMapping;',
         HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::TYPE_FILE     => '{title_legend},title,type;{file_legend},retrievalType;',
     ],
 
@@ -83,13 +83,13 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
     ],
     // Fields
     'fields'      => [
-        'id'              => [
+        'id'                       => [
             'sql' => "int(10) unsigned NOT NULL auto_increment",
         ],
-        'tstamp'          => [
+        'tstamp'                   => [
             'sql' => "int(10) unsigned NOT NULL default '0'",
         ],
-        'title'           => [
+        'title'                    => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['title'],
             'search'    => true,
             'exclude'   => true,
@@ -97,7 +97,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'eval'      => ['mandatory' => true, 'maxlength' => 128, 'tl_class' => 'w50'],
             'sql'       => "varchar(128) NOT NULL default ''",
         ],
-        'type'            => [
+        'type'                     => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['type'],
             'exclude'   => true,
             'filter'    => true,
@@ -107,7 +107,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'eval'      => ['submitOnChange' => true, 'includeBlankOption' => true, 'tl_class' => 'w50', 'mandatory' => true],
             'sql'       => "varchar(32) NOT NULL default ''",
         ],
-        'dbDriver'        => [
+        'dbDriver'                 => [
             'exclude'   => true,
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['dbDriver'],
             'inputType' => 'select',
@@ -116,7 +116,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'eval'      => ['mandatory' => true, 'tl_class' => 'w50'],
             'sql'       => "varchar(12) NOT NULL default ''",
         ],
-        'dbHost'          => [
+        'dbHost'                   => [
             'exclude'   => true,
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['dbHost'],
             'inputType' => 'text',
@@ -124,7 +124,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'eval'      => ['mandatory' => true, 'maxlength' => 64, 'tl_class' => 'w50'],
             'sql'       => "varchar(64) NOT NULL default ''",
         ],
-        'dbUser'          => [
+        'dbUser'                   => [
             'exclude'   => true,
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['dbUser'],
             'inputType' => 'text',
@@ -132,21 +132,22 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'eval'      => ['mandatory' => true, 'maxlength' => 64, 'tl_class' => 'w50'],
             'sql'       => "varchar(64) NOT NULL default ''",
         ],
-        'dbPass'          => [
+        'dbPass'                   => [
             'exclude'   => true,
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['dbPass'],
             'inputType' => 'text',
             'eval'      => ['maxlength' => 64, 'tl_class' => 'w50'],
             'sql'       => "varchar(64) NOT NULL default ''",
         ],
-        'dbDatabase'      => [
+        'dbDatabase'               => [
             'exclude'   => true,
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['dbDatabase'],
             'inputType' => 'text',
+            'default'   => \Config::get('dbDatabase') ?: '',
             'eval'      => ['mandatory' => true, 'maxlength' => 64, 'tl_class' => 'w50'],
             'sql'       => "varchar(64) NOT NULL default ''",
         ],
-        'dbPconnect'      => [
+        'dbPconnect'               => [
             'exclude'   => true,
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['dbPconnect'],
             'inputType' => 'select',
@@ -155,7 +156,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'eval'      => ['tl_class' => 'w50'],
             'sql'       => "varchar(5) NOT NULL default ''",
         ],
-        'dbCharset'       => [
+        'dbCharset'                => [
             'exclude'   => true,
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['dbCharset'],
             'inputType' => 'text',
@@ -163,7 +164,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'eval'      => ['mandatory' => true, 'maxlength' => 32, 'tl_class' => 'w50'],
             'sql'       => "varchar(32) NOT NULL default ''",
         ],
-        'dbPort'          => [
+        'dbPort'                   => [
             'exclude'   => true,
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['dbPort'],
             'inputType' => 'text',
@@ -171,21 +172,46 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'eval'      => ['maxlength' => 5, 'tl_class' => 'w50', 'rgxp' => 'digit'],
             'sql'       => "int(5) unsigned NOT NULL default '0'",
         ],
-        'dbSocket'        => [
+        'dbSocket'                 => [
             'exclude'   => true,
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['dbSocket'],
             'inputType' => 'text',
             'eval'      => ['tl_class' => 'w50'],
             'sql'       => "varchar(64) NOT NULL default ''",
         ],
-        'externalUrl'     => [
+        'dbSourceTableExplanation' => [
+            'inputType' => 'explanation',
+            'eval'      => [
+                'text'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['dbSourceTableExplanation'],
+                'class'    => 'tl_info',
+                'tl_class' => 'long clr',
+            ]
+        ],
+        'dbSourceTable'            => [
+            'label'            => &$GLOBALS['TL_LANG']['tl_entity_import_source']['dbSourceTable'],
+            'search'           => true,
+            'exclude'          => true,
+            'inputType'        => 'select',
+            'eval'             => ['tl_class' => 'w50', 'chosen' => true, 'includeBlankOption' => true, 'submitOnChange' => true],
+            'options_callback' => [\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::class, 'getAllTargetTables'],
+            'sql'              => "varchar(64) NOT NULL default ''",
+        ],
+        'dbSourceTableWhere'       => [
+            'label'       => &$GLOBALS['TL_LANG']['tl_entity_import_source']['dbSourceTableWhere'],
+            'inputType'   => 'textarea',
+            'exclude'     => true,
+            'eval'        => ['class' => 'monospace', 'rte' => 'ace|sql', 'tl_class' => 'w50', 'decodeEntities' => true],
+            'explanation' => 'insertTags',
+            'sql'         => "text NULL",
+        ],
+        'externalUrl'              => [
             'exclude'   => true,
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['externalUrl'],
             'inputType' => 'text',
             'eval'      => ['tl_class' => 'w50', 'rgxp' => 'url', 'decodeEntities' => true],
             'sql'       => "varchar(64) NOT NULL default ''",
         ],
-        'retrievalType'   => [
+        'retrievalType'            => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['retrievalType'],
             'exclude'   => true,
             'filter'    => true,
@@ -195,7 +221,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'eval'      => ['submitOnChange' => true, 'includeBlankOption' => true, 'tl_class' => 'w50', 'mandatory' => true],
             'sql'       => "varchar(32) NOT NULL default ''",
         ],
-        'fileType'        => [
+        'fileType'                 => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['fileType'],
             'exclude'   => true,
             'filter'    => true,
@@ -205,15 +231,15 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'eval'      => ['submitOnChange' => true, 'includeBlankOption' => true, 'tl_class' => 'w50', 'mandatory' => true],
             'sql'       => "varchar(16) NOT NULL default ''",
         ],
-        'sourceUrl'       => [
+        'sourceUrl'                => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['sourceUrl'],
             'exclude'   => true,
             'filter'    => true,
             'inputType' => 'text',
-            'eval'      => ['submitOnChange' => true, 'includeBlankOption' => true, 'tl_class' => 'clr w50', 'rgxp' =>'url'],
+            'eval'      => ['submitOnChange' => true, 'includeBlankOption' => true, 'tl_class' => 'clr w50', 'rgxp' => 'url'],
             'sql'       => "varchar(255) NOT NULL default ''",
         ],
-        'httpMethod'      => [
+        'httpMethod'               => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['httpMethod'],
             'exclude'   => true,
             'filter'    => true,
@@ -226,11 +252,11 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'eval'      => ['tl_class' => 'w50', 'mandatory' => true, 'includeBlankOption' => true, 'submitOnChange' => true],
             'sql'       => "varchar(64) NOT NULL default ''",
         ],
-        'httpAuth'        => [
+        'httpAuth'                 => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['httpAuth'],
             'inputType' => 'multiColumnEditor',
             'eval'      => [
-                'tl_class'          => 'long clr',
+                'tl_class' => 'long clr',
 
                 'multiColumnEditor' => [
                     'minRowCount' => 0,
@@ -258,21 +284,21 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             ],
             'sql'       => "blob NULL",
         ],
-        'fileSRC'         => [
+        'fileSRC'                  => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['fileSRC'],
             'exclude'   => true,
             'inputType' => 'fileTree',
             'eval'      => ['filesOnly' => true, 'fieldType' => 'radio', 'mandatory' => true, 'tl_class' => 'w50 clr', 'submitOnChange' => true],
             'sql'       => "binary(16) NULL",
         ],
-        'absolutePath'    => [
+        'absolutePath'             => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['absolutePath'],
             'exclude'   => true,
             'filter'    => true,
             'inputType' => 'text',
             'eval'      => ['submitOnChange' => true, 'includeBlankOption' => true, 'tl_class' => 'clr w50'],
         ],
-        'fileContent'     => [
+        'fileContent'              => [
             'label'         => &$GLOBALS['TL_LANG']['tl_entity_import_source']['fileContent'],
             'exclude'       => true,
             'inputType'     => 'textarea',
@@ -286,7 +312,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             ],
             'load_callback' => [[\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::class, 'onLoadFileContent']],
         ],
-        'pathToDataArray' => [
+        'pathToDataArray'          => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['pathToDataArray'],
             'exclude'   => true,
             'search'    => true,
@@ -294,21 +320,21 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'eval'      => ['maxlength' => 255, 'tl_class' => 'clr w50'],
             'sql'       => "varchar(255) NOT NULL default ''",
         ],
-        'fieldMappingCopier' => [
+        'fieldMappingCopier'       => [
             'inputType' => 'fieldValueCopier',
             'eval'      => [
                 'fieldValueCopier' => [
                     'table'            => 'tl_entity_import_source',
                     'field'            => 'fieldMapping',
-                    'config' => [
+                    'config'           => [
                         'labelPattern' => '%title% (ID %id%)'
                     ],
                     'options_callback' => ['huh.field_value_copier.util.field_value_copier_util', 'getOptions']
                 ],
-                'tl_class' => 'clr w50'
+                'tl_class'         => 'clr w50'
             ]
         ],
-        'fieldMapping'    => [
+        'fieldMapping'             => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['fieldMapping'],
             'inputType' => 'multiColumnEditor',
             'eval'      => [
@@ -329,7 +355,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
                             'inputType' => 'text',
                             'eval'      => [
                                 'groupStyle' => 'width: 38%',
-                                'mandatory' => true
+                                'mandatory'  => true
                             ],
                         ],
                         'valueType'   => [
@@ -361,7 +387,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
                             'inputType' => 'text',
                             'eval'      => [
                                 'groupStyle' => 'width: 38%',
-                                'mandatory' => true
+                                'mandatory'  => true
                             ],
                         ],
                     ],
@@ -369,7 +395,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             ],
             'sql'       => "blob NULL",
         ],
-        'csvHeaderRow'    => [
+        'csvHeaderRow'             => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['csvHeaderRow'],
             'exclude'   => true,
             'inputType' => 'checkbox',
@@ -379,7 +405,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             ],
             'sql'       => "char(1) NOT NULL default ''",
         ],
-        'csvDelimiter'    => [
+        'csvDelimiter'             => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['csvDelimiter'],
             'exclude'   => true,
             'inputType' => 'text',
@@ -391,7 +417,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             ],
             'sql'       => "char(1) NOT NULL default ''",
         ],
-        'csvEnclosure'    => [
+        'csvEnclosure'             => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['csvEnclosure'],
             'exclude'   => true,
             'inputType' => 'text',
@@ -403,7 +429,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             ],
             'sql'       => "char(1) NOT NULL default ''",
         ],
-        'csvEscape'       => [
+        'csvEscape'                => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['csvEscape'],
             'exclude'   => true,
             'inputType' => 'text',
@@ -417,3 +443,16 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
         ],
     ],
 ];
+
+$dca = &$GLOBALS['TL_DCA']['tl_entity_import_source'];
+
+// DC_Multilingual
+if (class_exists('\Terminal42\DcMultilingualBundle\Terminal42DcMultilingualBundle')) {
+    $dca['fields']['addDcMultilingualSupport'] = [
+        'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['addDcMultilingualSupport'],
+        'exclude'   => true,
+        'inputType' => 'checkbox',
+        'eval'      => ['tl_class' => 'w50'],
+        'sql'       => "char(1) NOT NULL default ''"
+    ];
+}

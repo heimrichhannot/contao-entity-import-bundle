@@ -9,15 +9,12 @@
 namespace HeimrichHannot\EntityImportBundle\Source;
 
 use Ausi\SlugGenerator\SlugGenerator;
-use Contao\Model;
 use GuzzleHttp\Client;
 use HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer;
 use HeimrichHannot\EntityImportBundle\Event\AfterFileSourceGetContentEvent;
 use HeimrichHannot\EntityImportBundle\Event\BeforeAuthenticationEvent;
-use HeimrichHannot\EntityImportBundle\Model\EntityImportSourceModel;
 use HeimrichHannot\UtilsBundle\Container\ContainerUtil;
 use HeimrichHannot\UtilsBundle\File\FileUtil;
-use HeimrichHannot\UtilsBundle\Model\ModelUtil;
 use HeimrichHannot\UtilsBundle\String\StringUtil;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Cache\Simple\FilesystemCache;
@@ -29,16 +26,6 @@ abstract class AbstractFileSource extends AbstractSource
      * @var FileUtil
      */
     protected $fileUtil;
-
-    /**
-     * @var EntityImportSourceModel
-     */
-    protected $sourceModel;
-
-    /**
-     * @var ModelUtil
-     */
-    protected $modelUtil;
 
     /**
      * @var StringUtil
@@ -63,25 +50,14 @@ abstract class AbstractFileSource extends AbstractSource
     /**
      * AbstractFileSource constructor.
      */
-    public function __construct(EventDispatcherInterface $eventDispatcher, FileUtil $fileUtil, ModelUtil $modelUtil, StringUtil $stringUtil, ContainerUtil $containerUtil)
+    public function __construct(EventDispatcherInterface $eventDispatcher, FileUtil $fileUtil, StringUtil $stringUtil, ContainerUtil $containerUtil)
     {
         $this->fileUtil = $fileUtil;
-        $this->modelUtil = $modelUtil;
         $this->stringUtil = $stringUtil;
         $this->containerUtil = $containerUtil;
         $this->eventDispatcher = $eventDispatcher;
 
-        parent::__construct($this->modelUtil);
-    }
-
-    public function getSourceModel(): EntityImportSourceModel
-    {
-        return $this->sourceModel;
-    }
-
-    public function setSourceModel(Model $sourceModel)
-    {
-        $this->sourceModel = $sourceModel;
+        parent::__construct();
     }
 
     public function getFilesystemCache(): FilesystemCache
@@ -120,7 +96,7 @@ abstract class AbstractFileSource extends AbstractSource
                 $auth = [];
 
                 if (null !== $this->sourceModel->httpAuth) {
-                    $httpAuth = \Contao\StringUtil::deserialize($this->sourceModel->httpAuth);
+                    $httpAuth = \Contao\StringUtil::deserialize($this->sourceModel->httpAuth, true);
                     $auth = ['auth' => [$httpAuth['username'], $httpAuth['password']]];
                 }
 

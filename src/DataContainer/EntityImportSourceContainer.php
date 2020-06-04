@@ -8,11 +8,14 @@
 
 namespace HeimrichHannot\EntityImportBundle\DataContainer;
 
+use Contao\Database;
 use Contao\DataContainer;
+use Contao\Message;
 use Contao\System;
 use HeimrichHannot\EntityImportBundle\Source\AbstractFileSource;
 use HeimrichHannot\EntityImportBundle\Source\CSVFileSource;
 use HeimrichHannot\EntityImportBundle\Source\SourceFactory;
+use HeimrichHannot\UtilsBundle\Dca\DcaUtil;
 use HeimrichHannot\UtilsBundle\File\FileUtil;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
 
@@ -22,7 +25,7 @@ class EntityImportSourceContainer
     const TYPE_FILE = 'file';
 
     const TYPES = [
-//        self::TYPE_DATABASE,
+        self::TYPE_DATABASE,
         self::TYPE_FILE,
     ];
 
@@ -60,13 +63,18 @@ class EntityImportSourceContainer
      * @var SourceFactory
      */
     private $sourceFactory;
+    /**
+     * @var DcaUtil
+     */
+    private $dcaUtil;
 
-    public function __construct(FileUtil $fileUtil, ModelUtil $modelUtil, SourceFactory $sourceFactory)
+    public function __construct(SourceFactory $sourceFactory, FileUtil $fileUtil, ModelUtil $modelUtil, DcaUtil $dcaUtil)
     {
         $this->activeBundles = System::getContainer()->getParameter('kernel.bundles');
+        $this->sourceFactory = $sourceFactory;
         $this->fileUtil = $fileUtil;
         $this->modelUtil = $modelUtil;
-        $this->sourceFactory = $sourceFactory;
+        $this->dcaUtil = $dcaUtil;
     }
 
     public function initPalette(?DataContainer $dc)
@@ -75,44 +83,68 @@ class EntityImportSourceContainer
             return;
         }
 
-        $fileType = $sourceModel->fileType;
-
         $dca = &$GLOBALS['TL_DCA'][$dc->table];
 
-        switch ($fileType) {
-            case self::FILETYPE_CSV:
+        // database
+        switch ($sourceModel->type) {
+            case static::TYPE_DATABASE:
+                if (!$sourceModel->dbSourceTable) {
+                    $dca['palettes'][static::TYPE_DATABASE] = str_replace('fieldMappingCopier', '', $dca['palettes'][static::TYPE_DATABASE]);
+                    $dca['palettes'][static::TYPE_DATABASE] = str_replace('fieldMapping', '', $dca['palettes'][static::TYPE_DATABASE]);
+                } else {
+                    $options = $this->dcaUtil->getFields($sourceModel->dbSourceTable);
 
-                /** @var CSVFileSource $source */
-                $source = $this->sourceFactory->createInstance($sourceModel->id);
+                    $sourceValueDca = &$dca['fields']['fieldMapping']['eval']['multiColumnEditor']['fields']['sourceValue'];
 
-                $options = [];
-                $fields = $source->getHeadingLine();
-
-                foreach ($fields as $index => $field) {
-                    if ($sourceModel->csvHeaderRow) {
-                        $options[' '.$index] = $field.' ['.$index.']';
-                    } else {
-                        $options[' '.$index] = '['.$index.']';
-                    }
+                    $sourceValueDca['inputType'] = 'select';
+                    $sourceValueDca['options'] = $options;
+                    $sourceValueDca['eval']['includeBlankOption'] = true;
+                    $sourceValueDca['eval']['mandatory'] = true;
+                    $sourceValueDca['eval']['chosen'] = true;
                 }
 
-                $sourceValueDca = &$dca['fields']['fieldMapping']['eval']['multiColumnEditor']['fields']['sourceValue'];
-
-                $sourceValueDca['inputType'] = 'select';
-                $sourceValueDca['options'] = $options;
-                $sourceValueDca['eval']['includeBlankOption'] = true;
-                $sourceValueDca['eval']['mandatory'] = true;
-                $sourceValueDca['eval']['chosen'] = true;
-                $dca['fields']['fileContent']['eval']['rte'] = 'ace';
-
                 break;
 
-            case self::FILETYPE_JSON:
-                $dca['fields']['fileContent']['eval']['rte'] = 'ace|json';
+            case static::TYPE_FILE:
+                $fileType = $sourceModel->fileType;
 
-                break;
+                switch ($fileType) {
+                    case static::FILETYPE_CSV:
 
-            default:
+                        /** @var CSVFileSource $source */
+                        $source = $this->sourceFactory->createInstance($sourceModel->id);
+
+                        $options = [];
+                        $fields = $source->getHeadingLine();
+
+                        foreach ($fields as $index => $field) {
+                            if ($sourceModel->csvHeaderRow) {
+                                $options[' '.$index] = $field.' ['.$index.']';
+                            } else {
+                                $options[' '.$index] = '['.$index.']';
+                            }
+                        }
+
+                        $sourceValueDca = &$dca['fields']['fieldMapping']['eval']['multiColumnEditor']['fields']['sourceValue'];
+
+                        $sourceValueDca['inputType'] = 'select';
+                        $sourceValueDca['options'] = $options;
+                        $sourceValueDca['eval']['includeBlankOption'] = true;
+                        $sourceValueDca['eval']['mandatory'] = true;
+                        $sourceValueDca['eval']['chosen'] = true;
+                        $dca['fields']['fileContent']['eval']['rte'] = 'ace';
+
+                        break;
+
+                    case static::FILETYPE_JSON:
+                        $dca['fields']['fileContent']['eval']['rte'] = 'ace|json';
+
+                        break;
+
+                    default:
+                        break;
+                }
+
                 break;
         }
     }
@@ -145,5 +177,22 @@ class EntityImportSourceContainer
         }
 
         return $source->getFileContent(true);
+    }
+
+    public function getAllTargetTables(?DataContainer $dc): array
+    {
+        if (null === ($source = $this->modelUtil->findModelInstanceByPk('tl_entity_import_source', $dc->id))) {
+            return [];
+        }
+
+        try {
+            $options = array_values(Database::getInstance($source->row())->listTables(null, true));
+        } catch (\Exception $e) {
+            Message::addError(sprintf($GLOBALS['TL_LANG']['MSC']['entityImport']['dbConnectionError'], $e->getMessage()));
+
+            return [];
+        }
+
+        return $options;
     }
 }

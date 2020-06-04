@@ -14,6 +14,7 @@ use HeimrichHannot\EntityImportBundle\Importer\ImporterInterface;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
@@ -67,7 +68,7 @@ class ExecuteImportCommand extends AbstractLockedCommand
         $this->setName('huh:entity-import:execute');
         $this->setDescription('Runs a given importer config on the command line.');
         $this->addArgument('config-id', InputArgument::REQUIRED, 'The importer source id');
-        $this->addArgument('dry-run', InputArgument::OPTIONAL, 'Run importer without making changes to the database', false);
+        $this->addOption('dry-run', null, InputOption::VALUE_NONE, 'Run importer without making changes to the database.');
     }
 
     /**
@@ -83,6 +84,8 @@ class ExecuteImportCommand extends AbstractLockedCommand
 
         if ($this->import()) {
             $this->io->success('Import finished');
+        } else {
+            $this->io->error('Import failed');
         }
 
         return 0;
@@ -91,7 +94,7 @@ class ExecuteImportCommand extends AbstractLockedCommand
     private function import(): bool
     {
         $importerConfigId = $this->input->getArgument('config-id');
-        $importerDryRun = $this->input->getArgument('dry-run') ?: false;
+        $importerDryRun = $this->input->getOption('dry-run') ?: false;
 
         if (null === ($configModel = $this->modelUtil->findModelInstanceByPk('tl_entity_import_config', $importerConfigId))) {
             $this->io->error('Exporter config with id '.$importerConfigId.' not found.');
@@ -108,12 +111,12 @@ class ExecuteImportCommand extends AbstractLockedCommand
         /** @var ImporterInterface $importer */
         $importer = $this->importerFactory->createInstance($configModel->id);
         $importer->setDryRun($importerDryRun);
-        $importer->run();
+        $result = $importer->run();
 
         if ($configModel->language) {
             $GLOBALS['TL_LANGUAGE'] = $language;
         }
 
-        return true;
+        return $result;
     }
 }

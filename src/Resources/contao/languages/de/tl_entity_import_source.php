@@ -23,7 +23,7 @@ $lang['csvEscape'][1]    = 'Geben Sie hier das Trennzeichen für die Umwandlung 
 
 $lang['pathToDataArray'][0]             = 'Pfad zu den Daten';
 $lang['pathToDataArray'][1]             = 'Geben Sie hier den Pfad der Daten in der Datei ein. Ist notwendig wenn die zu importierenden Daten sich nicht in der ersten Ebene befinden.';
-$lang['fieldMapping'][0]                = 'Felderabblidung';
+$lang['fieldMapping'][0]                = 'Felderabbildung';
 $lang['fieldMapping'][1]                = 'Geben Sie hier die Zuordnung der Felder aus der Quelle ein.';
 $lang['fieldMapping']['name'][0]        = 'Name';
 $lang['fieldMapping']['name'][1]        = 'Geben Sie hier den Namen des Wertes für die weitere Verarbeitung ein.';
@@ -46,38 +46,48 @@ $lang['retrievalType'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityIm
 $lang['type'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::TYPE_DATABASE]                              = 'Datenbank';
 $lang['type'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::TYPE_FILE]                                  = 'Datei';
 
-$lang['sourceUrl'][0]            = 'Url';
-$lang['sourceUrl'][1]            = 'Geben Sie hier die URL zur Datei ein.';
-$lang['absolutePath'][0]         = 'Absoluter Dateipfad';
-$lang['absolutePath'][1]         = 'Geben Sie hier einen absoluten Dateipfad auf dem Server ein.';
-$lang['fileSRC'][0]              = 'Datei wählen oder hochladen';
-$lang['fileSRC'][1]              = 'Wählen Sie hier eine vorhandene Datei, oder laden Sie eine neue Datei hoch.';
-$lang['dbDriver'][0]             = 'Treiber';
-$lang['dbDriver'][1]             = 'Wählen Sie hier den Datenbanktreiber aus.';
-$lang['dbHost'][0]               = 'Host';
-$lang['dbHost'][1]               = 'Geben Sie hier die Adresse des Datenbankhosts ein.';
-$lang['dbUser'][0]               = 'Nutzer';
-$lang['dbUser'][1]               = 'Geben Sie hier einen berechtigten Datenbanknutzer ein.';
-$lang['dbPass'][0]               = 'Passwort';
-$lang['dbPass'][1]               = 'Geben Sie hier das Passwort des berechtigten Datenbanknutzers ein.';
-$lang['dbDatabase'][0]           = 'Datenbankname';
-$lang['dbDatabase'][1]           = 'Geben Sie hier den Namen der Datenbank ein.';
-$lang['dbPconnect'][0]           = 'PConnect';
-$lang['dbPconnect'][1]           = 'Wählen Sie hier, ob Sie PConnect nutzen möchten.';
-$lang['dbCharset'][0]            = 'Zeichensatz';
-$lang['dbCharset'][1]            = 'Wählen Sie hier den gewünschten Zeichensatz aus.';
-$lang['dbSocket'][0]             = 'Socket';
-$lang['dbSocket'][1]             = 'Geben Sie hier einen Socket ein.';
-$lang['externalUrl'][0]          = 'Url';
-$lang['externalUrl'][1]          = 'Tragen Sie hier die Url ein, von der die Daten importiert werden sollen.';
-$lang['httpMethod'][0]           = 'HTTP-Methode';
-$lang['httpMethod'][1]           = 'Wählen Sie hier die HTTP-Methode mit der auf die Datei zugegriffen werden soll.';
-$lang['httpAuth'][0]             = 'Authentifizierung';
-$lang['httpAuth'][1]             = 'Traugen Sie hier die Daten für die Authentifizierung ein.';
-$lang['httpAuth']['username'][0] = 'Benutzername';
-$lang['httpAuth']['username'][1] = 'Traugen Sie hier Ihren Benutzernamen ein.';
-$lang['httpAuth']['password'][0] = 'Passwort';
-$lang['httpAuth']['password'][1] = 'Traugen Sie hier Ihr Passwort ein.';
+$lang['sourceUrl'][0]                = 'Url';
+$lang['sourceUrl'][1]                = 'Geben Sie hier die URL zur Datei ein.';
+$lang['absolutePath'][0]             = 'Absoluter Dateipfad';
+$lang['absolutePath'][1]             = 'Geben Sie hier einen absoluten Dateipfad auf dem Server ein.';
+$lang['fileSRC'][0]                  = 'Datei wählen oder hochladen';
+$lang['fileSRC'][1]                  = 'Wählen Sie hier eine vorhandene Datei, oder laden Sie eine neue Datei hoch.';
+$lang['dbDriver'][0]                 = 'Treiber';
+$lang['dbDriver'][1]                 = 'Wählen Sie hier den Datenbanktreiber aus.';
+$lang['dbHost'][0]                   = 'Host';
+$lang['dbHost'][1]                   = 'Geben Sie hier die Adresse des Datenbankhosts ein.';
+$lang['dbUser'][0]                   = 'Nutzer';
+$lang['dbUser'][1]                   = 'Geben Sie hier einen berechtigten Datenbanknutzer ein.';
+$lang['dbPass'][0]                   = 'Passwort';
+$lang['dbPass'][1]                   = 'Geben Sie hier das Passwort des berechtigten Datenbanknutzers ein.';
+$lang['dbDatabase'][0]               = 'Datenbankname';
+$lang['dbDatabase'][1]               = 'Geben Sie hier den Namen der Datenbank ein.';
+$lang['dbPort'][0]                   = 'Port';
+$lang['dbPort'][1]                   = 'Geben Sie hier einen Port ein.';
+$lang['dbPconnect'][0]               = 'PConnect';
+$lang['dbPconnect'][1]               = 'Wählen Sie hier, ob Sie PConnect nutzen möchten.';
+$lang['dbCharset'][0]                = 'Zeichensatz';
+$lang['dbCharset'][1]                = 'Wählen Sie hier den gewünschten Zeichensatz aus.';
+$lang['dbSocket'][0]                 = 'Socket';
+$lang['dbSocket'][1]                 = 'Geben Sie hier einen Socket ein.';
+$lang['dbSourceTable'][0]            = 'Quelltabelle';
+$lang['dbSourceTable'][1]            = 'Wählen Sie hier die Quelltabelle aus.';
+$lang['dbSourceTableExplanation']    = 'Wenn Sie von der im CMS genutzten Datenbankverbindung abweichen, müssen Sie den Datensatz erst abspeichern, damit sich die Optionen des Feldes "Quelltabelle" aktualisieren.';
+$lang['dbSourceTableWhere'][0]       = 'WHERE-Bedingung für den Import';
+$lang['dbSourceTableWhere'][1]       = 'Geben Sie hier auf Wunsch eine WHERE-Bedingung ein.';
+$lang['externalUrl'][0]              = 'Url';
+$lang['externalUrl'][1]              = 'Tragen Sie hier die Url ein, von der die Daten importiert werden sollen.';
+$lang['httpMethod'][0]               = 'HTTP-Methode';
+$lang['httpMethod'][1]               = 'Wählen Sie hier die HTTP-Methode mit der auf die Datei zugegriffen werden soll.';
+$lang['httpAuth'][0]                 = 'Authentifizierung';
+$lang['httpAuth'][1]                 = 'Tragen Sie hier die Daten für die Authentifizierung ein.';
+$lang['httpAuth']['username'][0]     = 'Benutzername';
+$lang['httpAuth']['username'][1]     = 'Tragen Sie hier Ihren Benutzernamen ein.';
+$lang['httpAuth']['password'][0]     = 'Passwort';
+$lang['httpAuth']['password'][1]     = 'Tragen Sie hier Ihr Passwort ein.';
+$lang['addDcMultilingualSupport'][0] = 'Unterstützung für DC_Multilingual hinzufügen (ACHTUNG: Erklärung lesen!)';
+$lang['addDcMultilingualSupport'][1] = 'Wählen Sie diese Option, wenn es sich bei der Quelltabelle um eine Contao-Tabelle mit Unterstützung für DC_Multilingual handelt. WICHTIG: Fügen Sie die DC_Multilingual-Felder (langPid, language, ...) NICHT der Felderabbildung hinzu.';
+
 
 /**
  * Reference
@@ -100,6 +110,7 @@ $lang['title_legend']    = 'Titel';
 $lang['db_legend']       = 'Datenbankeinstellungen';
 $lang['external_legend'] = 'Externe Quelle';
 $lang['file_legend']     = 'Datei';
+$lang['misc_legend']     = 'Verschiedenes';
 
 /**
  * Buttons

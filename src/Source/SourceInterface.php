@@ -8,9 +8,15 @@
 
 namespace HeimrichHannot\EntityImportBundle\Source;
 
+use Contao\Model;
+
 interface SourceInterface
 {
     public function getMapping(): array;
 
     public function getMappedData(): array;
+
+    public function getSourceModel(): Model;
+
+    public function setSourceModel(Model $sourceModel);
 }

@@ -84,6 +84,16 @@ class Importer implements ImporterInterface
     private $dbMergeCache;
 
     /**
+     * @var array|null
+     */
+    private $dbIdMapping;
+
+    /**
+     * @var array|null
+     */
+    private $dbItemMapping;
+
+    /**
      * Importer constructor.
      */
     public function __construct(ContainerInterface $container, Model $configModel, SourceInterface $source, EventDispatcherInterface $eventDispatcher, DatabaseUtil $databaseUtil, ModelUtil $modelUtil, StringUtil $stringUtil, DcaUtil $dcaUtil, ContainerUtil $containerUtil)
@@ -108,11 +118,11 @@ class Importer implements ImporterInterface
 
         $event = $this->eventDispatcher->dispatch(BeforeImportEvent::NAME, new BeforeImportEvent($items, $this->configModel, $this->source, $this->dryRun));
 
-        $this->executeImport($event->getItems());
+        $result = $this->executeImport($event->getItems());
 
         $this->eventDispatcher->dispatch(AfterImportEvent::NAME, new AfterImportEvent($items, $this->configModel, $this->source, $this->dryRun));
 
-        return true;
+        return $result;
     }
 
     public function getDataFromSource(): array
@@ -125,31 +135,32 @@ class Importer implements ImporterInterface
         $this->dryRun = $dry;
     }
 
-    protected function applyFieldMappingToSourceItem(array $item): ?array
+    protected function applyFieldMappingToSourceItem(array $item, array $mapping): ?array
     {
-        if (null === $fields = \Contao\StringUtil::deserialize($this->configModel->fieldMapping)) {
-            return null;
-        }
-
         $mapped = [];
 
-        foreach ($fields as $field) {
-            if ('source_value' === $field['valueType']) {
-                $mapped[$field['columnName']] = $item[$field['mappingValue']];
-            } elseif ('static_value' === $field['valueType']) {
-                $mapped[$field['columnName']] = $this->stringUtil->replaceInsertTags($field['staticValue']);
+        foreach ($mapping as $mappingElement) {
+            if (isset($mappingElement['skip']) && $mappingElement['skip']) {
+                continue;
+            }
+
+            if ('source_value' === $mappingElement['valueType']) {
+                $mapped[$mappingElement['columnName']] = $item[$mappingElement['mappingValue']];
+            } elseif ('static_value' === $mappingElement['valueType']) {
+                $mapped[$mappingElement['columnName']] = $this->stringUtil->replaceInsertTags($mappingElement['staticValue']);
             }
         }
 
         return $mapped;
     }
 
-    protected function executeImport(array $items)
+    protected function executeImport(array $items): bool
     {
         $stopwatch = new Stopwatch();
 
         $stopwatch->start('contao-entity-import-bundle.id'.$this->configModel->id);
 
+        $this->dcaUtil->loadLanguageFile('default');
         $database = Database::getInstance();
         $table = $this->configModel->targetTable;
 
@@ -163,6 +174,12 @@ class Importer implements ImporterInterface
             $mappedItems = [];
 
             $mode = $this->configModel->importMode;
+
+            $mapping = \Contao\StringUtil::deserialize($this->configModel->fieldMapping, true);
+            $mapping = $this->adjustMappingForDcMultilingual($mapping);
+
+            $this->dbIdMapping = [];
+            $this->dbItemMapping = [];
 
             if ('merge' === $mode) {
                 $mergeIdentifiers = \Contao\StringUtil::deserialize($this->configModel->mergeIdentifierFields, true);
@@ -185,7 +202,7 @@ class Importer implements ImporterInterface
             $this->databaseUtil->beginTransaction();
 
             foreach ($items as $item) {
-                $mappedItem = $this->applyFieldMappingToSourceItem($item);
+                $mappedItem = $this->applyFieldMappingToSourceItem($item, $mapping);
 
                 if (!\is_array($mappedItem)) {
                     throw new Exception($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['configFieldMapping']);
@@ -249,7 +266,7 @@ class Importer implements ImporterInterface
                         $set = array_merge($set, $this->generateAlias($existing));
                         $set = array_merge($set, $this->setTstamp($existing));
 
-                        if (!empty($set) && !$this->dryRun) {
+                        if (!$this->dryRun) {
                             $this->databaseUtil->update($table, array_merge($mappedItem, $set), "$table.id=?", [$existing->id]);
                         }
 
@@ -276,6 +293,16 @@ class Importer implements ImporterInterface
                     throw new Exception($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['modeNotSet']);
                 }
 
+                // store mapping e.g. for DC_Multilingual -> only possible if an id field exists
+                if (isset($item['__id'])) {
+                    $this->dbIdMapping[$item['__id']] = $importedRecord->id;
+                }
+
+                $this->dbItemMapping[] = [
+                    'source' => $item,
+                    'target' => $importedRecord,
+                ];
+
                 /* @var AfterItemImportEvent $event */
                 $this->eventDispatcher->dispatch(AfterItemImportEvent::NAME, new AfterItemImportEvent(
                     $importedRecord,
@@ -287,6 +314,22 @@ class Importer implements ImporterInterface
                 ));
 
                 $mappedItems[] = $event->getMappedItem();
+            }
+
+            // DC_Multilingual -> fix langPid (can only be done after all items are imported due to order issues otherwise)
+            if (class_exists('\Terminal42\DcMultilingualBundle\Terminal42DcMultilingualBundle') &&
+                $this->configModel->addDcMultilingualSupport) {
+                $langPidField = $GLOBALS['TL_DCA'][$table]['config']['langPid'] ?? 'langPid';
+
+                foreach ($this->dbItemMapping as $itemMapping) {
+                    if (!$itemMapping['source']['langPid']) {
+                        continue;
+                    }
+
+                    $this->databaseUtil->update($table, [
+                        $table.'.'.$langPidField => $this->dbIdMapping[$itemMapping['source']['langPid']],
+                    ], "$table.id=?", [$itemMapping['target']->id]);
+                }
             }
 
             $this->deleteAfterImport($mappedItems);
@@ -317,7 +360,7 @@ class Importer implements ImporterInterface
 
                 if (isset($config['email']) && $config['email']) {
                     $email = new Email();
-                    $email->subject = sprintf($GLOBALS['TL_LANG']['MSG']['entityImport']['exceptionEmailSubject'], $this->configModel->title);
+                    $email->subject = sprintf($GLOBALS['TL_LANG']['MSC']['entityImport']['exceptionEmailSubject'], $this->configModel->title);
                     $email->text = sprintf('An error occurred on domain "%s"', $this->configModel->cronDomain).' : '.$e->getMessage();
                     $email->sendTo($GLOBALS['TL_CONFIG']['adminEmail']);
                 }
@@ -327,11 +370,17 @@ class Importer implements ImporterInterface
 
             Message::addError(sprintf($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['errorImport'], $count,
                 $this->containerUtil->isDev() ? str_replace("\n", '<br>', $e) : $e->getMessage()));
+
+            return false;
         }
+
+        return true;
     }
 
     protected function initDbCacheForMerge(array $mergeIdentifiers)
     {
+        $this->dbMergeCache = [];
+
         $table = $this->configModel->targetTable;
 
         if (null === ($records = $this->databaseUtil->findResultsBy($table, null, null)) || $records->numRows < 1) {
@@ -522,5 +571,63 @@ class Importer implements ImporterInterface
 
                 break;
         }
+    }
+
+    protected function adjustMappingForDcMultilingual(array $mapping)
+    {
+        // DC_Multilingual -> add specific fields if not already existing
+        if (!class_exists('\Terminal42\DcMultilingualBundle\Terminal42DcMultilingualBundle') || !$this->configModel->addDcMultilingualSupport) {
+            return $mapping;
+        }
+
+        $table = $this->configModel->targetTable;
+
+        $this->dcaUtil->loadDc($table);
+
+        $dca = $GLOBALS['TL_DCA'][$table];
+
+        $langPidField = $dca['config']['langPid'] ?? 'langPid';
+        $languageField = $dca['config']['langColumnName'] ?? 'language';
+
+        $mapping[] = [
+            'columnName' => $langPidField,
+            'valueType' => 'source_value',
+            'mappingValue' => 'langPid',
+        ];
+
+        $mapping[] = [
+            'columnName' => $languageField,
+            'valueType' => 'source_value',
+            'mappingValue' => 'language',
+        ];
+
+        if (class_exists('HeimrichHannot\DcMultilingualUtilsBundle\ContaoDcMultilingualUtilsBundle') && isset($dca['config']['langPublished'])) {
+            $publishedField = $dca['config']['langPublished'] ?? 'langPublished';
+
+            $mapping[] = [
+                'columnName' => $publishedField,
+                'valueType' => 'source_value',
+                'mappingValue' => 'langPublished',
+            ];
+
+            if ($dca['config']['langStart']) {
+                $publishedStartField = $dca['config']['langStart'] ?? 'langStart';
+                $publishedStopField = $dca['config']['langStop'] ?? 'langStop';
+
+                $mapping[] = [
+                    'columnName' => $publishedStartField,
+                    'valueType' => 'source_value',
+                    'mappingValue' => 'langStart',
+                ];
+
+                $mapping[] = [
+                    'columnName' => $publishedStopField,
+                    'valueType' => 'source_value',
+                    'mappingValue' => 'langStop',
+                ];
+            }
+        }
+
+        return $mapping;
     }
 }
