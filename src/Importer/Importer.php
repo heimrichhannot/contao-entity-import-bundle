@@ -8,6 +8,7 @@
 
 namespace HeimrichHannot\EntityImportBundle\Importer;
 
+use Contao\CoreBundle\Exception\RedirectResponseException;
 use Contao\Database;
 use Contao\Email;
 use Contao\Message;
@@ -20,6 +21,7 @@ use HeimrichHannot\EntityImportBundle\Event\BeforeImportEvent;
 use HeimrichHannot\EntityImportBundle\Event\BeforeItemImportEvent;
 use HeimrichHannot\EntityImportBundle\Model\EntityImportConfigModel;
 use HeimrichHannot\EntityImportBundle\Source\SourceInterface;
+use HeimrichHannot\RequestBundle\Component\HttpFoundation\Request;
 use HeimrichHannot\UtilsBundle\Container\ContainerUtil;
 use HeimrichHannot\UtilsBundle\Database\DatabaseUtil;
 use HeimrichHannot\UtilsBundle\Dca\DcaUtil;
@@ -93,11 +95,15 @@ class Importer implements ImporterInterface
      * @var array|null
      */
     private $dbItemMapping;
+    /**
+     * @var Request
+     */
+    private $request;
 
     /**
      * Importer constructor.
      */
-    public function __construct(ContainerInterface $container, Model $configModel, SourceInterface $source, EventDispatcherInterface $eventDispatcher, DatabaseUtil $databaseUtil, ModelUtil $modelUtil, StringUtil $stringUtil, DcaUtil $dcaUtil, ContainerUtil $containerUtil)
+    public function __construct(ContainerInterface $container, Model $configModel, SourceInterface $source, EventDispatcherInterface $eventDispatcher, DatabaseUtil $databaseUtil, ModelUtil $modelUtil, StringUtil $stringUtil, DcaUtil $dcaUtil, ContainerUtil $containerUtil, Request $request)
     {
         $this->container = $container;
         $this->configModel = $configModel;
@@ -108,6 +114,7 @@ class Importer implements ImporterInterface
         $this->stringUtil = $stringUtil;
         $this->dcaUtil = $dcaUtil;
         $this->containerUtil = $containerUtil;
+        $this->request = $request;
     }
 
     /**
@@ -330,9 +337,11 @@ class Importer implements ImporterInterface
                         continue;
                     }
 
-                    $this->databaseUtil->update($table, [
-                        $table.'.'.$langPidField => $this->dbIdMapping[$itemMapping['source']['langPid']],
-                    ], "$table.id=?", [$itemMapping['target']->id]);
+                    if (!$this->dryRun) {
+                        $this->databaseUtil->update($table, [
+                            $table.'.'.$langPidField => $this->dbIdMapping[$itemMapping['source']['langPid']],
+                        ], "$table.id=?", [$itemMapping['target']->id]);
+                    }
                 }
             }
 
@@ -378,6 +387,10 @@ class Importer implements ImporterInterface
             return false;
         }
 
+        if ($this->request->getGet('redirect_url')) {
+            throw new RedirectResponseException(html_entity_decode($this->request->getGet('redirect_url')));
+        }
+
         return true;
     }
 
@@ -414,18 +427,22 @@ class Importer implements ImporterInterface
                     );
 
                     if (null === $existing) {
-                        System::getContainer()->get('huh.categories.manager')->createAssociations(
-                            $targetId, $targetField, $table, $categories
-                        );
+                        if (!$this->dryRun) {
+                            System::getContainer()->get('huh.categories.manager')->createAssociations(
+                                $targetId, $targetField, $table, $categories
+                            );
+                        }
                     } else {
                         $existingIds = $existing->fetchEach('id');
 
                         $idsToInsert = array_diff($categories, $existingIds);
 
                         if (!empty($idsToInsert)) {
-                            System::getContainer()->get('huh.categories.manager')->createAssociations(
-                                $targetId, $targetField, $table, $idsToInsert
-                            );
+                            if (!$this->dryRun) {
+                                System::getContainer()->get('huh.categories.manager')->createAssociations(
+                                    $targetId, $targetField, $table, $idsToInsert
+                                );
+                            }
                         }
                     }
                 }

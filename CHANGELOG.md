@@ -1,10 +1,14 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [0.5.0] - 2020-04-30
+## [0.6.0] - 2020-06-05
+- fixed dry-run for categories and dc_multilingual support
+- added option to call the backend import action with a GET parameter `redirect_url`
+
+## [0.5.0] - 2020-06-05
 - added support for heimrichhannot/contao-categories-bundle in the database source
 
-## [0.4.0] - 2020-04-30
+## [0.4.0] - 2020-06-04
 - added database source in order to import from one database entity into another (cms database or other)
 - added support for DC_Multilingual
 - fixed bug in merge mode when none of dateAdded, tstamp and alias is generated automatically

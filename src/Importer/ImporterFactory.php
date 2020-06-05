@@ -9,6 +9,7 @@
 namespace HeimrichHannot\EntityImportBundle\Importer;
 
 use HeimrichHannot\EntityImportBundle\Source\SourceFactory;
+use HeimrichHannot\RequestBundle\Component\HttpFoundation\Request;
 use HeimrichHannot\UtilsBundle\Container\ContainerUtil;
 use HeimrichHannot\UtilsBundle\Database\DatabaseUtil;
 use HeimrichHannot\UtilsBundle\Dca\DcaUtil;
@@ -54,12 +55,25 @@ class ImporterFactory
      * @var ContainerUtil
      */
     private $containerUtil;
+    /**
+     * @var Request
+     */
+    private $request;
 
     /**
      * Importer constructor.
      */
-    public function __construct(ContainerInterface $container, DatabaseUtil $databaseUtil, EventDispatcherInterface $eventDispatcher, ModelUtil $modelUtil, StringUtil $stringUtil, DcaUtil $dcaUtil, SourceFactory $sourceFactory, ContainerUtil $containerUtil)
-    {
+    public function __construct(
+        ContainerInterface $container,
+        DatabaseUtil $databaseUtil,
+        EventDispatcherInterface $eventDispatcher,
+        ModelUtil $modelUtil,
+        StringUtil $stringUtil,
+        DcaUtil $dcaUtil,
+        SourceFactory $sourceFactory,
+        ContainerUtil $containerUtil,
+        Request $request
+    ) {
         $this->databaseUtil = $databaseUtil;
         $this->eventDispatcher = $eventDispatcher;
         $this->modelUtil = $modelUtil;
@@ -68,6 +82,7 @@ class ImporterFactory
         $this->dcaUtil = $dcaUtil;
         $this->container = $container;
         $this->containerUtil = $containerUtil;
+        $this->request = $request;
     }
 
     public function createInstance(int $configModel): ?ImporterInterface
@@ -82,6 +97,17 @@ class ImporterFactory
 
         $source = $this->sourceFactory->createInstance($sourceModel->id);
 
-        return new Importer($this->container, $configModel, $source, $this->eventDispatcher, $this->databaseUtil, $this->modelUtil, $this->stringUtil, $this->dcaUtil, $this->containerUtil);
+        return new Importer(
+            $this->container,
+            $configModel,
+            $source,
+            $this->eventDispatcher,
+            $this->databaseUtil,
+            $this->modelUtil,
+            $this->stringUtil,
+            $this->dcaUtil,
+            $this->containerUtil,
+            $this->request
+        );
     }
 }
