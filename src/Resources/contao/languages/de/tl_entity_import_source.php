@@ -88,7 +88,6 @@ $lang['httpAuth']['password'][1]     = 'Tragen Sie hier Ihr Passwort ein.';
 $lang['addDcMultilingualSupport'][0] = 'Unterstützung für DC_Multilingual hinzufügen (ACHTUNG: Erklärung lesen!)';
 $lang['addDcMultilingualSupport'][1] = 'Wählen Sie diese Option, wenn es sich bei der Quelltabelle um eine Contao-Tabelle mit Unterstützung für DC_Multilingual handelt. WICHTIG: Fügen Sie die DC_Multilingual-Felder (langPid, language, ...) NICHT der Felderabbildung hinzu.';
 
-
 /**
  * Reference
  */

@@ -92,6 +92,9 @@ $lang['cronDomain'][1]   = 'Geben Sie hier die Domain ein auf welcher der Cronjo
 $lang['addDcMultilingualSupport'][0] = 'Unterstützung für DC_Multilingual hinzufügen';
 $lang['addDcMultilingualSupport'][1] = 'Wählen Sie diese Option, wenn es sich bei der Zieltabelle um eine Contao-Tabelle mit Unterstützung für DC_Multilingual handelt.';
 
+$lang['addCategoriesSupport'][0] = 'Unterstützung für heimrichhannot/contao-categories-bundle hinzufügen';
+$lang['addCategoriesSupport'][1] = 'Wählen Sie diese Option, um entsprechende Felder zu beachten.';
+
 /**
  * Reference
  */

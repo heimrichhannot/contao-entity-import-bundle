@@ -12,6 +12,7 @@ use Contao\Database;
 use Contao\Email;
 use Contao\Message;
 use Contao\Model;
+use Contao\System;
 use HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer;
 use HeimrichHannot\EntityImportBundle\Event\AfterImportEvent;
 use HeimrichHannot\EntityImportBundle\Event\AfterItemImportEvent;
@@ -303,6 +304,9 @@ class Importer implements ImporterInterface
                     'target' => $importedRecord,
                 ];
 
+                // categories bundle
+                $this->importCategoryAssociations($mapping, $item, $importedRecord->id);
+
                 /* @var AfterItemImportEvent $event */
                 $this->eventDispatcher->dispatch(AfterItemImportEvent::NAME, new AfterItemImportEvent(
                     $importedRecord,
@@ -375,6 +379,58 @@ class Importer implements ImporterInterface
         }
 
         return true;
+    }
+
+    protected function importCategoryAssociations(array $mapping, array $item, $targetId)
+    {
+        if (!$this->configModel->addCategoriesSupport || !$targetId) {
+            return;
+        }
+
+        $table = $this->configModel->targetTable;
+
+        $dca = &$GLOBALS['TL_DCA'][$table];
+
+        foreach ($mapping as $mappingElement) {
+            if (isset($mappingElement['skip']) && $mappingElement['skip']) {
+                continue;
+            }
+
+            if ('source_value' !== $mappingElement['valueType']) {
+                continue;
+            }
+
+            $targetField = $mappingElement['columnName'];
+
+            if ((isset($dca['fields'][$targetField]['eval']['isCategoryField']) && $dca['fields'][$targetField]['eval']['isCategoryField'] ||
+                isset($dca['fields'][$targetField]['eval']['isCategoriesField']) && $dca['fields'][$targetField]['eval']['isCategoriesField'])
+            ) {
+                $categories = \Contao\StringUtil::deserialize($item[$mappingElement['mappingValue']], true);
+
+                if (!empty($categories)) {
+                    // insert the associations if not already existing
+                    $existing = System::getContainer()->get('huh.categories.manager')->findByEntityAndCategoryFieldAndTable(
+                        $targetId, $targetField, $table
+                    );
+
+                    if (null === $existing) {
+                        System::getContainer()->get('huh.categories.manager')->createAssociations(
+                            $targetId, $targetField, $table, $categories
+                        );
+                    } else {
+                        $existingIds = $existing->fetchEach('id');
+
+                        $idsToInsert = array_diff($categories, $existingIds);
+
+                        if (!empty($idsToInsert)) {
+                            System::getContainer()->get('huh.categories.manager')->createAssociations(
+                                $targetId, $targetField, $table, $idsToInsert
+                            );
+                        }
+                    }
+                }
+            }
+        }
     }
 
     protected function initDbCacheForMerge(array $mergeIdentifiers)
@@ -575,7 +631,7 @@ class Importer implements ImporterInterface
 
     protected function adjustMappingForDcMultilingual(array $mapping)
     {
-        // DC_Multilingual -> add specific fields if not already existing
+        // DC_Multilingual
         if (!class_exists('\Terminal42\DcMultilingualBundle\Terminal42DcMultilingualBundle') || !$this->configModel->addDcMultilingualSupport) {
             return $mapping;
         }

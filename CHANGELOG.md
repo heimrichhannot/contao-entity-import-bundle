@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.5.0] - 2020-04-30
+- added support for heimrichhannot/contao-categories-bundle in the database source
+
 ## [0.4.0] - 2020-04-30
 - added database source in order to import from one database entity into another (cms database or other)
 - added support for DC_Multilingual

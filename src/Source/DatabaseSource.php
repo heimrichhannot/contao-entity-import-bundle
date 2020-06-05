@@ -81,14 +81,14 @@ class DatabaseSource extends AbstractSource
 
     protected function adjustMappingForDcMultilingual(array $mapping)
     {
-        // DC_Multilingual -> add specific fields if not already existing
+        // DC_Multilingual
         if (!class_exists('\Terminal42\DcMultilingualBundle\Terminal42DcMultilingualBundle') || !$this->sourceModel->addDcMultilingualSupport) {
             return $mapping;
         }
 
         $table = $this->sourceModel->dbSourceTable;
 
-        // id is needed mandatory for fixing the langPid with the new ids
+        // id is needed mandatory for fixing the foreign key (langPid) with the new ids
         $mapping[] = [
             'name' => '__id',
             'valueType' => 'source_value',
