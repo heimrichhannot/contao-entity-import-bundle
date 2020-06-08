@@ -47,7 +47,9 @@ huh_entity_import:
 ## Technical instructions
 ### Run as symfony command
 
-`huh:entity-import:execute config-id [--dry-run]`
+`huh:entity-import:execute config-ids [--dry-run]`
+
+where `config-ids` needs to be a comma separated list of importer config IDs.
 
 ##### Arguments
 Argument | Mandatory | Type | Description

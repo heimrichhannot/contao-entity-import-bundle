@@ -67,7 +67,7 @@ class ExecuteImportCommand extends AbstractLockedCommand
     {
         $this->setName('huh:entity-import:execute');
         $this->setDescription('Runs a given importer config on the command line.');
-        $this->addArgument('config-id', InputArgument::REQUIRED, 'The importer source id');
+        $this->addArgument('config-ids', InputArgument::REQUIRED, 'The importer source ids as a comma separated list');
         $this->addOption('dry-run', null, InputOption::VALUE_NONE, 'Run importer without making changes to the database.');
     }
 
@@ -82,41 +82,41 @@ class ExecuteImportCommand extends AbstractLockedCommand
         $this->framework = $this->getContainer()->get('contao.framework');
         $this->framework->initialize();
 
-        if ($this->import()) {
-            $this->io->success('Import finished');
-        } else {
-            $this->io->error('Import failed');
-        }
+        $this->import();
 
         return 0;
     }
 
-    private function import(): bool
+    private function import()
     {
-        $importerConfigId = $this->input->getArgument('config-id');
+        $configIds = explode(',', $this->input->getArgument('config-ids'));
         $importerDryRun = $this->input->getOption('dry-run') ?: false;
 
-        if (null === ($configModel = $this->modelUtil->findModelInstanceByPk('tl_entity_import_config', $importerConfigId))) {
-            $this->io->error('Exporter config with id '.$importerConfigId.' not found.');
+        foreach ($configIds as $configId) {
+            if (null === ($configModel = $this->modelUtil->findModelInstanceByPk('tl_entity_import_config', $configId))) {
+                $this->io->error("Importer config with ID $configId not found.");
+            }
 
-            return false;
+            if ($configModel->language) {
+                $language = $GLOBALS['TL_LANGUAGE'];
+
+                $GLOBALS['TL_LANGUAGE'] = $configModel->language;
+            }
+
+            /** @var ImporterInterface $importer */
+            $importer = $this->importerFactory->createInstance($configModel->id);
+            $importer->setDryRun($importerDryRun);
+            $result = $importer->run();
+
+            if ($result) {
+                $this->io->success("Importer with config ID $configId finished successfully");
+            } else {
+                $this->io->error("Importer with config ID $configId failed");
+            }
+
+            if ($configModel->language) {
+                $GLOBALS['TL_LANGUAGE'] = $language;
+            }
         }
-
-        if ($configModel->language) {
-            $language = $GLOBALS['TL_LANGUAGE'];
-
-            $GLOBALS['TL_LANGUAGE'] = $configModel->language;
-        }
-
-        /** @var ImporterInterface $importer */
-        $importer = $this->importerFactory->createInstance($configModel->id);
-        $importer->setDryRun($importerDryRun);
-        $result = $importer->run();
-
-        if ($configModel->language) {
-            $GLOBALS['TL_LANGUAGE'] = $language;
-        }
-
-        return $result;
     }
 }

@@ -136,7 +136,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'exclude'   => true,
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['dbPass'],
             'inputType' => 'text',
-            'eval'      => ['maxlength' => 64, 'tl_class' => 'w50'],
+            'eval'      => ['maxlength' => 64, 'tl_class' => 'w50', 'decodeEntities' => true],
             'sql'       => "varchar(64) NOT NULL default ''",
         ],
         'dbDatabase'               => [
