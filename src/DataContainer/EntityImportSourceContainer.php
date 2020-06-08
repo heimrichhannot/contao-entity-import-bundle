@@ -92,15 +92,18 @@ class EntityImportSourceContainer
                     $dca['palettes'][static::TYPE_DATABASE] = str_replace('fieldMappingCopier', '', $dca['palettes'][static::TYPE_DATABASE]);
                     $dca['palettes'][static::TYPE_DATABASE] = str_replace('fieldMapping', '', $dca['palettes'][static::TYPE_DATABASE]);
                 } else {
-                    $options = $this->dcaUtil->getFields($sourceModel->dbSourceTable);
+                    try {
+                        $options = array_values(Database::getInstance($sourceModel->row())->getFieldNames($sourceModel->dbSourceTable, true));
 
-                    $sourceValueDca = &$dca['fields']['fieldMapping']['eval']['multiColumnEditor']['fields']['sourceValue'];
+                        $sourceValueDca = &$dca['fields']['fieldMapping']['eval']['multiColumnEditor']['fields']['sourceValue'];
 
-                    $sourceValueDca['inputType'] = 'select';
-                    $sourceValueDca['options'] = $options;
-                    $sourceValueDca['eval']['includeBlankOption'] = true;
-                    $sourceValueDca['eval']['mandatory'] = true;
-                    $sourceValueDca['eval']['chosen'] = true;
+                        $sourceValueDca['inputType'] = 'select';
+                        $sourceValueDca['options'] = array_combine($options, $options);
+                        $sourceValueDca['eval']['includeBlankOption'] = true;
+                        $sourceValueDca['eval']['mandatory'] = true;
+                        $sourceValueDca['eval']['chosen'] = true;
+                    } catch (\Exception $e) {
+                    }
                 }
 
                 break;

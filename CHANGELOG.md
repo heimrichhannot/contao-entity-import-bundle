@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.6.1] - 2020-06-08
+- fixed db source field retrieval
+
 ## [0.6.0] - 2020-06-05
 - fixed dry-run for categories and dc_multilingual support
 - added option to call the backend import action with a GET parameter `redirect_url`
