@@ -523,9 +523,11 @@ class Importer implements ImporterInterface
                     $conditions[] = '('.$table.'.'.$deletionIdentifier['target'].' NOT IN ('.implode(',', $sourceValues).'))';
                 }
 
-                $conditions[] = '('.$this->configModel->targetDeletionAdditionalWhere.')';
+                if ($this->configModel->targetDeletionAdditionalWhere) {
+                    $conditions[] = '('.$this->configModel->targetDeletionAdditionalWhere.')';
+                }
 
-                if (!$this->dryRun) {
+                if (!$this->dryRun && !empty($conditions)) {
                     $this->databaseUtil->delete($table, implode(' AND ', $conditions), []);
                 }
 
