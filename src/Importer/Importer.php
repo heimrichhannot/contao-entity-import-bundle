@@ -408,7 +408,7 @@ class Importer implements ImporterInterface
         $skipFields = \Contao\StringUtil::deserialize($this->configModel->skipFieldsOnMerge, true);
 
         foreach ($skipFields as $skipField) {
-            if (!array_key_exists($skipField, $mappingItem)) {
+            if (!\array_key_exists($skipField, $mappingItem)) {
                 continue;
             }
 
@@ -545,9 +545,11 @@ class Importer implements ImporterInterface
                     $conditions[] = '('.$table.'.'.$deletionIdentifier['target'].' NOT IN ('.implode(',', $sourceValues).'))';
                 }
 
-                $conditions[] = '('.$this->configModel->targetDeletionAdditionalWhere.')';
+                if ($this->configModel->targetDeletionAdditionalWhere) {
+                    $conditions[] = '('.$this->configModel->targetDeletionAdditionalWhere.')';
+                }
 
-                if (!$this->dryRun) {
+                if (!$this->dryRun && !empty($conditions)) {
                     $this->databaseUtil->delete($table, implode(' AND ', $conditions), []);
                 }
 

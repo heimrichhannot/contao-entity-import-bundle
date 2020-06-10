@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 ## [0.8.0] - 2020-06-10
 - added skip fields for merge 
 
+## [0.7.1] - 2020-06-09
+- fixed mirror mode deletion syntax bug
+
 ## [0.7.0] - 2020-06-08
 - importer command now takes a comma separated list of config ids
 - fixed database source password encoding issue
