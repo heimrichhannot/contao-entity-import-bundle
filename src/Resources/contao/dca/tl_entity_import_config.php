@@ -75,11 +75,11 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
         ],
     ],
     'palettes'    => [
-        '__selector__' => ['importMode', 'deleteBeforeImport', 'sortingMode', 'setDateAdded', 'setTstamp', 'generateAlias', 'deletionMode', 'useCron'],
+        '__selector__' => ['importMode', 'deleteBeforeImport', 'sortingMode', 'setDateAdded', 'setTstamp', 'generateAlias', 'deletionMode', 'useCron', 'addSkipFieldsOnMerge'],
         'default'      => '{general_legend},title,targetTable,importMode;{mapping_legend},fieldMappingCopier,fieldMapping;{fields_legend},setDateAdded,setTstamp,generateAlias;{sorting_legend},sortingMode;{deletion_legend},deleteBeforeImport,deletionMode;{misc_legend},addCategoriesSupport,addDcMultilingualSupport;{cron_legend},useCron;',
     ],
     'subpalettes' => [
-        'importMode_merge'                                                                                                          => 'mergeIdentifierFields',
+        'importMode_merge'                                                                                                          => 'mergeIdentifierFields,addSkipFieldsOnMerge',
         'sortingMode_' . \HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::SORTING_MODE_TARGET_FIELDS
                                                                                                                                     => 'targetSortingField,targetSortingOrder,targetSortingContextWhere',
         'deletionMode_' . \HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::DELETION_MODE_MIRROR        =>
@@ -90,7 +90,8 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
         'setTstamp'                                                                                                                 => 'targetTstampField',
         'generateAlias'                                                                                                             => 'targetAliasField,aliasFieldPattern',
         'deleteBeforeImport'                                                                                                        => 'deleteBeforeImportWhere',
-        'useCron'                                                                                                                   => 'cronInterval,cronDomain'
+        'useCron'                                                                                                                   => 'cronInterval,cronDomain',
+        'addSkipFieldsOnMerge'  => 'skipFieldsOnMerge'
     ],
     'fields'      => [
         'id'                            => [
@@ -452,6 +453,28 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
         'errorNotificationLock'         => [
             'sql' => "char(1) NOT NULL default ''"
         ],
+        'addSkipFieldsOnMerge' => [
+            'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['addSkipFieldsOnMerge'],
+            'inputType' => 'checkbox',
+            'exclude'   => true,
+            'eval'      => [
+                'tl_class'       => 'w50 clr',
+                'submitOnChange' => true
+            ],
+            'sql'       => "char(1) NOT NULL default ''",
+        ],
+        'skipFieldsOnMerge' => [
+            'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['skipFieldsOnMerge'],
+            'inputType' => 'checkboxWizard',
+            'exclude'   => true,
+            'options_callback' => [\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::class, 'getTargetFields'],
+            'eval' => [
+                'multiple' => true,
+                'tl_class' => 'clr',
+                'mandatory' => true
+            ],
+            'sql'       => "blob NULL",
+        ]
     ],
 ];
 

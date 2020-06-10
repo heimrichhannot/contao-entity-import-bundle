@@ -268,6 +268,8 @@ class Importer implements ImporterInterface
                     }, $identifierFields));
 
                     if ($key && isset($this->dbMergeCache[$key])) {
+                        $this->updateMappingItemForSkippedFields($mappedItem);
+
                         $existing = (object) $this->dbMergeCache[$key];
 
                         $set = $this->setDateAdded($existing);
@@ -392,6 +394,26 @@ class Importer implements ImporterInterface
         }
 
         return true;
+    }
+
+    /**
+     * @param $mappingItem
+     */
+    protected function updateMappingItemForSkippedFields(array &$mappingItem): void
+    {
+        if (!$this->configModel->addSkipFieldsOnMerge) {
+            return;
+        }
+
+        $skipFields = \Contao\StringUtil::deserialize($this->configModel->skipFieldsOnMerge, true);
+
+        foreach ($skipFields as $skipField) {
+            if (!array_key_exists($skipField, $mappingItem)) {
+                continue;
+            }
+
+            unset($mappingItem[$skipField]);
+        }
     }
 
     protected function importCategoryAssociations(array $mapping, array $item, $targetId)

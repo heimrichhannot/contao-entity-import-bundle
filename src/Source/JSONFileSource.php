@@ -38,7 +38,7 @@ class JSONFileSource extends AbstractFileSource
 
     protected function getDataFromPath(array $data, array $path): array
     {
-        if (empty($path)) {
+        if (empty($path) || '' == reset($path)) {
             return $data;
         }
 
