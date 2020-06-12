@@ -33,6 +33,12 @@ $lang['cronInterval'][1] = 'Select the interval at which the import is to be per
 $lang['cronDomain'][0] = 'Domain name';
 $lang['cronDomain'][1] = 'Enter the domain on which the cronjob is executed. This is for a better allocation in case errors occur during the cronjob.';
 
+$lang['addSkipFieldsOnMerge'][0] = 'Add skip fields for merge';
+$lang['addSkipFieldsOnMerge'][1] = 'Select this option if you want to declare certain fields to not be overwritten on merge.';
+
+$lang['skipFieldsOnMerge'][0] = 'Fields';
+$lang['skipFieldsOnMerge'][1] = 'Select the fields that shall not be overwritten.';
+
 /**
  * Reference
  */

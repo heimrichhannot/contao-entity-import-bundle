@@ -465,7 +465,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
         ],
         'skipFieldsOnMerge' => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['skipFieldsOnMerge'],
-            'inputType' => 'checkboxWizard',
+            'inputType' => 'checkbox',
             'exclude'   => true,
             'options_callback' => [\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::class, 'getTargetFields'],
             'eval' => [

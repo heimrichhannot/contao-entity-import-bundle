@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.8.1] - 2020-06-12
+- fixed input value for `skipFieldsOnMerge` 
+- added language to new fields
+
 ## [0.8.0] - 2020-06-10
 - added skip fields for merge 
 
