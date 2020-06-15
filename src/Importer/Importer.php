@@ -507,7 +507,7 @@ class Importer implements ImporterInterface
         $this->dbMergeCache = $cache;
     }
 
-    protected function getDebugConfig(): array
+    protected function getDebugConfig(): ?array
     {
         $config = $this->container->getParameter('huh_entity_import');
 
@@ -519,7 +519,7 @@ class Importer implements ImporterInterface
         $table = $this->configModel->targetTable;
 
         if ($this->configModel->deleteBeforeImport && !$this->dryRun) {
-            $this->databaseUtil->delete($table, $this->configModel->targetDeletionWhere);
+            $this->databaseUtil->delete($table, $this->configModel->deleteBeforeImportWhere);
         }
     }
 

@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.8.2] - 2020-06-15
+- fixed usage of `deleteBeforeImportWhere` in deleteBeforeImport
+
 ## [0.8.1] - 2020-06-12
 - fixed input value for `skipFieldsOnMerge` 
 - added language to new fields
