@@ -15,6 +15,7 @@ use Contao\System;
 use HeimrichHannot\EntityImportBundle\Source\AbstractFileSource;
 use HeimrichHannot\EntityImportBundle\Source\CSVFileSource;
 use HeimrichHannot\EntityImportBundle\Source\SourceFactory;
+use HeimrichHannot\EntityImportBundle\Util\EntityImportUtil;
 use HeimrichHannot\UtilsBundle\Dca\DcaUtil;
 use HeimrichHannot\UtilsBundle\File\FileUtil;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
@@ -67,14 +68,19 @@ class EntityImportSourceContainer
      * @var DcaUtil
      */
     private $dcaUtil;
+    /**
+     * @var EntityImportUtil
+     */
+    private $util;
 
-    public function __construct(SourceFactory $sourceFactory, FileUtil $fileUtil, ModelUtil $modelUtil, DcaUtil $dcaUtil)
+    public function __construct(SourceFactory $sourceFactory, FileUtil $fileUtil, ModelUtil $modelUtil, DcaUtil $dcaUtil, EntityImportUtil $util)
     {
         $this->activeBundles = System::getContainer()->getParameter('kernel.bundles');
         $this->sourceFactory = $sourceFactory;
         $this->fileUtil = $fileUtil;
         $this->modelUtil = $modelUtil;
         $this->dcaUtil = $dcaUtil;
+        $this->util = $util;
     }
 
     public function initPalette(?DataContainer $dc)
@@ -95,13 +101,9 @@ class EntityImportSourceContainer
                     try {
                         $options = array_values(Database::getInstance($sourceModel->row())->getFieldNames($sourceModel->dbSourceTable, true));
 
-                        $sourceValueDca = &$dca['fields']['fieldMapping']['eval']['multiColumnEditor']['fields']['sourceValue'];
-
-                        $sourceValueDca['inputType'] = 'select';
-                        $sourceValueDca['options'] = array_combine($options, $options);
-                        $sourceValueDca['eval']['includeBlankOption'] = true;
-                        $sourceValueDca['eval']['mandatory'] = true;
-                        $sourceValueDca['eval']['chosen'] = true;
+                        $this->util->transformFieldMappingSourceValueToSelect(
+                            array_combine($options, $options)
+                        );
                     } catch (\Exception $e) {
                     }
                 }
@@ -128,13 +130,10 @@ class EntityImportSourceContainer
                             }
                         }
 
-                        $sourceValueDca = &$dca['fields']['fieldMapping']['eval']['multiColumnEditor']['fields']['sourceValue'];
+                        $this->util->transformFieldMappingSourceValueToSelect(
+                            $options
+                        );
 
-                        $sourceValueDca['inputType'] = 'select';
-                        $sourceValueDca['options'] = $options;
-                        $sourceValueDca['eval']['includeBlankOption'] = true;
-                        $sourceValueDca['eval']['mandatory'] = true;
-                        $sourceValueDca['eval']['chosen'] = true;
                         $dca['fields']['fileContent']['eval']['rte'] = 'ace';
 
                         break;

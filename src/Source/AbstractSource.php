@@ -45,4 +45,19 @@ abstract class AbstractSource implements SourceInterface
     {
         $this->sourceModel = $sourceModel;
     }
+
+    protected function getMappedItemData(?array $element, array $mapping): array
+    {
+        $result = [];
+
+        foreach ($mapping as $mappingElement) {
+            if ('static_value' === $mappingElement['valueType']) {
+                $result[$mappingElement['name']] = $this->stringUtil->replaceInsertTags($mappingElement['staticValue']);
+            } elseif ('source_value' === $mappingElement['valueType']) {
+                $result[$mappingElement['name']] = $element[$mappingElement['sourceValue']];
+            }
+        }
+
+        return $result;
+    }
 }

@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.9.0] - 2020-06-19
+- fixed localizations
+- fixed usability issues
+- fixed `SourceFactoryCreateSourceEvent` to contain the source model
+- refactoring in `Source`
+
 ## [0.8.2] - 2020-06-15
 - fixed usage of `deleteBeforeImportWhere` in deleteBeforeImport
 

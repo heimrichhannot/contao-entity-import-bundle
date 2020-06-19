@@ -29,7 +29,7 @@ class JSONFileSource extends AbstractFileSource
 
         if (null !== $fileData) {
             foreach ($fileData as $index => $element) {
-                $data[] = $this->getMappedValues($element, $mapping);
+                $data[] = $this->getMappedItemData($element, $mapping);
             }
         }
 
@@ -47,7 +47,7 @@ class JSONFileSource extends AbstractFileSource
         return $this->getDataFromPath($data, $path);
     }
 
-    protected function getMappedValues(array $element, array $mapping): array
+    protected function getMappedItemData(?array $element, array $mapping): array
     {
         $result = [];
 
@@ -56,8 +56,6 @@ class JSONFileSource extends AbstractFileSource
                 $result[$mappingElement['name']] = $this->stringUtil->replaceInsertTags($mappingElement['staticValue']);
             } elseif ('source_value' === $mappingElement['valueType']) {
                 $result[$mappingElement['name']] = $this->getValue($element, $mappingElement);
-            } else {
-                continue;
             }
         }
 

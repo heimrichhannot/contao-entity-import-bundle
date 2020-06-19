@@ -110,6 +110,7 @@ $lang['db_legend']       = 'Datenbankeinstellungen';
 $lang['external_legend'] = 'Externe Quelle';
 $lang['file_legend']     = 'Datei';
 $lang['misc_legend']     = 'Verschiedenes';
+$lang['config_legend']   = 'Konfiguration';
 
 /**
  * Buttons

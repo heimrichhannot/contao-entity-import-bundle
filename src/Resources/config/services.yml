@@ -3,5 +3,5 @@ services:
     autowire: true
 
   HeimrichHannot\EntityImportBundle\Importer\ImporterFactory: ~
-
   HeimrichHannot\EntityImportBundle\Source\SourceFactory: ~
+  HeimrichHannot\EntityImportBundle\Util\EntityImportUtil: ~

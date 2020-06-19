@@ -56,27 +56,10 @@ class DatabaseSource extends AbstractSource
         $data = [];
 
         while ($records->next()) {
-            $data[] = $this->getMappedValues($records->row(), $mapping);
+            $data[] = $this->getMappedItemData($records->row(), $mapping);
         }
 
         return $data;
-    }
-
-    protected function getMappedValues(array $element, array $mapping): array
-    {
-        $result = [];
-
-        foreach ($mapping as $mappingElement) {
-            if ('static_value' === $mappingElement['valueType']) {
-                $result[$mappingElement['name']] = $this->stringUtil->replaceInsertTags($mappingElement['staticValue']);
-            } elseif ('source_value' === $mappingElement['valueType']) {
-                $result[$mappingElement['name']] = $element[$mappingElement['sourceValue']];
-            } else {
-                continue;
-            }
-        }
-
-        return $result;
     }
 
     protected function adjustMappingForDcMultilingual(array $mapping)

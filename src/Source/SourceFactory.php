@@ -66,7 +66,6 @@ class SourceFactory
 
         $source = null;
 
-        // TODO -> change to config.yml
         switch ($sourceModel->type) {
             case EntityImportSourceContainer::TYPE_DATABASE:
                 $source = new DatabaseSource($this->eventDispatcher, $this->stringUtil, $this->dcaUtil);
@@ -89,7 +88,10 @@ class SourceFactory
                 break;
         }
 
-        $event = $this->eventDispatcher->dispatch(SourceFactoryCreateSourceEvent::NAME, new SourceFactoryCreateSourceEvent($source, $this->fileUtil, $this->modelUtil));
+        $event = $this->eventDispatcher->dispatch(SourceFactoryCreateSourceEvent::NAME, new SourceFactoryCreateSourceEvent(
+            $source,
+            $sourceModel
+        ));
 
         $source = $event->getSource();
 

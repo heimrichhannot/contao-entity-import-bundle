@@ -27,7 +27,7 @@ class CSVFileSource extends AbstractFileSource
         $csv->next();
 
         while ($current = $csv->current()) {
-            $data[] = $this->getRowData($current, $this->fieldMapping);
+            $data[] = $this->getMappedItemData($current, $this->fieldMapping);
 
             $csv->next();
         }
@@ -66,22 +66,5 @@ class CSVFileSource extends AbstractFileSource
         }
 
         return $settings;
-    }
-
-    protected function getRowData(?array $current, ?array $mapping): array
-    {
-        $row = [];
-
-        foreach ($mapping as $element) {
-            if ('source_value' === $element['valueType']) {
-                $row[$element['name']] = $current[$element['sourceValue']];
-            } elseif ('static_value' === $element['valueType']) {
-                $row[$element['name']] = $this->stringUtil->replaceInsertTags($element['staticValue']);
-            } else {
-                continue;
-            }
-        }
-
-        return $row;
     }
 }

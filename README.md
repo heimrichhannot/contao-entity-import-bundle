@@ -31,20 +31,23 @@ Importer config backend settings:
 Install via composer: `composer require heimrichhannot/contao-entity-import-bundle` and update your database.
 
 ## Configuration
+
 1. Navigate to "Import" in the Contao backend in the section "system".
 1. Create an importer source to your needs.
 1. Create an importer using the source created in the step before.
 1. Run the importer either using dry-run or the normal mode.
 
-#####config.yml
+### config.yml
+
 ```yaml
 huh_entity_import:
   debug:
-    contao_log: true
-    email: false
+    contao_log: true # log errors while importing to contao system log
+    email: false # report errors while importing via email to the admin email defined in the contao settings
 ```
 
 ## Technical instructions
+
 ### Run as symfony command
 
 `huh:entity-import:execute config-ids [--dry-run]`
@@ -62,7 +65,40 @@ dry-run | false | boolean |Run importer without writing data into database
 Import is executable with contao poor man's cron. The interval of execution is similar to the contao definition.
 The import configuration allows to enable cron execution and picking of the cron interval.
 Possible to choose between `minutely`, `hourly`, `daily`, `weekly`, `monthly` interval. It is recommended to setup
- the debug options in config.yml before importing via cronjob.
+the debug options in config.yml before importing via cronjob.
+
+### Add custom sources
+
+1. Create the source and extend from `\HeimrichHannot\EntityImportBundle\Source\AbstractSource` or implement the
+   interface `\HeimrichHannot\EntityImportBundle\Source\SourceInterface`.
+1. Create an event listener for the event `SourceFactoryCreateSourceEvent`:
+   ```php
+   class SourceFactoryCreateSourceEventListener {
+       public function __invoke(SourceFactoryCreateSourceEvent $event) {
+           $sourceModel = $event->getSourceModel();
+           $source = $event->getSource();
+   
+           switch ($sourceModel->type) {
+               case 'new_stuff':
+                   $source = new NewStuffSource();
+   
+                   break;
+               // ...
+           }
+   
+           $event->setSource($source);
+       }
+   }
+   ```
+1. Create a `tl_entity_import_source.php` and add your sources in the `type` field's options:
+   ```php
+   $dca = &$GLOBALS['TL_DCA']['tl_entity_import_source'];
+   
+   $dca['fields']['type']['options'] = array_merge($dca['fields']['type']['options'], [
+       'new_stuff'
+   ]);
+   ```
+1. Create your palette in your `tl_entity_import_source.php`, e.g. by copying one from this bundle.
 
 ## Events
 

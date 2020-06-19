@@ -341,6 +341,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
                 'tl_class'          => 'long clr',
                 'multiColumnEditor' => [
                     'sortable'    => true,
+                    'minRowCount' => 0,
                     'palettes'    => [
                         '__selector__' => ['valueType'],
                         'default'      => 'name, valueType',
