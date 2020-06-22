@@ -76,7 +76,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
     ],
     'palettes'    => [
         '__selector__' => ['importMode', 'deleteBeforeImport', 'sortingMode', 'setDateAdded', 'setTstamp', 'generateAlias', 'deletionMode', 'useCron', 'addSkipFieldsOnMerge'],
-        'default'      => '{general_legend},title,targetTable,importMode,maxQuantity;{mapping_legend},fieldMappingCopier,fieldMapping;{fields_legend},setDateAdded,setTstamp,generateAlias;{file_mapping_legend},fileFieldMappingCopier,fileFieldMapping;{sorting_legend},sortingMode;{deletion_legend},deleteBeforeImport,deletionMode;{misc_legend},addCategoriesSupport,addDcMultilingualSupport;{cron_legend},useCron;',
+        'default'      => '{general_legend},title,targetTable,importMode;{mapping_legend},fieldMappingCopier,fieldMapping;{fields_legend},setDateAdded,setTstamp,generateAlias;{file_mapping_legend},fileFieldMappingCopier,fileFieldMapping;{sorting_legend},sortingMode;{deletion_legend},deleteBeforeImport,deletionMode;{misc_legend},addCategoriesSupport,addDcMultilingualSupport;{cron_legend},useCron;',
     ],
     'subpalettes' => [
         'importMode_merge'                                                                                                          => 'mergeIdentifierFields,addSkipFieldsOnMerge',
@@ -338,14 +338,6 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'reference' => &$GLOBALS['TL_LANG']['tl_entity_import_config']['reference']['importMode'],
             'eval'      => ['tl_class' => 'w50', 'submitOnChange' => true, 'mandatory' => true],
             'sql'       => "varchar(16) NOT NULL default ''",
-        ],
-        'maxQuantity'                   => [
-            'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['maxQuantity'],
-            'exclude'   => true,
-            'search'    => true,
-            'inputType' => 'text',
-            'eval'      => ['rgxp' => 'digit', 'maxlength' => 10, 'tl_class' => 'w50'],
-            'sql'       => "int(10) unsigned NOT NULL default '0'"
         ],
         'deleteBeforeImport'            => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['deleteBeforeImport'],

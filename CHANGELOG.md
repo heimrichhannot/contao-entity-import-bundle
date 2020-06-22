@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.10.1] - 2020-06-22
+- removed test field
+
 ## [0.10.0] - 2020-06-22
 - added file import
 - added event `BeforeFileImportEvent` for manipulation file path and/or folder path
