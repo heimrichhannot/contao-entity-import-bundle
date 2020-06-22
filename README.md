@@ -111,3 +111,4 @@ Name | Description
 `BeforeImportEvent` | Configure the data before importing
 `BeforeItemImportEvent` | Configure the item data before importing; call `setSkipped(true)` in order to skip the import
 `SourceFactoryCreateSourceEvent` | Implement custom logic for new custom file sources
+`BeforeFileImportEvent` | Implement a custom logic for setting the folder and/or file path when importing files

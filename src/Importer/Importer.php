@@ -8,15 +8,20 @@
 
 namespace HeimrichHannot\EntityImportBundle\Importer;
 
+use Ausi\SlugGenerator\SlugGenerator;
 use Contao\CoreBundle\Exception\RedirectResponseException;
 use Contao\Database;
 use Contao\Email;
+use Contao\File;
+use Contao\Folder;
 use Contao\Message;
 use Contao\Model;
 use Contao\System;
+use Contao\Validator;
 use HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer;
 use HeimrichHannot\EntityImportBundle\Event\AfterImportEvent;
 use HeimrichHannot\EntityImportBundle\Event\AfterItemImportEvent;
+use HeimrichHannot\EntityImportBundle\Event\BeforeFileImportEvent;
 use HeimrichHannot\EntityImportBundle\Event\BeforeImportEvent;
 use HeimrichHannot\EntityImportBundle\Event\BeforeItemImportEvent;
 use HeimrichHannot\EntityImportBundle\Model\EntityImportConfigModel;
@@ -25,6 +30,7 @@ use HeimrichHannot\RequestBundle\Component\HttpFoundation\Request;
 use HeimrichHannot\UtilsBundle\Container\ContainerUtil;
 use HeimrichHannot\UtilsBundle\Database\DatabaseUtil;
 use HeimrichHannot\UtilsBundle\Dca\DcaUtil;
+use HeimrichHannot\UtilsBundle\File\FileUtil;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
 use HeimrichHannot\UtilsBundle\String\StringUtil;
 use Psr\Log\LogLevel;
@@ -99,12 +105,27 @@ class Importer implements ImporterInterface
      * @var Request
      */
     private $request;
+    /**
+     * @var FileUtil
+     */
+    private $fileUtil;
 
     /**
      * Importer constructor.
      */
-    public function __construct(ContainerInterface $container, Model $configModel, SourceInterface $source, EventDispatcherInterface $eventDispatcher, DatabaseUtil $databaseUtil, ModelUtil $modelUtil, StringUtil $stringUtil, DcaUtil $dcaUtil, ContainerUtil $containerUtil, Request $request)
-    {
+    public function __construct(
+        ContainerInterface $container,
+        Model $configModel,
+        SourceInterface $source,
+        EventDispatcherInterface $eventDispatcher,
+        Request $request,
+        DatabaseUtil $databaseUtil,
+        ModelUtil $modelUtil,
+        StringUtil $stringUtil,
+        DcaUtil $dcaUtil,
+        ContainerUtil $containerUtil,
+        FileUtil $fileUtil
+    ) {
         $this->container = $container;
         $this->configModel = $configModel;
         $this->source = $source;
@@ -115,6 +136,7 @@ class Importer implements ImporterInterface
         $this->dcaUtil = $dcaUtil;
         $this->containerUtil = $containerUtil;
         $this->request = $request;
+        $this->fileUtil = $fileUtil;
     }
 
     /**
@@ -255,6 +277,7 @@ class Importer implements ImporterInterface
                         $set = $this->setDateAdded($record);
                         $set = array_merge($set, $this->generateAlias($record));
                         $set = array_merge($set, $this->setTstamp($record));
+                        $set = array_merge($set, $this->applyFieldFileMapping($record, $item));
 
                         if (!empty($set) && !$this->dryRun) {
                             $this->databaseUtil->update($table, $set, "$table.id=?", [$record->id]);
@@ -275,6 +298,7 @@ class Importer implements ImporterInterface
                         $set = $this->setDateAdded($existing);
                         $set = array_merge($set, $this->generateAlias($existing));
                         $set = array_merge($set, $this->setTstamp($existing));
+                        $set = array_merge($set, $this->applyFieldFileMapping($existing, $item));
 
                         if (!$this->dryRun) {
                             $this->databaseUtil->update($table, array_merge($mappedItem, $set), "$table.id=?", [$existing->id]);
@@ -291,6 +315,7 @@ class Importer implements ImporterInterface
                             $set = $this->setDateAdded($record);
                             $set = array_merge($set, $this->generateAlias($record));
                             $set = array_merge($set, $this->setTstamp($record));
+                            $set = array_merge($set, $this->applyFieldFileMapping($record, $item));
 
                             if (!empty($set) && !$this->dryRun) {
                                 $this->databaseUtil->update($table, $set, "$table.id=?", [$record->id]);
@@ -584,7 +609,6 @@ class Importer implements ImporterInterface
 
     protected function setTstamp($record): array
     {
-        $table = $this->configModel->targetTable;
         $field = $this->configModel->targetTstampField;
 
         if (!$this->configModel->setTstamp || !$field || !$record->id) {
@@ -630,6 +654,104 @@ class Importer implements ImporterInterface
         return [
             $field => $alias,
         ];
+    }
+
+    protected function applyFieldFileMapping($record, $item): array
+    {
+        $set = [];
+        $slugGenerator = new SlugGenerator();
+        $fileMapping = \Contao\StringUtil::deserialize($this->configModel->fileFieldMapping, true);
+
+        foreach ($fileMapping as $mapping) {
+            // retrieve the file
+            $content = $this->fileUtil->retrieveFileContent(
+                $item[$mapping['mappingField']], $this->containerUtil->isBackend()
+            );
+
+            // sleep after http requests because of a possible rate limiting
+            if (Validator::isUrl($item[$mapping['mappingField']]) && $mapping['delayAfter'] > 0) {
+                sleep((int) ($mapping['delayAfter']));
+            }
+
+            // no file found?
+            if (!$content) {
+                $set[$mapping['targetField']] = null;
+
+                continue;
+            }
+
+            // generate the file name
+            switch ($mapping['namingMode']) {
+                case 'random_md5':
+                    $filename = md5(rand(0, 99999999999999));
+
+                    break;
+
+                case 'field_pattern':
+                    $filename = preg_replace_callback(
+                        '@%([^%]+)%@i',
+                        function ($matches) use ($record) {
+                            return $record->{$matches[1]};
+                        },
+                        $mapping['filenamePattern']
+                    );
+
+                    break;
+            }
+
+            if ($mapping['slugFilename']) {
+                $filename = $slugGenerator->generate($filename);
+            }
+
+            $extension = $this->fileUtil->getExtensionFromFileContent($content);
+
+            $extension = $extension ? '.'.$extension : '';
+
+            // check if a file of that name already exists
+            $folder = new Folder($this->fileUtil->getPathFromUuid($mapping['targetFolder']));
+
+            $filenameWithoutExtension = $folder->path.'/'.$filename;
+
+            $file = new File($filenameWithoutExtension.$extension);
+
+            if ($file->exists()) {
+                if (!$record->{$mapping['targetField']}) {
+                    // no reference -> create the file with an incremented suffix
+                    $i = 1;
+
+                    while ($file->exists()) {
+                        $filenameWithoutExtension .= '-'.$i++;
+                        $file = new File($filenameWithoutExtension.$extension);
+                    }
+                } else {
+                    // only rewrite if content has changed
+                    if ($file->getContent() === $content) {
+                        continue;
+                    }
+                }
+            }
+
+            $event = $this->eventDispatcher->dispatch(BeforeFileImportEvent::NAME, new BeforeFileImportEvent(
+                $file->path,
+                $content,
+                (array) $record,
+                $item,
+                $this->configModel,
+                $this->source,
+                $this->dryRun
+            ));
+
+            $file = new File($event->getPath());
+
+            if (!$this->dryRun) {
+                $file->write($event->getContent());
+                $file->close();
+
+                $set[$mapping['targetField']] = $file->getModel()->uuid;
+            }
+        }
+
+        return $set;
     }
 
     protected function applySorting()

@@ -13,6 +13,7 @@ use HeimrichHannot\RequestBundle\Component\HttpFoundation\Request;
 use HeimrichHannot\UtilsBundle\Container\ContainerUtil;
 use HeimrichHannot\UtilsBundle\Database\DatabaseUtil;
 use HeimrichHannot\UtilsBundle\Dca\DcaUtil;
+use HeimrichHannot\UtilsBundle\File\FileUtil;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
 use HeimrichHannot\UtilsBundle\String\StringUtil;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -59,6 +60,10 @@ class ImporterFactory
      * @var Request
      */
     private $request;
+    /**
+     * @var FileUtil
+     */
+    private $fileUtil;
 
     /**
      * Importer constructor.
@@ -67,12 +72,13 @@ class ImporterFactory
         ContainerInterface $container,
         DatabaseUtil $databaseUtil,
         EventDispatcherInterface $eventDispatcher,
+        Request $request,
         ModelUtil $modelUtil,
         StringUtil $stringUtil,
         DcaUtil $dcaUtil,
         SourceFactory $sourceFactory,
         ContainerUtil $containerUtil,
-        Request $request
+        FileUtil $fileUtil
     ) {
         $this->databaseUtil = $databaseUtil;
         $this->eventDispatcher = $eventDispatcher;
@@ -83,6 +89,7 @@ class ImporterFactory
         $this->container = $container;
         $this->containerUtil = $containerUtil;
         $this->request = $request;
+        $this->fileUtil = $fileUtil;
     }
 
     public function createInstance(int $configModel): ?ImporterInterface
@@ -102,12 +109,13 @@ class ImporterFactory
             $configModel,
             $source,
             $this->eventDispatcher,
+            $this->request,
             $this->databaseUtil,
             $this->modelUtil,
             $this->stringUtil,
             $this->dcaUtil,
             $this->containerUtil,
-            $this->request
+            $this->fileUtil
         );
     }
 }

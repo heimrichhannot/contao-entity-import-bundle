@@ -25,14 +25,31 @@ $lang['mergeIdentifierFields']['target'][1] = 'Wählen Sie hier ein Feld aus der
 
 $lang['fieldMapping'][0]                 = 'Feldabbildung';
 $lang['fieldMapping'][1]                 = 'Geben Sie hier die Zuordnung der ausgewählten Felder der Quelle mit den vorhandenen Tabellenspalten.';
-$lang['fieldMapping']['columnName'][0]   = 'Spaltenname';
+$lang['fieldMapping']['columnName'][0]   = 'Zielfeld';
 $lang['fieldMapping']['columnName'][1]   = 'Wählen Sie hier die Spalte der gewählten Tabelle aus.';
 $lang['fieldMapping']['valueType'][0]    = 'Typ des Wertes';
 $lang['fieldMapping']['valueType'][1]    = 'Wählen Sie hier den Typ des Wertes aus. Bei dynamisch wird der Wert aus der Feldabbildung der Quelle genommen. Bei statisch wird der Inhalt des Feldes als Wert genommen.';
-$lang['fieldMapping']['mappingValue'][0] = 'Quellfeld Wert';
+$lang['fieldMapping']['mappingValue'][0] = 'Quellfeld';
 $lang['fieldMapping']['mappingValue'][1] = 'Wählen Sie hier ein Feld aus der Feldabbildung der Quelle aus.';
 $lang['fieldMapping']['staticValue'][0]  = 'Statischer Wert';
 $lang['fieldMapping']['staticValue'][1]  = 'Geben Sie hier einen Wert ein. Dieser wird in alle Datensätze eingetragen.';
+
+$lang['fileFieldMapping'][0]                    = 'Datei-Feldabbildung';
+$lang['fileFieldMapping'][1]                    = 'Geben Sie hier die Zuordnung der ausgewählten Felder der Quelle mit den vorhandenen Tabellenspalten.';
+$lang['fileFieldMapping']['mappingField'][0]    = 'Quellfeld (siehe Notiz)';
+$lang['fileFieldMapping']['mappingField'][1]    = 'Wählen Sie hier ein Feld aus der Feldabbildung der Quelle aus. Es kann folgendes enthalten: URL, UUID oder Binärdaten der Datei.';
+$lang['fileFieldMapping']['targetField'][0]     = 'Zielfeld';
+$lang['fileFieldMapping']['targetField'][1]     = 'In diesem Feld der Zieltabelle wird eine binäre Referenz (UUID) der Datei gespeichert.';
+$lang['fileFieldMapping']['targetFolder'][0]    = 'Zielverzeichnis';
+$lang['fileFieldMapping']['targetFolder'][1]    = 'Wählen Sie hier aus, in welchem Zielverzeichnis die Datei gespeichert werden soll.';
+$lang['fileFieldMapping']['namingMode'][0]      = 'Benamungsmodus';
+$lang['fileFieldMapping']['namingMode'][1]      = 'Wählen Sie hier aus, wie der Dateiname generiert werden soll.';
+$lang['fileFieldMapping']['filenamePattern'][0] = 'Feldmuster';
+$lang['fileFieldMapping']['filenamePattern'][1] = 'Geben Sie hier ein Muster der Form "%title%" ein, welches für die Generierung des Dateinamens genutzt wird (Verkettungen wie "%fieldname1%-%fieldname2%" sind auch möglich).';
+$lang['fileFieldMapping']['slugFilename'][0]    = 'Dateiname normalisieren (slug)';
+$lang['fileFieldMapping']['slugFilename'][1]    = 'Wählen Sie diese Option, um den Dateinamen von potentiell problematischen Zeichen zu säubern.';
+$lang['fileFieldMapping']['delayAfter'][0]      = 'Wartezeit nach HTTP-Request';
+$lang['fileFieldMapping']['delayAfter'][1]      = 'Geben Sie hier die Zeit in Sekunden ein, die der Importer nach einem HTTP-Request warten soll, um bspw. ein Rate-Limit zu umgehen.';
 
 $lang['importMode'][0] = 'Importmodus';
 $lang['importMode'][1] = 'Wählen Sie hier aus, auf welche Weise importiert werden soll.';
@@ -126,6 +143,10 @@ $lang['reference'] = [
     'valueType'    => [
         'source_value' => 'dynamisch',
         'static_value' => 'statisch',
+    ],
+    'namingMode'   => [
+        'field_pattern' => 'aus Quellfeld-Werten',
+        'random_md5' => 'zufällige MD5-Zeichenfolge',
     ]
 ];
 
@@ -162,13 +183,14 @@ $lang['label']     = 'Klicken Sie &quot;Import ausführen&quot;, um den Importpr
 /**
  * Legends
  */
-$lang['general_legend']  = 'Allgemeines';
-$lang['mapping_legend']  = 'Felderabbildung';
-$lang['fields_legend']   = 'Felderbearbeitung';
-$lang['sorting_legend']  = 'Sortierung';
-$lang['deletion_legend'] = 'Löschen';
-$lang['misc_legend']     = 'Verschiedenes';
-$lang['cron_legend']     = 'Cronjob/Command';
+$lang['general_legend']      = 'Allgemeines';
+$lang['mapping_legend']      = 'Felderabbildung';
+$lang['fields_legend']       = 'Felderbearbeitung';
+$lang['file_mapping_legend'] = 'Felderabbildung (Dateien)';
+$lang['sorting_legend']      = 'Sortierung';
+$lang['deletion_legend']     = 'Löschen';
+$lang['misc_legend']         = 'Verschiedenes';
+$lang['cron_legend']         = 'Cronjob/Command';
 
 /**
  * Buttons

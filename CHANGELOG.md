@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.10.0] - 2020-06-19
+- added file import
+- added event `BeforeFileImportEvent` for manipulation file path and/or folder path
+
 ## [0.9.0] - 2020-06-19
 - fixed localizations
 - fixed usability issues
