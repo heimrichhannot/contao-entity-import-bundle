@@ -346,6 +346,7 @@ class Importer implements ImporterInterface
                     $importedRecord,
                     $mappedItem,
                     $item,
+                    $mapping,
                     $this->configModel,
                     $this->source,
                     $this->dryRun
@@ -367,6 +368,22 @@ class Importer implements ImporterInterface
                     if (!$this->dryRun) {
                         $this->databaseUtil->update($table, [
                             $table.'.'.$langPidField => $this->dbIdMapping[$itemMapping['source']['langPid']],
+                        ], "$table.id=?", [$itemMapping['target']->id]);
+                    }
+                }
+            }
+
+            // Drafts -> fix draftParent (can only be done after all items are imported due to order issues otherwise)
+            if (class_exists('\HeimrichHannot\DraftsBundle\ContaoDraftsBundle') &&
+                $this->configModel->addDraftsSupport) {
+                foreach ($this->dbItemMapping as $itemMapping) {
+                    if (!$itemMapping['source']['draftParent']) {
+                        continue;
+                    }
+
+                    if (!$this->dryRun) {
+                        $this->databaseUtil->update($table, [
+                            $table.'.draftParent' => $this->dbIdMapping[$itemMapping['source']['draftParent']],
                         ], "$table.id=?", [$itemMapping['target']->id]);
                     }
                 }

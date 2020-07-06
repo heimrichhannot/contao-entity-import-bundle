@@ -112,6 +112,9 @@ $lang['addDcMultilingualSupport'][1] = 'Wählen Sie diese Option, wenn es sich b
 $lang['addCategoriesSupport'][0] = 'Unterstützung für heimrichhannot/contao-categories-bundle hinzufügen';
 $lang['addCategoriesSupport'][1] = 'Wählen Sie diese Option, um entsprechende Felder zu beachten.';
 
+$lang['addDraftsSupport'][0] = 'Unterstützung für heimrichhannot/contao-drafts-bundle hinzufügen';
+$lang['addDraftsSupport'][1] = 'Wählen Sie diese Option, um entsprechende Felder zu beachten.';
+
 $lang['addSkipFieldsOnMerge'][0] = 'Bei der Zusammenführung zu überspringende Felder hinzufügen';
 $lang['addSkipFieldsOnMerge'][1] = 'Wählen Sie diese Option, wenn beim Zusammenführen (Merge) Felder in der Datenbank nicht überschrieben werden sollen.';
 

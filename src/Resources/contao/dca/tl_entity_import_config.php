@@ -76,7 +76,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
     ],
     'palettes'    => [
         '__selector__' => ['importMode', 'deleteBeforeImport', 'sortingMode', 'setDateAdded', 'setTstamp', 'generateAlias', 'deletionMode', 'useCron', 'addSkipFieldsOnMerge'],
-        'default'      => '{general_legend},title,targetTable,importMode;{mapping_legend},fieldMappingCopier,fieldMapping;{fields_legend},setDateAdded,setTstamp,generateAlias;{file_mapping_legend},fileFieldMappingCopier,fileFieldMapping;{sorting_legend},sortingMode;{deletion_legend},deleteBeforeImport,deletionMode;{misc_legend},addCategoriesSupport,addDcMultilingualSupport;{cron_legend},useCron;',
+        'default'      => '{general_legend},title,targetTable,importMode;{mapping_legend},fieldMappingCopier,fieldMapping;{fields_legend},setDateAdded,setTstamp,generateAlias;{file_mapping_legend},fileFieldMappingCopier,fileFieldMapping;{sorting_legend},sortingMode;{deletion_legend},deleteBeforeImport,deletionMode;{misc_legend},addCategoriesSupport,addDcMultilingualSupport,addDraftsSupport;{cron_legend},useCron;',
     ],
     'subpalettes' => [
         'importMode_merge'                                                                                                          => 'mergeIdentifierFields,addSkipFieldsOnMerge',
@@ -614,6 +614,17 @@ if (class_exists('\Terminal42\DcMultilingualBundle\Terminal42DcMultilingualBundl
 if (class_exists('\HeimrichHannot\CategoriesBundle\CategoriesBundle')) {
     $dca['fields']['addCategoriesSupport'] = [
         'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['addCategoriesSupport'],
+        'exclude'   => true,
+        'inputType' => 'checkbox',
+        'eval'      => ['tl_class' => 'w50'],
+        'sql'       => "char(1) NOT NULL default ''"
+    ];
+}
+
+// drafts
+if (class_exists('\HeimrichHannot\DraftsBundle\ContaoDraftsBundle')) {
+    $dca['fields']['addDraftsSupport'] = [
+        'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['addDraftsSupport'],
         'exclude'   => true,
         'inputType' => 'checkbox',
         'eval'      => ['tl_class' => 'w50'],

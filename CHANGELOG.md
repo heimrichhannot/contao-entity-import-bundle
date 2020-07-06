@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.11.0] - 2020-07-06
+- added (optional) suppor for draft bundle
+- added mapping to `AfterItemImportEvent`
+
 ## [0.10.2] - 2020-07-06
 - fixed delimiter issue (https://github.com/heimrichhannot/contao-entity-import-bundle/pull/1, thanks to SGehle)
 
