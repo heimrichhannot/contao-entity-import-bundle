@@ -42,6 +42,7 @@ class CSVFileSource extends AbstractFileSource
     public function getHeadingLine(): array
     {
         $settings = $this->getCsvSettings();
+
         return explode($settings['delimiter'], $this->getLinesFromFile(1));
     }
 

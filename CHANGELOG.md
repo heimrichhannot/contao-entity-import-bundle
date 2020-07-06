@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.10.2] - 2020-07-06
+- fixed delimiter issue (https://github.com/heimrichhannot/contao-entity-import-bundle/pull/1, thanks to SGehle)
+
 ## [0.10.1] - 2020-06-22
 - removed test field
 
