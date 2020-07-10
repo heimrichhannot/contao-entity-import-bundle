@@ -14,12 +14,14 @@ use Contao\Database;
 use Contao\DataContainer;
 use Contao\Date;
 use Contao\StringUtil;
+use HeimrichHannot\EntityImportBundle\Event\AddConfigFieldMappingPresetsEvent;
 use HeimrichHannot\EntityImportBundle\Importer\ImporterFactory;
 use HeimrichHannot\RequestBundle\Component\HttpFoundation\Request;
 use HeimrichHannot\UtilsBundle\Arrays\ArrayUtil;
 use HeimrichHannot\UtilsBundle\Database\DatabaseUtil;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
 use HeimrichHannot\UtilsBundle\Url\UrlUtil;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class EntityImportConfigContainer
 {
@@ -64,11 +66,15 @@ class EntityImportConfigContainer
      * @var ArrayUtil
      */
     private $arrayUtil;
+    /**
+     * @var EventDispatcherInterface
+     */
+    private $eventDispatcher;
 
     /**
      * EntityImportConfigContainer constructor.
      */
-    public function __construct(Request $request, ImporterFactory $importerFactory, UrlUtil $urlUtil, ModelUtil $modelUtil, DatabaseUtil $databaseUtil, ArrayUtil $arrayUtil)
+    public function __construct(Request $request, ImporterFactory $importerFactory, UrlUtil $urlUtil, ModelUtil $modelUtil, DatabaseUtil $databaseUtil, ArrayUtil $arrayUtil, EventDispatcherInterface $eventDispatcher)
     {
         $this->request = $request;
         $this->urlUtil = $urlUtil;
@@ -76,6 +82,21 @@ class EntityImportConfigContainer
         $this->importerFactory = $importerFactory;
         $this->databaseUtil = $databaseUtil;
         $this->arrayUtil = $arrayUtil;
+        $this->eventDispatcher = $eventDispatcher;
+    }
+
+    public function setPreset(?DataContainer $dc)
+    {
+        if (!($preset = $dc->activeRecord->fieldMappingPresets)) {
+            return;
+        }
+
+        $dca = &$GLOBALS['TL_DCA']['tl_entity_import_config'];
+
+        $this->databaseUtil->update('tl_entity_import_config', [
+            'fieldMappingPresets' => '',
+            'fieldMapping' => serialize($dca['fields']['fieldMappingPresets']['eval']['presets'][$preset]),
+        ], 'tl_entity_import_config.id='.$dc->id);
     }
 
     public function initPalette(?DataContainer $dc)
@@ -86,6 +107,22 @@ class EntityImportConfigContainer
             $dca['palettes']['default'] = '{general_legend},title,targetTable;';
 
             return;
+        }
+
+        // field mapping presets
+        $event = $this->eventDispatcher->dispatch(AddConfigFieldMappingPresetsEvent::NAME, new AddConfigFieldMappingPresetsEvent([], $configModel));
+
+        $presets = $event->getPresets();
+
+        if (empty($presets)) {
+            unset($dca['fields']['fieldMappingPresets']);
+        } else {
+            $options = array_keys($presets);
+
+            asort($presets);
+
+            $dca['fields']['fieldMappingPresets']['options'] = $options;
+            $dca['fields']['fieldMappingPresets']['eval']['presets'] = $presets;
         }
     }
 

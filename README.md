@@ -100,10 +100,59 @@ the debug options in config.yml before importing via cronjob.
    ```
 1. Create your palette in your `tl_entity_import_source.php`, e.g. by copying one from this bundle.
 
+### Add presets for source/config field mapping
+
+Adding a field mapping might be tedious sometimes. Hence we provide an event for adding presets which then are selectable in the backend entity (source and config).
+
+Just register an event listener and add your presets the following way:
+
+```
+$presets = $event->getPresets();
+
+$presets = array_merge($presets, [
+    'twitter' => [
+        [
+            'name'        => 'externalId',
+            'valueType'   => 'source_value',
+            'sourceValue' => 'id',
+        ],
+        [
+            'name'        => 'text',
+            'valueType'   => 'source_value',
+            'sourceValue' => 'full_text',
+        ],
+        [
+            'name'        => 'publishedAt',
+            'valueType'   => 'source_value',
+            'sourceValue' => 'created_at',
+        ],
+        [
+            'name'        => 'imageUrl',
+            'valueType'   => 'source_value',
+            'sourceValue' => 'image_url',
+        ],
+        [
+            'name'        => 'imageId',
+            'valueType'   => 'source_value',
+            'sourceValue' => 'image_id',
+        ],
+        [
+            'name'        => 'url',
+            'valueType'   => 'source_value',
+            'sourceValue' => 'url',
+        ],
+    ]
+]);
+
+$event->setPresets($presets);
+```
+
 ## Events
 
 Name | Description
 -----|------------
+`AddConfigFieldMappingPresetsEvent` | Add config field mapping presets
+`AddSourceFieldMappingPresetsEvent` | Add source field mapping presets
 `AfterFileSourceGetContentEvent` | Configure the data after receiving from source
 `AfterImportEvent` | Get imported data after finished import
 `AfterItemImportEvent` | Get imported item data after finished import

@@ -8,6 +8,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
         'onload_callback'   => [[\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::class, 'initPalette']],
         'onsubmit_callback' => [
             ['huh.utils.dca', 'setDateAdded'],
+            [\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::class, 'setPreset']
         ],
         'oncopy_callback'   => [
             ['huh.utils.dca', 'setDateAddedOnCopy'],
@@ -76,7 +77,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
     ],
     'palettes'    => [
         '__selector__' => ['importMode', 'deleteBeforeImport', 'sortingMode', 'setDateAdded', 'setTstamp', 'generateAlias', 'deletionMode', 'useCron', 'addSkipFieldsOnMerge'],
-        'default'      => '{general_legend},title,targetTable,importMode;{mapping_legend},fieldMappingCopier,fieldMapping;{fields_legend},setDateAdded,setTstamp,generateAlias;{file_mapping_legend},fileFieldMappingCopier,fileFieldMapping;{sorting_legend},sortingMode;{deletion_legend},deleteBeforeImport,deletionMode;{misc_legend},addCategoriesSupport,addDcMultilingualSupport,addDraftsSupport;{cron_legend},useCron;',
+        'default'      => '{general_legend},title,targetTable,importMode;{mapping_legend},fieldMappingCopier,fieldMappingPresets,fieldMapping;{fields_legend},setDateAdded,setTstamp,generateAlias;{file_mapping_legend},fileFieldMappingCopier,fileFieldMapping;{sorting_legend},sortingMode;{deletion_legend},deleteBeforeImport,deletionMode;{misc_legend},addCategoriesSupport,addDcMultilingualSupport,addDraftsSupport;{cron_legend},useCron;',
     ],
     'subpalettes' => [
         'importMode_merge'                                                                                                          => 'mergeIdentifierFields,addSkipFieldsOnMerge',
@@ -132,6 +133,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
         'fieldMappingCopier'            => [
             'inputType' => 'fieldValueCopier',
             'eval'      => [
+                'tl_class' => 'w50',
                 'fieldValueCopier' => [
                     'table'            => 'tl_entity_import_config',
                     'field'            => 'fieldMapping',
@@ -142,12 +144,23 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
                 ]
             ]
         ],
+        'fieldMappingPresets'      => [
+            'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['fieldMappingPresets'],
+            'exclude'   => true,
+            'filter'    => true,
+            'inputType' => 'select',
+            'reference' => &$GLOBALS['TL_LANG']['tl_entity_import_config']['reference']['fieldMappingPresets'],
+            // options can be passed in via event listener
+            'eval'      => ['tl_class' => 'w50', 'includeBlankOption' => true, 'submitOnChange' => true, 'onchange' => "if(!confirm('" . $GLOBALS['TL_LANG']['MSC']['entityImport']['presetConfirm'] . "')) {this.selectedIndex = 0; return false;}"],
+            'sql'       => "varchar(64) NOT NULL default ''"
+        ],
         'fieldMapping'                  => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['fieldMapping'],
             'inputType' => 'multiColumnEditor',
             'eval'      => [
                 'tl_class'          => 'long clr',
                 'multiColumnEditor' => [
+                    'minRowCount' => 0,
                     'sortable'    => true,
                     'palettes'    => [
                         '__selector__' => ['valueType'],

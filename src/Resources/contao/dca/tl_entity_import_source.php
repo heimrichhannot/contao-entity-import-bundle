@@ -4,10 +4,17 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
 
     // Config
     'config'      => [
-        'dataContainer'    => 'Table',
-        'enableVersioning' => true,
-        'onload_callback'  => [[\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::class, 'initPalette']],
-        'sql'              => [
+        'dataContainer'     => 'Table',
+        'enableVersioning'  => true,
+        'onload_callback'   => [[\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::class, 'initPalette']],
+        'onsubmit_callback' => [
+            ['huh.utils.dca', 'setDateAdded'],
+            [\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::class, 'setPreset']
+        ],
+        'oncopy_callback'   => [
+            ['huh.utils.dca', 'setDateAddedOnCopy'],
+        ],
+        'sql'               => [
             'keys' => [
                 'id' => 'primary',
             ],
@@ -25,7 +32,6 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
         'label'             => [
             'fields' => ['title', 'type'],
             'format' => '%s <span style="color:#b3b3b3; padding-left:3px;">[%s]</span>',
-            //            'label_callback' => [\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::class, 'addDate', true],
         ],
         'global_operations' => [
             'all' => [
@@ -69,7 +75,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
     'palettes'    => [
         '__selector__'                                                                             => ['type', 'retrievalType', 'fileType'],
         'default'                                                                                  => '{title_legend},title,type;',
-        HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::TYPE_DATABASE => '{title_legend},title,type;{db_legend},dbDriver,dbHost,dbUser,dbPass,dbDatabase,dbPconnect,dbCharset,dbPort,dbSocket,dbSourceTableExplanation,dbSourceTable,dbSourceTableWhere,addDcMultilingualSupport,fieldMappingCopier,fieldMapping;',
+        HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::TYPE_DATABASE => '{title_legend},title,type;{db_legend},dbDriver,dbHost,dbUser,dbPass,dbDatabase,dbPconnect,dbCharset,dbPort,dbSocket,dbSourceTableExplanation,dbSourceTable,dbSourceTableWhere,addDcMultilingualSupport,fieldMappingCopier,fieldMappingPresets,fieldMapping;',
         HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::TYPE_FILE     => '{title_legend},title,type;{file_legend},retrievalType;',
     ],
 
@@ -78,8 +84,8 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
         'retrievalType_http'               => 'sourceUrl,httpMethod,httpAuth,fileType',
         'retrievalType_contao_file_system' => 'fileSRC,fileType',
         'retrievalType_absolute_path'      => 'absolutePath',
-        'fileType_csv'                     => 'fileContent,csvHeaderRow,csvDelimiter,csvEnclosure,csvEscape,fieldMappingCopier,fieldMapping',
-        'fileType_json'                    => 'fileContent,pathToDataArray,fieldMappingCopier,fieldMapping',
+        'fileType_csv'                     => 'fileContent,csvHeaderRow,csvDelimiter,csvEnclosure,csvEscape,fieldMappingCopier,fieldMappingPresets,fieldMapping',
+        'fileType_json'                    => 'fileContent,pathToDataArray,fieldMappingCopier,fieldMappingPresets,fieldMapping',
     ],
     // Fields
     'fields'      => [
@@ -88,6 +94,13 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
         ],
         'tstamp'                   => [
             'sql' => "int(10) unsigned NOT NULL default '0'",
+        ],
+        'dateAdded'                => [
+            'label'   => &$GLOBALS['TL_LANG']['MSC']['dateAdded'],
+            'sorting' => true,
+            'flag'    => 6,
+            'eval'    => ['rgxp' => 'datim', 'doNotCopy' => true],
+            'sql'     => "int(10) unsigned NOT NULL default '0'",
         ],
         'title'                    => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['title'],
@@ -333,6 +346,16 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
                 ],
                 'tl_class'         => 'clr w50'
             ]
+        ],
+        'fieldMappingPresets'      => [
+            'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['fieldMappingPresets'],
+            'exclude'   => true,
+            'filter'    => true,
+            'inputType' => 'select',
+            'reference' => &$GLOBALS['TL_LANG']['tl_entity_import_source']['reference']['fieldMappingPresets'],
+            // options can be passed in via event listener
+            'eval'      => ['tl_class' => 'w50', 'includeBlankOption' => true, 'submitOnChange' => true, 'onchange' => "if(!confirm('" . $GLOBALS['TL_LANG']['MSC']['entityImport']['presetConfirm'] . "')) {this.selectedIndex = 0; return false;}"],
+            'sql'       => "varchar(64) NOT NULL default ''"
         ],
         'fieldMapping'             => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['fieldMapping'],

@@ -51,6 +51,9 @@ $lang['fileFieldMapping']['slugFilename'][1]    = 'Wählen Sie diese Option, um 
 $lang['fileFieldMapping']['delayAfter'][0]      = 'Wartezeit nach HTTP-Request';
 $lang['fileFieldMapping']['delayAfter'][1]      = 'Geben Sie hier die Zeit in Sekunden ein, die der Importer nach einem HTTP-Request warten soll, um bspw. ein Rate-Limit zu umgehen.';
 
+$lang['fieldMappingPresets'][0] = 'Felderabbildung aus Vorlage erzeugen';
+$lang['fieldMappingPresets'][1] = 'Wählen Sie hier bei Bedarf eine Vorlage aus. ACHTUNG: Dies überschreibt Ihre aktuell gesetzte Felderabbildung!';
+
 $lang['importMode'][0] = 'Importmodus';
 $lang['importMode'][1] = 'Wählen Sie hier aus, auf welche Weise importiert werden soll.';
 
@@ -149,7 +152,7 @@ $lang['reference'] = [
     ],
     'namingMode'   => [
         'field_pattern' => 'aus Quellfeld-Werten',
-        'random_md5' => 'zufällige MD5-Zeichenfolge',
+        'random_md5'    => 'zufällige MD5-Zeichenfolge',
     ]
 ];
 

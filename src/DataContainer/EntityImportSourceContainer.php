@@ -12,13 +12,16 @@ use Contao\Database;
 use Contao\DataContainer;
 use Contao\Message;
 use Contao\System;
+use HeimrichHannot\EntityImportBundle\Event\AddSourceFieldMappingPresetsEvent;
 use HeimrichHannot\EntityImportBundle\Source\AbstractFileSource;
 use HeimrichHannot\EntityImportBundle\Source\CSVFileSource;
 use HeimrichHannot\EntityImportBundle\Source\SourceFactory;
 use HeimrichHannot\EntityImportBundle\Util\EntityImportUtil;
+use HeimrichHannot\UtilsBundle\Database\DatabaseUtil;
 use HeimrichHannot\UtilsBundle\Dca\DcaUtil;
 use HeimrichHannot\UtilsBundle\File\FileUtil;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class EntityImportSourceContainer
 {
@@ -72,8 +75,16 @@ class EntityImportSourceContainer
      * @var EntityImportUtil
      */
     private $util;
+    /**
+     * @var EventDispatcherInterface
+     */
+    private $eventDispatcher;
+    /**
+     * @var DatabaseUtil
+     */
+    private $databaseUtil;
 
-    public function __construct(SourceFactory $sourceFactory, FileUtil $fileUtil, ModelUtil $modelUtil, DcaUtil $dcaUtil, EntityImportUtil $util)
+    public function __construct(SourceFactory $sourceFactory, FileUtil $fileUtil, ModelUtil $modelUtil, DcaUtil $dcaUtil, EntityImportUtil $util, EventDispatcherInterface $eventDispatcher, DatabaseUtil $databaseUtil)
     {
         $this->activeBundles = System::getContainer()->getParameter('kernel.bundles');
         $this->sourceFactory = $sourceFactory;
@@ -81,6 +92,22 @@ class EntityImportSourceContainer
         $this->modelUtil = $modelUtil;
         $this->dcaUtil = $dcaUtil;
         $this->util = $util;
+        $this->eventDispatcher = $eventDispatcher;
+        $this->databaseUtil = $databaseUtil;
+    }
+
+    public function setPreset(?DataContainer $dc)
+    {
+        if (!($preset = $dc->activeRecord->fieldMappingPresets)) {
+            return;
+        }
+
+        $dca = &$GLOBALS['TL_DCA']['tl_entity_import_source'];
+
+        $this->databaseUtil->update('tl_entity_import_source', [
+            'fieldMappingPresets' => '',
+            'fieldMapping' => serialize($dca['fields']['fieldMappingPresets']['eval']['presets'][$preset]),
+        ], 'tl_entity_import_source.id='.$dc->id);
     }
 
     public function initPalette(?DataContainer $dc)
@@ -148,6 +175,22 @@ class EntityImportSourceContainer
                 }
 
                 break;
+        }
+
+        // field mapping presets
+        $event = $this->eventDispatcher->dispatch(AddSourceFieldMappingPresetsEvent::NAME, new AddSourceFieldMappingPresetsEvent([], $sourceModel));
+
+        $presets = $event->getPresets();
+
+        if (empty($presets)) {
+            unset($dca['fields']['fieldMappingPresets']);
+        } else {
+            $options = array_keys($presets);
+
+            asort($presets);
+
+            $dca['fields']['fieldMappingPresets']['options'] = $options;
+            $dca['fields']['fieldMappingPresets']['eval']['presets'] = $presets;
         }
     }
 

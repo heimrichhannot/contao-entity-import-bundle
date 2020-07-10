@@ -33,6 +33,8 @@ $lang['fieldMapping']['sourceValue'][0] = 'Wert aus der Quelle';
 $lang['fieldMapping']['sourceValue'][1] = 'Geben Sie hier den Ort des Wertes in der Quelle ein.';
 $lang['fieldMapping']['staticValue'][0] = 'Statischer Wert';
 $lang['fieldMapping']['staticValue'][1] = 'Geben Sie hier den Wert ein, der gleich in allen Datensätzen eingetragen werden soll.';
+$lang['fieldMappingPresets'][0]         = 'Felderabbildung aus Vorlage erzeugen';
+$lang['fieldMappingPresets'][1]         = 'Wählen Sie hier bei Bedarf eine Vorlage aus. ACHTUNG: Dies überschreibt Ihre aktuell gesetzte Felderabbildung!';
 
 $lang['fileContent'][0] = 'Dateivorschau';
 $lang['fileContent'][1] = 'Hier können Sie den Inhalt der ausgewählten Datei sehen. Es wird nicht die gesammte Datei dargestellt.';
@@ -99,7 +101,7 @@ $lang['reference'] = [
     'httpMethod' => [
         'get'  => 'GET',
         'post' => 'POST',
-    ],
+    ]
 ];
 
 /**
