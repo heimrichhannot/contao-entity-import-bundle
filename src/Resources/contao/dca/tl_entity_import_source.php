@@ -350,7 +350,6 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
         'fieldMappingPresets'      => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['fieldMappingPresets'],
             'exclude'   => true,
-            'filter'    => true,
             'inputType' => 'select',
             'reference' => &$GLOBALS['TL_LANG']['tl_entity_import_source']['reference']['fieldMappingPresets'],
             // options can be passed in via event listener

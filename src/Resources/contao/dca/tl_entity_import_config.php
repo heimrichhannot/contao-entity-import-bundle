@@ -133,7 +133,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
         'fieldMappingCopier'            => [
             'inputType' => 'fieldValueCopier',
             'eval'      => [
-                'tl_class' => 'w50',
+                'tl_class'         => 'w50',
                 'fieldValueCopier' => [
                     'table'            => 'tl_entity_import_config',
                     'field'            => 'fieldMapping',
@@ -144,10 +144,9 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
                 ]
             ]
         ],
-        'fieldMappingPresets'      => [
+        'fieldMappingPresets'           => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['fieldMappingPresets'],
             'exclude'   => true,
-            'filter'    => true,
             'inputType' => 'select',
             'reference' => &$GLOBALS['TL_LANG']['tl_entity_import_config']['reference']['fieldMappingPresets'],
             // options can be passed in via event listener
@@ -244,7 +243,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
                     'sortable'    => true,
                     'palettes'    => [
                         '__selector__' => ['namingMode'],
-                        'default'      => 'mappingField,targetField,targetFolder,delayAfter,namingMode',
+                        'default'      => 'mappingField,targetField,targetFolder,delayAfter,namingMode,skipIfExisting',
                     ],
                     'subpalettes' => [
                         'namingMode_field_pattern' => 'filenamePattern,slugFilename',
@@ -288,6 +287,17 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
                                 'tl_class'    => 'w50 autoheight'
                             ],
                         ],
+                        'delayAfter'      => [
+                            'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['fileFieldMapping']['delayAfter'],
+                            'inputType' => 'text',
+                            'eval'      => [
+                                'default'    => 0,
+                                'groupStyle' => 'width: 20%',
+                                'rgxp'       => 'digit',
+                                'maxlength'  => 10,
+                                'tl_class'   => 'w50'
+                            ]
+                        ],
                         'namingMode'      => [
                             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['fileFieldMapping']['namingMode'],
                             'exclude'   => true,
@@ -320,20 +330,15 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
                             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['fileFieldMapping']['slugFilename'],
                             'inputType' => 'checkbox',
                             'eval'      => [
-                                'groupStyle' => 'width: 20%',
+                                'groupStyle' => 'width: 40%',
                                 'tl_class'   => 'w50'
                             ],
                         ],
-                        'delayAfter'      => [
-                            'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['fileFieldMapping']['delayAfter'],
-                            'inputType' => 'text',
-                            'eval'      => [
-                                'default'    => 0,
-                                'groupStyle' => 'width: 20%',
-                                'rgxp'       => 'digit',
-                                'maxlength'  => 10,
-                                'tl_class'   => 'w50'
-                            ]
+                        'skipIfExisting'  => [
+                            'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['fileFieldMapping']['skipIfExisting'],
+                            'exclude'   => true,
+                            'inputType' => 'checkbox',
+                            'eval'      => ['tl_class' => 'w50', 'groupStyle' => 'width: 40%',],
                         ],
                     ],
                 ],

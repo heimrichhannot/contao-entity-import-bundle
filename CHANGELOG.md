@@ -1,8 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.12.0] - 2020-07-06
+- moved cache to `AbstractSource` so that not only file sources can use it
+- added `skipOnExisting` option for `fileFieldMapping`
+- fixed stopwatch to contain also source generation
+
 ## [0.11.0] - 2020-07-06
-- added (optional) suppor for draft bundle
+- added (optional) support for draft bundle
 - added mapping to `AfterItemImportEvent`
 
 ## [0.10.2] - 2020-07-06

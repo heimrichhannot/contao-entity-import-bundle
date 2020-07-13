@@ -50,6 +50,8 @@ $lang['fileFieldMapping']['slugFilename'][0]    = 'Dateiname normalisieren (slug
 $lang['fileFieldMapping']['slugFilename'][1]    = 'Wählen Sie diese Option, um den Dateinamen von potentiell problematischen Zeichen zu säubern.';
 $lang['fileFieldMapping']['delayAfter'][0]      = 'Wartezeit nach HTTP-Request';
 $lang['fileFieldMapping']['delayAfter'][1]      = 'Geben Sie hier die Zeit in Sekunden ein, die der Importer nach einem HTTP-Request warten soll, um bspw. ein Rate-Limit zu umgehen.';
+$lang['fileFieldMapping']['skipIfExisting'][0]  = 'Überspringen, wenn vorhanden';
+$lang['fileFieldMapping']['skipIfExisting'][1]  = 'Wählen Sie diese Option, um einen erneuten Import bei bereits existierender lokalen Datei zu verhindern (Performance).';
 
 $lang['fieldMappingPresets'][0] = 'Felderabbildung aus Vorlage erzeugen';
 $lang['fieldMappingPresets'][1] = 'Wählen Sie hier bei Bedarf eine Vorlage aus. ACHTUNG: Dies überschreibt Ihre aktuell gesetzte Felderabbildung!';

@@ -62,6 +62,11 @@ class Importer implements ImporterInterface
     protected $eventDispatcher;
 
     /**
+     * @var Stopwatch
+     */
+    protected $stopwatch;
+
+    /**
      * @var DatabaseUtil
      */
     private $databaseUtil;
@@ -144,6 +149,10 @@ class Importer implements ImporterInterface
      */
     public function run(): bool
     {
+        $this->stopwatch = new Stopwatch();
+
+        $this->stopwatch->start('contao-entity-import-bundle.id'.$this->configModel->id);
+
         $items = $this->getDataFromSource();
 
         $event = $this->eventDispatcher->dispatch(BeforeImportEvent::NAME, new BeforeImportEvent($items, $this->configModel, $this->source, $this->dryRun));
@@ -186,10 +195,6 @@ class Importer implements ImporterInterface
 
     protected function executeImport(array $items): bool
     {
-        $stopwatch = new Stopwatch();
-
-        $stopwatch->start('contao-entity-import-bundle.id'.$this->configModel->id);
-
         $this->dcaUtil->loadLanguageFile('default');
         $database = Database::getInstance();
         $table = $this->configModel->targetTable;
@@ -394,7 +399,7 @@ class Importer implements ImporterInterface
 
             $this->databaseUtil->commitTransaction();
 
-            $event = $stopwatch->stop('contao-entity-import-bundle.id'.$this->configModel->id);
+            $event = $this->stopwatch->stop('contao-entity-import-bundle.id'.$this->configModel->id);
 
             if ($count > 0) {
                 $duration = str_replace('.', ',', round($event->getDuration() / 1000, 2));
@@ -680,6 +685,10 @@ class Importer implements ImporterInterface
         $fileMapping = \Contao\StringUtil::deserialize($this->configModel->fileFieldMapping, true);
 
         foreach ($fileMapping as $mapping) {
+            if ($record->{$mapping['targetField']} && $mapping['skipIfExisting']) {
+                continue;
+            }
+
             // retrieve the file
             $content = $this->fileUtil->retrieveFileContent(
                 $item[$mapping['mappingField']], $this->containerUtil->isBackend()
