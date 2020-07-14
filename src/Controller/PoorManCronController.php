@@ -104,17 +104,17 @@ class PoorManCronController
             return;
         }
 
-        if ($configModel->language) {
+        if ($configModel->cronLanguage) {
             $language = $GLOBALS['TL_LANGUAGE'];
 
-            $GLOBALS['TL_LANGUAGE'] = $configModel->language;
+            $GLOBALS['TL_LANGUAGE'] = $configModel->cronLanguage;
         }
 
         /** @var ImporterInterface $importer */
         $importer = $this->importerFactory->createInstance($configModel->id);
         $importer->run();
 
-        if ($configModel->language) {
+        if ($configModel->cronLanguage) {
             $GLOBALS['TL_LANGUAGE'] = $language;
         }
     }

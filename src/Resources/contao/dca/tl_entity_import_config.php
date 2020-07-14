@@ -91,7 +91,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
         'setTstamp'                                                                                                                 => 'targetTstampField',
         'generateAlias'                                                                                                             => 'targetAliasField,aliasFieldPattern',
         'deleteBeforeImport'                                                                                                        => 'deleteBeforeImportWhere',
-        'useCron'                                                                                                                   => 'cronInterval,cronDomain',
+        'useCron'                                                                                                                   => 'cronInterval,cronDomain,cronLanguage',
         'addSkipFieldsOnMerge'                                                                                                      => 'skipFieldsOnMerge'
     ],
     'fields'      => [
@@ -525,6 +525,14 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'search'    => true,
             'inputType' => 'text',
             'eval'      => ['maxlength' => 64, 'tl_class' => 'w50', 'mandatory' => true],
+            'sql'       => "varchar(64) NOT NULL default ''"
+        ],
+        'cronLanguage'                  => [
+            'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['cronLanguage'],
+            'exclude'   => true,
+            'inputType' => 'select',
+            'options'   => \Contao\System::getLanguages(),
+            'eval'      => ['tl_class' => 'w50', 'mandatory' => true, 'includeBlankOption' => true, 'chosen' => true],
             'sql'       => "varchar(64) NOT NULL default ''"
         ],
         'deletionMode'                  => [

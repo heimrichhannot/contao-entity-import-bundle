@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.14.0] - 2020-07-14
+- added fields `cronLanguage` and `cronDomain` in order to pass context to a command call
+
 ## [0.13.0] - 2020-07-06
 - moved cache to `AbstractSource` so that not only file sources can use it
 - added `skipOnExisting` option for `fileFieldMapping`

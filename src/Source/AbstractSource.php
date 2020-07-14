@@ -8,6 +8,7 @@
 
 namespace HeimrichHannot\EntityImportBundle\Source;
 
+use Contao\Environment;
 use Contao\Model;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
@@ -29,6 +30,11 @@ abstract class AbstractSource implements SourceInterface
      * @var FilesystemCache
      */
     protected $filesystemCache;
+
+    /**
+     * @var string
+     */
+    protected $domain;
 
     public function __construct()
     {
@@ -61,6 +67,22 @@ abstract class AbstractSource implements SourceInterface
         }
 
         return $this->filesystemCache;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDomain(): ?string
+    {
+        return $this->domain ?: Environment::get('url');
+    }
+
+    /**
+     * @param string $domain
+     */
+    public function setDomain(?string $domain): void
+    {
+        $this->domain = $domain;
     }
 
     protected function getMappedItemData(?array $element, array $mapping): array

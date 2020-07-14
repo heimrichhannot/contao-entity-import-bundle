@@ -109,7 +109,9 @@ $lang['useCron'][1]      = 'Wählen Sie diese Option, um den Importer per Cronjo
 $lang['cronInterval'][0] = 'Cron-Interval';
 $lang['cronInterval'][1] = 'Wählen Sie hier das Interval aus, in dem der Import ausgeführt werden soll.';
 $lang['cronDomain'][0]   = 'Domainname';
-$lang['cronDomain'][1]   = 'Geben Sie hier die Domain ein auf welcher der Cronjob ausgeführt wird. Das dient der besseren zuordnung falls beim Cronjob Fehler auftretten sollten.';
+$lang['cronDomain'][1]   = 'Geben Sie hier die Domain ein, unter der der Cronjob ausgeführt wird.';
+$lang['cronLanguage'][0] = 'Sprache';
+$lang['cronLanguage'][1] = 'Wählen Sie hier die Sprache aus, mit der der Cronjob ausgeführt wird.';
 
 $lang['addDcMultilingualSupport'][0] = 'Unterstützung für DC_Multilingual hinzufügen';
 $lang['addDcMultilingualSupport'][1] = 'Wählen Sie diese Option, wenn es sich bei der Zieltabelle um eine Contao-Tabelle mit Unterstützung für DC_Multilingual handelt.';

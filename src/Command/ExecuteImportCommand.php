@@ -57,7 +57,8 @@ class ExecuteImportCommand extends AbstractLockedCommand
     {
         $this->modelUtil = $modelUtil;
         $this->importerFactory = $importerFactory;
-        parent::__construct(null);
+
+        parent::__construct();
     }
 
     /**
@@ -67,7 +68,7 @@ class ExecuteImportCommand extends AbstractLockedCommand
     {
         $this->setName('huh:entity-import:execute');
         $this->setDescription('Runs a given importer config on the command line.');
-        $this->addArgument('config-ids', InputArgument::REQUIRED, 'The importer source ids as a comma separated list');
+        $this->addArgument('config-ids', InputArgument::REQUIRED, 'The importer config ids as a comma separated list');
         $this->addOption('dry-run', null, InputOption::VALUE_NONE, 'Run importer without making changes to the database.');
     }
 
@@ -97,10 +98,10 @@ class ExecuteImportCommand extends AbstractLockedCommand
                 $this->io->error("Importer config with ID $configId not found.");
             }
 
-            if ($configModel->language) {
+            if ($configModel->cronLanguage) {
                 $language = $GLOBALS['TL_LANGUAGE'];
 
-                $GLOBALS['TL_LANGUAGE'] = $configModel->language;
+                $GLOBALS['TL_LANGUAGE'] = $configModel->cronLanguage;
             }
 
             /** @var ImporterInterface $importer */
@@ -114,7 +115,7 @@ class ExecuteImportCommand extends AbstractLockedCommand
                 $this->io->error("Importer with config ID $configId failed");
             }
 
-            if ($configModel->language) {
+            if ($configModel->cronLanguage) {
                 $GLOBALS['TL_LANGUAGE'] = $language;
             }
         }
