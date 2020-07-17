@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.15.0] - 2020-07-17
+- added RSS import source
+- fixed localizations
+- fixed preview issue for HTTP files sources
+
 ## [0.14.0] - 2020-07-14
 - added fields `cronLanguage` and `cronDomain` in order to pass context to a command call
 

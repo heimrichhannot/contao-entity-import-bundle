@@ -83,6 +83,11 @@ class SourceFactory
                         $source = new CSVFileSource($this->eventDispatcher, $this->fileUtil, $this->stringUtil, $this->containerUtil);
 
                         break;
+
+                    case EntityImportSourceContainer::FILETYPE_RSS:
+                        $source = new RSSFileSource($this->eventDispatcher, $this->fileUtil, $this->stringUtil, $this->containerUtil);
+
+                        break;
                 }
 
                 break;
