@@ -1,6 +1,29 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.16.0] - 2020-09-14
+- added `usePoorMansCron` in order to allow defining domain and language for non-poor-man's-crons (commands)
+
+## [0.15.0] - 2020-07-17
+- added RSS import source
+- fixed localizations
+- fixed preview issue for HTTP files sources
+
+## [0.14.0] - 2020-07-14
+- added fields `cronLanguage` and `cronDomain` in order to pass context to a command call
+
+## [0.13.0] - 2020-07-06
+- moved cache to `AbstractSource` so that not only file sources can use it
+- added `skipOnExisting` option for `fileFieldMapping`
+- fixed stopwatch to contain also source generation
+
+## [0.11.0] - 2020-07-06
+- added (optional) support for draft bundle
+- added mapping to `AfterItemImportEvent`
+
+## [0.10.2] - 2020-07-06
+- fixed delimiter issue (https://github.com/heimrichhannot/contao-entity-import-bundle/pull/1, thanks to SGehle)
+
 ## [0.10.1] - 2020-06-22
 - removed test field
 

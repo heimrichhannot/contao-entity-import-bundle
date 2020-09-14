@@ -38,11 +38,15 @@ class AfterItemImportEvent extends Event
      * @var bool
      */
     private $dryRun;
+    /**
+     * @var array
+     */
+    private $mapping;
 
     /**
      * BeforeImportEvent constructor.
      */
-    public function __construct($importedRecord, array $mappedItem, array $item, Model $configModel, SourceInterface $source, bool $dryRun = false)
+    public function __construct($importedRecord, array $mappedItem, array $item, array $mapping, Model $configModel, SourceInterface $source, bool $dryRun = false)
     {
         $this->configModel = $configModel;
         $this->source = $source;
@@ -50,6 +54,7 @@ class AfterItemImportEvent extends Event
         $this->item = $item;
         $this->importedRecord = $importedRecord;
         $this->dryRun = $dryRun;
+        $this->mapping = $mapping;
     }
 
     public function getConfigModel(): Model
@@ -111,5 +116,10 @@ class AfterItemImportEvent extends Event
     public function isDryRun(): bool
     {
         return $this->dryRun;
+    }
+
+    public function getMapping(): array
+    {
+        return $this->mapping;
     }
 }

@@ -62,6 +62,11 @@ class Importer implements ImporterInterface
     protected $eventDispatcher;
 
     /**
+     * @var Stopwatch
+     */
+    protected $stopwatch;
+
+    /**
      * @var DatabaseUtil
      */
     private $databaseUtil;
@@ -144,6 +149,10 @@ class Importer implements ImporterInterface
      */
     public function run(): bool
     {
+        $this->stopwatch = new Stopwatch();
+
+        $this->stopwatch->start('contao-entity-import-bundle.id'.$this->configModel->id);
+
         $items = $this->getDataFromSource();
 
         $event = $this->eventDispatcher->dispatch(BeforeImportEvent::NAME, new BeforeImportEvent($items, $this->configModel, $this->source, $this->dryRun));
@@ -186,10 +195,6 @@ class Importer implements ImporterInterface
 
     protected function executeImport(array $items): bool
     {
-        $stopwatch = new Stopwatch();
-
-        $stopwatch->start('contao-entity-import-bundle.id'.$this->configModel->id);
-
         $this->dcaUtil->loadLanguageFile('default');
         $database = Database::getInstance();
         $table = $this->configModel->targetTable;
@@ -277,7 +282,7 @@ class Importer implements ImporterInterface
                         $set = $this->setDateAdded($record);
                         $set = array_merge($set, $this->generateAlias($record));
                         $set = array_merge($set, $this->setTstamp($record));
-                        $set = array_merge($set, $this->applyFieldFileMapping($record, $item));
+                        $set = array_merge($set, $this->applyFieldFileMapping($record, $mappedItem));
 
                         if (!empty($set) && !$this->dryRun) {
                             $this->databaseUtil->update($table, $set, "$table.id=?", [$record->id]);
@@ -298,7 +303,7 @@ class Importer implements ImporterInterface
                         $set = $this->setDateAdded($existing);
                         $set = array_merge($set, $this->generateAlias($existing));
                         $set = array_merge($set, $this->setTstamp($existing));
-                        $set = array_merge($set, $this->applyFieldFileMapping($existing, $item));
+                        $set = array_merge($set, $this->applyFieldFileMapping($existing, $mappedItem));
 
                         if (!$this->dryRun) {
                             $this->databaseUtil->update($table, array_merge($mappedItem, $set), "$table.id=?", [$existing->id]);
@@ -315,7 +320,7 @@ class Importer implements ImporterInterface
                             $set = $this->setDateAdded($record);
                             $set = array_merge($set, $this->generateAlias($record));
                             $set = array_merge($set, $this->setTstamp($record));
-                            $set = array_merge($set, $this->applyFieldFileMapping($record, $item));
+                            $set = array_merge($set, $this->applyFieldFileMapping($record, $mappedItem));
 
                             if (!empty($set) && !$this->dryRun) {
                                 $this->databaseUtil->update($table, $set, "$table.id=?", [$record->id]);
@@ -346,6 +351,7 @@ class Importer implements ImporterInterface
                     $importedRecord,
                     $mappedItem,
                     $item,
+                    $mapping,
                     $this->configModel,
                     $this->source,
                     $this->dryRun
@@ -372,12 +378,28 @@ class Importer implements ImporterInterface
                 }
             }
 
+            // Drafts -> fix draftParent (can only be done after all items are imported due to order issues otherwise)
+            if (class_exists('\HeimrichHannot\DraftsBundle\ContaoDraftsBundle') &&
+                $this->configModel->addDraftsSupport) {
+                foreach ($this->dbItemMapping as $itemMapping) {
+                    if (!$itemMapping['source']['draftParent']) {
+                        continue;
+                    }
+
+                    if (!$this->dryRun) {
+                        $this->databaseUtil->update($table, [
+                            $table.'.draftParent' => $this->dbIdMapping[$itemMapping['source']['draftParent']],
+                        ], "$table.id=?", [$itemMapping['target']->id]);
+                    }
+                }
+            }
+
             $this->deleteAfterImport($mappedItems);
             $this->applySorting();
 
             $this->databaseUtil->commitTransaction();
 
-            $event = $stopwatch->stop('contao-entity-import-bundle.id'.$this->configModel->id);
+            $event = $this->stopwatch->stop('contao-entity-import-bundle.id'.$this->configModel->id);
 
             if ($count > 0) {
                 $duration = str_replace('.', ',', round($event->getDuration() / 1000, 2));
@@ -663,6 +685,10 @@ class Importer implements ImporterInterface
         $fileMapping = \Contao\StringUtil::deserialize($this->configModel->fileFieldMapping, true);
 
         foreach ($fileMapping as $mapping) {
+            if ($record->{$mapping['targetField']} && $mapping['skipIfExisting']) {
+                continue;
+            }
+
             // retrieve the file
             $content = $this->fileUtil->retrieveFileContent(
                 $item[$mapping['mappingField']], $this->containerUtil->isBackend()

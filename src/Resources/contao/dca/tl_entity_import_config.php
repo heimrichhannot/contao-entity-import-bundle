@@ -8,6 +8,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
         'onload_callback'   => [[\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::class, 'initPalette']],
         'onsubmit_callback' => [
             ['huh.utils.dca', 'setDateAdded'],
+            [\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::class, 'setPreset']
         ],
         'oncopy_callback'   => [
             ['huh.utils.dca', 'setDateAddedOnCopy'],
@@ -75,8 +76,8 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
         ],
     ],
     'palettes'    => [
-        '__selector__' => ['importMode', 'deleteBeforeImport', 'sortingMode', 'setDateAdded', 'setTstamp', 'generateAlias', 'deletionMode', 'useCron', 'addSkipFieldsOnMerge'],
-        'default'      => '{general_legend},title,targetTable,importMode;{mapping_legend},fieldMappingCopier,fieldMapping;{fields_legend},setDateAdded,setTstamp,generateAlias;{file_mapping_legend},fileFieldMappingCopier,fileFieldMapping;{sorting_legend},sortingMode;{deletion_legend},deleteBeforeImport,deletionMode;{misc_legend},addCategoriesSupport,addDcMultilingualSupport;{cron_legend},useCron;',
+        '__selector__' => ['importMode', 'deleteBeforeImport', 'sortingMode', 'setDateAdded', 'setTstamp', 'generateAlias', 'deletionMode', 'useCron', 'usePoorMansCron', 'addSkipFieldsOnMerge'],
+        'default'      => '{general_legend},title,targetTable,importMode;{mapping_legend},fieldMappingCopier,fieldMappingPresets,fieldMapping;{fields_legend},setDateAdded,setTstamp,generateAlias;{file_mapping_legend},fileFieldMappingCopier,fileFieldMapping;{sorting_legend},sortingMode;{deletion_legend},deleteBeforeImport,deletionMode;{misc_legend},addCategoriesSupport,addDcMultilingualSupport,addDraftsSupport;{cron_legend},useCron;',
     ],
     'subpalettes' => [
         'importMode_merge'                                                                                                          => 'mergeIdentifierFields,addSkipFieldsOnMerge',
@@ -90,7 +91,8 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
         'setTstamp'                                                                                                                 => 'targetTstampField',
         'generateAlias'                                                                                                             => 'targetAliasField,aliasFieldPattern',
         'deleteBeforeImport'                                                                                                        => 'deleteBeforeImportWhere',
-        'useCron'                                                                                                                   => 'cronInterval,cronDomain',
+        'useCron'                                                                                                                   => 'cronDomain,cronLanguage,usePoorMansCron',
+        'usePoorMansCron'                                                                                                           => 'cronInterval',
         'addSkipFieldsOnMerge'                                                                                                      => 'skipFieldsOnMerge'
     ],
     'fields'      => [
@@ -132,6 +134,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
         'fieldMappingCopier'            => [
             'inputType' => 'fieldValueCopier',
             'eval'      => [
+                'tl_class'         => 'w50',
                 'fieldValueCopier' => [
                     'table'            => 'tl_entity_import_config',
                     'field'            => 'fieldMapping',
@@ -142,12 +145,22 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
                 ]
             ]
         ],
+        'fieldMappingPresets'           => [
+            'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['fieldMappingPresets'],
+            'exclude'   => true,
+            'inputType' => 'select',
+            'reference' => &$GLOBALS['TL_LANG']['tl_entity_import_config']['reference']['fieldMappingPresets'],
+            // options can be passed in via event listener
+            'eval'      => ['tl_class' => 'w50', 'includeBlankOption' => true, 'submitOnChange' => true, 'onchange' => "if(!confirm('" . $GLOBALS['TL_LANG']['MSC']['entityImport']['presetConfirm'] . "')) {this.selectedIndex = 0; return false;}"],
+            'sql'       => "varchar(64) NOT NULL default ''"
+        ],
         'fieldMapping'                  => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['fieldMapping'],
             'inputType' => 'multiColumnEditor',
             'eval'      => [
                 'tl_class'          => 'long clr',
                 'multiColumnEditor' => [
+                    'minRowCount' => 0,
                     'sortable'    => true,
                     'palettes'    => [
                         '__selector__' => ['valueType'],
@@ -231,7 +244,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
                     'sortable'    => true,
                     'palettes'    => [
                         '__selector__' => ['namingMode'],
-                        'default'      => 'mappingField,targetField,targetFolder,delayAfter,namingMode',
+                        'default'      => 'mappingField,targetField,targetFolder,delayAfter,namingMode,skipIfExisting',
                     ],
                     'subpalettes' => [
                         'namingMode_field_pattern' => 'filenamePattern,slugFilename',
@@ -275,6 +288,17 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
                                 'tl_class'    => 'w50 autoheight'
                             ],
                         ],
+                        'delayAfter'      => [
+                            'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['fileFieldMapping']['delayAfter'],
+                            'inputType' => 'text',
+                            'eval'      => [
+                                'default'    => 0,
+                                'groupStyle' => 'width: 20%',
+                                'rgxp'       => 'digit',
+                                'maxlength'  => 10,
+                                'tl_class'   => 'w50'
+                            ]
+                        ],
                         'namingMode'      => [
                             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['fileFieldMapping']['namingMode'],
                             'exclude'   => true,
@@ -307,20 +331,15 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
                             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['fileFieldMapping']['slugFilename'],
                             'inputType' => 'checkbox',
                             'eval'      => [
-                                'groupStyle' => 'width: 20%',
+                                'groupStyle' => 'width: 40%',
                                 'tl_class'   => 'w50'
                             ],
                         ],
-                        'delayAfter'      => [
-                            'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['fileFieldMapping']['delayAfter'],
-                            'inputType' => 'text',
-                            'eval'      => [
-                                'default'    => 0,
-                                'groupStyle' => 'width: 20%',
-                                'rgxp'       => 'digit',
-                                'maxlength'  => 10,
-                                'tl_class'   => 'w50'
-                            ]
+                        'skipIfExisting'  => [
+                            'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['fileFieldMapping']['skipIfExisting'],
+                            'exclude'   => true,
+                            'inputType' => 'checkbox',
+                            'eval'      => ['tl_class' => 'w50', 'groupStyle' => 'width: 40%',],
                         ],
                     ],
                 ],
@@ -509,6 +528,21 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'eval'      => ['maxlength' => 64, 'tl_class' => 'w50', 'mandatory' => true],
             'sql'       => "varchar(64) NOT NULL default ''"
         ],
+        'cronLanguage'                  => [
+            'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['cronLanguage'],
+            'exclude'   => true,
+            'inputType' => 'select',
+            'options'   => \Contao\System::getLanguages(),
+            'eval'      => ['tl_class' => 'w50', 'mandatory' => true, 'includeBlankOption' => true, 'chosen' => true],
+            'sql'       => "varchar(64) NOT NULL default ''"
+        ],
+        'usePoorMansCron'               => [
+            'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['usePoorMansCron'],
+            'exclude'   => true,
+            'inputType' => 'checkbox',
+            'eval'      => ['tl_class' => 'w50', 'submitOnChange' => true],
+            'sql'       => "char(1) NOT NULL default ''"
+        ],
         'deletionMode'                  => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['deletionMode'],
             'exclude'   => true,
@@ -614,6 +648,17 @@ if (class_exists('\Terminal42\DcMultilingualBundle\Terminal42DcMultilingualBundl
 if (class_exists('\HeimrichHannot\CategoriesBundle\CategoriesBundle')) {
     $dca['fields']['addCategoriesSupport'] = [
         'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['addCategoriesSupport'],
+        'exclude'   => true,
+        'inputType' => 'checkbox',
+        'eval'      => ['tl_class' => 'w50'],
+        'sql'       => "char(1) NOT NULL default ''"
+    ];
+}
+
+// drafts
+if (class_exists('\HeimrichHannot\DraftsBundle\ContaoDraftsBundle')) {
+    $dca['fields']['addDraftsSupport'] = [
+        'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['addDraftsSupport'],
         'exclude'   => true,
         'inputType' => 'checkbox',
         'eval'      => ['tl_class' => 'w50'],

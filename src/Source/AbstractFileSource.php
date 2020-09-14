@@ -9,15 +9,12 @@
 namespace HeimrichHannot\EntityImportBundle\Source;
 
 use Ausi\SlugGenerator\SlugGenerator;
-use GuzzleHttp\Client;
 use HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer;
 use HeimrichHannot\EntityImportBundle\Event\AfterFileSourceGetContentEvent;
 use HeimrichHannot\EntityImportBundle\Event\BeforeAuthenticationEvent;
 use HeimrichHannot\UtilsBundle\Container\ContainerUtil;
 use HeimrichHannot\UtilsBundle\File\FileUtil;
 use HeimrichHannot\UtilsBundle\String\StringUtil;
-use Psr\Http\Message\ResponseInterface;
-use Symfony\Component\Cache\Simple\FilesystemCache;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 abstract class AbstractFileSource extends AbstractSource
@@ -38,11 +35,6 @@ abstract class AbstractFileSource extends AbstractSource
     private $eventDispatcher;
 
     /**
-     * @var FilesystemCache
-     */
-    private $filesystemCache;
-
-    /**
      * @var ContainerUtil
      */
     private $containerUtil;
@@ -58,15 +50,6 @@ abstract class AbstractFileSource extends AbstractSource
         $this->eventDispatcher = $eventDispatcher;
 
         parent::__construct();
-    }
-
-    public function getFilesystemCache(): FilesystemCache
-    {
-        if (null === $this->filesystemCache) {
-            $this->filesystemCache = new FilesystemCache('contaoEntityImportBundle', 300);
-        }
-
-        return $this->filesystemCache;
     }
 
     public function getLinesFromFile(int $limit, bool $cache = false): string
@@ -105,18 +88,18 @@ abstract class AbstractFileSource extends AbstractSource
                 if ($cache) {
                     $generator = new SlugGenerator();
                     $cacheKey = $generator->generate($this->sourceModel->sourceUrl);
-                    $content = $this->getFileCache($cacheKey);
+                    $content = $this->getValueFromRemoteCache($cacheKey);
 
                     if (empty($content)) {
-                        $this->setFileCache($this->sourceModel->sourceUrl, $this->sourceModel->httpMethod, $event->getAuth(), $cacheKey);
-                        $content = $this->getFileCache($cacheKey);
+                        $this->storeValueToRemoteCache($this->sourceModel->sourceUrl, $cacheKey, $this->sourceModel->httpMethod, $event->getAuth());
+                        $content = $this->getValueFromRemoteCache($cacheKey);
                     }
 
                     break;
                 }
 
-                $httpResponse = $this->getFileFromUrl($this->sourceModel->httpMethod, $this->sourceModel->sourceUrl, $event->getAuth());
-                $content = $httpResponse->getBody()->getContents();
+                $result = $this->getContentFromUrl($this->sourceModel->httpMethod, $this->sourceModel->sourceUrl, $event->getAuth());
+                $content = $result['result'];
 
                 break;
 
@@ -134,30 +117,5 @@ abstract class AbstractFileSource extends AbstractSource
         $content = $event->getContent();
 
         return $content;
-    }
-
-    protected function getFileFromUrl(string $method, string $url, array $auth = []): ResponseInterface
-    {
-        $client = new Client();
-
-        return $client->request($method, \Contao\StringUtil::decodeEntities($url), $auth);
-    }
-
-    protected function getFileCache(string $cacheKey): string
-    {
-        $filesystemCache = $this->getFilesystemCache();
-
-        return $filesystemCache->get('entity-import-file.'.$cacheKey, '');
-    }
-
-    protected function setFileCache(string $fileUrl, string $method, array $auth, string $cacheKey)
-    {
-        $filesystemCache = $this->getFilesystemCache();
-        $response = $this->getFileFromUrl($method, $fileUrl, $auth);
-
-        if (200 === $response->getStatusCode()) {
-            $content = $response->getBody()->read(4096);
-            $filesystemCache->set('entity-import-file.'.$cacheKey, $content);
-        }
     }
 }

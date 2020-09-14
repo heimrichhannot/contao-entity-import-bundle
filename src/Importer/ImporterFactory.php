@@ -9,6 +9,7 @@
 namespace HeimrichHannot\EntityImportBundle\Importer;
 
 use HeimrichHannot\EntityImportBundle\Source\SourceFactory;
+use HeimrichHannot\EntityImportBundle\Source\SourceInterface;
 use HeimrichHannot\RequestBundle\Component\HttpFoundation\Request;
 use HeimrichHannot\UtilsBundle\Container\ContainerUtil;
 use HeimrichHannot\UtilsBundle\Database\DatabaseUtil;
@@ -92,7 +93,7 @@ class ImporterFactory
         $this->fileUtil = $fileUtil;
     }
 
-    public function createInstance(int $configModel): ?ImporterInterface
+    public function createInstance(int $configModel, array $options = []): ?ImporterInterface
     {
         if (null === ($configModel = $this->modelUtil->findModelInstanceByPk('tl_entity_import_config', $configModel))) {
             return null;
@@ -102,7 +103,13 @@ class ImporterFactory
             return null;
         }
 
+        /**
+         * @var SourceInterface
+         */
         $source = $this->sourceFactory->createInstance($sourceModel->id);
+
+        // set domain
+        $source->setDomain($configModel->cronDomain);
 
         return new Importer(
             $this->container,

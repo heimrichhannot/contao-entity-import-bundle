@@ -12,13 +12,17 @@ use Contao\Database;
 use Contao\DataContainer;
 use Contao\Message;
 use Contao\System;
+use HeimrichHannot\EntityImportBundle\Event\AddSourceFieldMappingPresetsEvent;
 use HeimrichHannot\EntityImportBundle\Source\AbstractFileSource;
 use HeimrichHannot\EntityImportBundle\Source\CSVFileSource;
+use HeimrichHannot\EntityImportBundle\Source\RSSFileSource;
 use HeimrichHannot\EntityImportBundle\Source\SourceFactory;
 use HeimrichHannot\EntityImportBundle\Util\EntityImportUtil;
+use HeimrichHannot\UtilsBundle\Database\DatabaseUtil;
 use HeimrichHannot\UtilsBundle\Dca\DcaUtil;
 use HeimrichHannot\UtilsBundle\File\FileUtil;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class EntityImportSourceContainer
 {
@@ -42,10 +46,12 @@ class EntityImportSourceContainer
 
     const FILETYPE_CSV = 'csv';
     const FILETYPE_JSON = 'json';
+    const FILETYPE_RSS = 'rss';
 
     const FILETYPES = [
         self::FILETYPE_CSV,
         self::FILETYPE_JSON,
+        self::FILETYPE_RSS,
     ];
 
     protected $activeBundles;
@@ -72,8 +78,16 @@ class EntityImportSourceContainer
      * @var EntityImportUtil
      */
     private $util;
+    /**
+     * @var EventDispatcherInterface
+     */
+    private $eventDispatcher;
+    /**
+     * @var DatabaseUtil
+     */
+    private $databaseUtil;
 
-    public function __construct(SourceFactory $sourceFactory, FileUtil $fileUtil, ModelUtil $modelUtil, DcaUtil $dcaUtil, EntityImportUtil $util)
+    public function __construct(SourceFactory $sourceFactory, FileUtil $fileUtil, ModelUtil $modelUtil, DcaUtil $dcaUtil, EntityImportUtil $util, EventDispatcherInterface $eventDispatcher, DatabaseUtil $databaseUtil)
     {
         $this->activeBundles = System::getContainer()->getParameter('kernel.bundles');
         $this->sourceFactory = $sourceFactory;
@@ -81,6 +95,22 @@ class EntityImportSourceContainer
         $this->modelUtil = $modelUtil;
         $this->dcaUtil = $dcaUtil;
         $this->util = $util;
+        $this->eventDispatcher = $eventDispatcher;
+        $this->databaseUtil = $databaseUtil;
+    }
+
+    public function setPreset(?DataContainer $dc)
+    {
+        if (!($preset = $dc->activeRecord->fieldMappingPresets)) {
+            return;
+        }
+
+        $dca = &$GLOBALS['TL_DCA']['tl_entity_import_source'];
+
+        $this->databaseUtil->update('tl_entity_import_source', [
+            'fieldMappingPresets' => '',
+            'fieldMapping' => serialize($dca['fields']['fieldMappingPresets']['eval']['presets'][$preset]),
+        ], 'tl_entity_import_source.id='.$dc->id);
     }
 
     public function initPalette(?DataContainer $dc)
@@ -115,7 +145,6 @@ class EntityImportSourceContainer
 
                 switch ($fileType) {
                     case static::FILETYPE_CSV:
-
                         /** @var CSVFileSource $source */
                         $source = $this->sourceFactory->createInstance($sourceModel->id);
 
@@ -143,11 +172,41 @@ class EntityImportSourceContainer
 
                         break;
 
+                    case static::FILETYPE_RSS:
+                        /** @var RSSFileSource $source */
+                        $source = $this->sourceFactory->createInstance($sourceModel->id);
+
+                        $options = $source->getPostFieldsAsOptions();
+
+                        $this->util->transformFieldMappingSourceValueToSelect(
+                            array_combine($options, $options)
+                        );
+
+                        $dca['fields']['fileContent']['eval']['rte'] = 'ace|xml';
+
+                        break;
+
                     default:
                         break;
                 }
 
                 break;
+        }
+
+        // field mapping presets
+        $event = $this->eventDispatcher->dispatch(AddSourceFieldMappingPresetsEvent::NAME, new AddSourceFieldMappingPresetsEvent([], $sourceModel));
+
+        $presets = $event->getPresets();
+
+        if (empty($presets)) {
+            unset($dca['fields']['fieldMappingPresets']);
+        } else {
+            $options = array_keys($presets);
+
+            asort($presets);
+
+            $dca['fields']['fieldMappingPresets']['options'] = $options;
+            $dca['fields']['fieldMappingPresets']['eval']['presets'] = $presets;
         }
     }
 
@@ -168,14 +227,19 @@ class EntityImportSourceContainer
         /** @var AbstractFileSource $source */
         $source = $this->sourceFactory->createInstance($dc->id);
 
-        if ($sourceModel->fileType === static::FILETYPE_CSV) {
-            return $source->getLinesFromFile(25, true)."\n...";
-        }
+        switch ($sourceModel->fileType) {
+            case static::FILETYPE_CSV:
+                return $source->getLinesFromFile(25, true)."\n...";
 
-        if ($sourceModel->fileType === static::FILETYPE_JSON) {
-            $string = json_decode($source->getFileContent(false));
+            case static::FILETYPE_JSON:
+                $string = json_decode($source->getFileContent(true));
 
-            return json_encode($string, JSON_PRETTY_PRINT);
+                return substr(json_encode($string, JSON_PRETTY_PRINT), 0, 50000);
+
+            case static::FILETYPE_RSS:
+                return substr($source->getFileContent(true), 0, 50000);
+
+                break;
         }
 
         return $source->getFileContent(true);

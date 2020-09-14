@@ -19,4 +19,8 @@ interface SourceInterface
     public function getSourceModel(): Model;
 
     public function setSourceModel(Model $sourceModel);
+
+    public function getDomain(): ?string;
+
+    public function setDomain(?string $domain);
 }

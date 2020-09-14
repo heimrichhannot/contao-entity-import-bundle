@@ -5,12 +5,19 @@ $lang = &$GLOBALS['TL_LANG']['tl_entity_import_source'];
 /**
  * Fields
  */
-$lang['title'][0]    = 'Titel';
-$lang['title'][1]    = 'Geben Sie hier den Titel der Quelle ein.';
-$lang['type'][0]     = 'Typ';
-$lang['type'][1]     = 'Wählen Sie hier den Typ des Imports aus.';
-$lang['fileType'][0] = 'Dateityp';
-$lang['fileType'][1] = 'Wählen Sie hier den Typ der Datei aus.';
+$lang['title'][0] = 'Titel';
+$lang['title'][1] = 'Geben Sie hier den Titel der Quelle ein.';
+
+$lang['type'][0]                                                                                           = 'Typ';
+$lang['type'][1]                                                                                           = 'Wählen Sie hier den Typ des Imports aus.';
+$lang['type'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::TYPE_DATABASE] = 'Datenbank';
+$lang['type'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::TYPE_FILE]     = 'Datei';
+
+$lang['fileType'][0]                                                                                           = 'Dateityp';
+$lang['fileType'][1]                                                                                           = 'Wählen Sie hier den Typ der Datei aus.';
+$lang['fileType'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::FILETYPE_CSV]  = 'CSV';
+$lang['fileType'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::FILETYPE_JSON] = 'JSON';
+$lang['fileType'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::FILETYPE_RSS]  = 'RSS';
 
 $lang['csvHeaderRow'][0] = 'Kopfdatensatz';
 $lang['csvHeaderRow'][1] = 'Der erste Datensatz enthält die Spaltennamen.';
@@ -33,6 +40,8 @@ $lang['fieldMapping']['sourceValue'][0] = 'Wert aus der Quelle';
 $lang['fieldMapping']['sourceValue'][1] = 'Geben Sie hier den Ort des Wertes in der Quelle ein.';
 $lang['fieldMapping']['staticValue'][0] = 'Statischer Wert';
 $lang['fieldMapping']['staticValue'][1] = 'Geben Sie hier den Wert ein, der gleich in allen Datensätzen eingetragen werden soll.';
+$lang['fieldMappingPresets'][0]         = 'Felderabbildung aus Vorlage erzeugen';
+$lang['fieldMappingPresets'][1]         = 'Wählen Sie hier bei Bedarf eine Vorlage aus. ACHTUNG: Dies überschreibt Ihre aktuell gesetzte Felderabbildung!';
 
 $lang['fileContent'][0] = 'Dateivorschau';
 $lang['fileContent'][1] = 'Hier können Sie den Inhalt der ausgewählten Datei sehen. Es wird nicht die gesammte Datei dargestellt.';
@@ -43,10 +52,8 @@ $lang['retrievalType'][1] = 'Wählen Sie hier die Art der Dateiquelle aus.';
 $lang['retrievalType'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::RETRIEVAL_TYPE_HTTP]               = 'HTTP';
 $lang['retrievalType'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::RETRIEVAL_TYPE_CONTAO_FILE_SYSTEM] = 'Contao Dateiverwaltung';
 $lang['retrievalType'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::RETRIEVAL_TYPE_ABSOLUTE_PATH]      = 'Absoluter Pfad';
-$lang['type'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::TYPE_DATABASE]                              = 'Datenbank';
-$lang['type'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::TYPE_FILE]                                  = 'Datei';
 
-$lang['sourceUrl'][0]                = 'Url';
+$lang['sourceUrl'][0]                = 'URL';
 $lang['sourceUrl'][1]                = 'Geben Sie hier die URL zur Datei ein.';
 $lang['absolutePath'][0]             = 'Absoluter Dateipfad';
 $lang['absolutePath'][1]             = 'Geben Sie hier einen absoluten Dateipfad auf dem Server ein.';
@@ -75,7 +82,7 @@ $lang['dbSourceTable'][1]            = 'Wählen Sie hier die Quelltabelle aus.';
 $lang['dbSourceTableExplanation']    = 'Wenn Sie von der im CMS genutzten Datenbankverbindung abweichen, müssen Sie den Datensatz erst abspeichern, damit sich die Optionen des Feldes "Quelltabelle" aktualisieren.';
 $lang['dbSourceTableWhere'][0]       = 'WHERE-Bedingung für den Import';
 $lang['dbSourceTableWhere'][1]       = 'Geben Sie hier auf Wunsch eine WHERE-Bedingung ein.';
-$lang['externalUrl'][0]              = 'Url';
+$lang['externalUrl'][0]              = 'URL';
 $lang['externalUrl'][1]              = 'Tragen Sie hier die Url ein, von der die Daten importiert werden sollen.';
 $lang['httpMethod'][0]               = 'HTTP-Methode';
 $lang['httpMethod'][1]               = 'Wählen Sie hier die HTTP-Methode mit der auf die Datei zugegriffen werden soll.';
@@ -99,7 +106,7 @@ $lang['reference'] = [
     'httpMethod' => [
         'get'  => 'GET',
         'post' => 'POST',
-    ],
+    ]
 ];
 
 /**

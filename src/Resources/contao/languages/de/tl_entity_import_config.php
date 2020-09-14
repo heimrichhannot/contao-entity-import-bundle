@@ -50,6 +50,11 @@ $lang['fileFieldMapping']['slugFilename'][0]    = 'Dateiname normalisieren (slug
 $lang['fileFieldMapping']['slugFilename'][1]    = 'Wählen Sie diese Option, um den Dateinamen von potentiell problematischen Zeichen zu säubern.';
 $lang['fileFieldMapping']['delayAfter'][0]      = 'Wartezeit nach HTTP-Request';
 $lang['fileFieldMapping']['delayAfter'][1]      = 'Geben Sie hier die Zeit in Sekunden ein, die der Importer nach einem HTTP-Request warten soll, um bspw. ein Rate-Limit zu umgehen.';
+$lang['fileFieldMapping']['skipIfExisting'][0]  = 'Überspringen, wenn vorhanden';
+$lang['fileFieldMapping']['skipIfExisting'][1]  = 'Wählen Sie diese Option, um einen erneuten Import bei bereits existierender lokalen Datei zu verhindern (Performance).';
+
+$lang['fieldMappingPresets'][0] = 'Felderabbildung aus Vorlage erzeugen';
+$lang['fieldMappingPresets'][1] = 'Wählen Sie hier bei Bedarf eine Vorlage aus. ACHTUNG: Dies überschreibt Ihre aktuell gesetzte Felderabbildung!';
 
 $lang['importMode'][0] = 'Importmodus';
 $lang['importMode'][1] = 'Wählen Sie hier aus, auf welche Weise importiert werden soll.';
@@ -99,18 +104,25 @@ $lang['targetDeletionAdditionalWhere'][1] = 'Geben Sie hier zusätzlich zu den I
 $lang['targetDeletionWhere'][0] = 'WHERE-Bedingung für das Löschen';
 $lang['targetDeletionWhere'][1] = 'Geben Sie hier Bedingungen an, die für das Löschen erfüllt sein müssen.';
 
-$lang['useCron'][0]      = 'Cronjob nutzen';
-$lang['useCron'][1]      = 'Wählen Sie diese Option, um den Importer per Cronjob auszulösen.';
-$lang['cronInterval'][0] = 'Cron-Interval';
-$lang['cronInterval'][1] = 'Wählen Sie hier das Interval aus, in dem der Import ausgeführt werden soll.';
-$lang['cronDomain'][0]   = 'Domainname';
-$lang['cronDomain'][1]   = 'Geben Sie hier die Domain ein auf welcher der Cronjob ausgeführt wird. Das dient der besseren zuordnung falls beim Cronjob Fehler auftretten sollten.';
+$lang['useCron'][0]         = 'Cronjob/Command nutzen';
+$lang['useCron'][1]         = 'Wählen Sie diese Option, um den Importer per Cronjob oder Command auszulösen.';
+$lang['cronInterval'][0]    = 'Cron-Interval';
+$lang['cronInterval'][1]    = 'Wählen Sie hier das Interval aus, in dem der Import ausgeführt werden soll.';
+$lang['cronDomain'][0]      = 'Domainname';
+$lang['cronDomain'][1]      = 'Geben Sie hier die Domain ein, unter der der Cronjob ausgeführt wird.';
+$lang['cronLanguage'][0]    = 'Sprache';
+$lang['cronLanguage'][1]    = 'Wählen Sie hier die Sprache aus, mit der der Cronjob ausgeführt wird.';
+$lang['usePoorMansCron'][0] = 'Als Poor-Man\'s-Cronjob nutzen';
+$lang['usePoorMansCron'][1] = 'Wählen Sie diese Option, um den Importer per Poor-Man\'s-Cronjob auszulösen.';
 
 $lang['addDcMultilingualSupport'][0] = 'Unterstützung für DC_Multilingual hinzufügen';
 $lang['addDcMultilingualSupport'][1] = 'Wählen Sie diese Option, wenn es sich bei der Zieltabelle um eine Contao-Tabelle mit Unterstützung für DC_Multilingual handelt.';
 
 $lang['addCategoriesSupport'][0] = 'Unterstützung für heimrichhannot/contao-categories-bundle hinzufügen';
 $lang['addCategoriesSupport'][1] = 'Wählen Sie diese Option, um entsprechende Felder zu beachten.';
+
+$lang['addDraftsSupport'][0] = 'Unterstützung für heimrichhannot/contao-drafts-bundle hinzufügen';
+$lang['addDraftsSupport'][1] = 'Wählen Sie diese Option, um entsprechende Felder zu beachten.';
 
 $lang['addSkipFieldsOnMerge'][0] = 'Bei der Zusammenführung zu überspringende Felder hinzufügen';
 $lang['addSkipFieldsOnMerge'][1] = 'Wählen Sie diese Option, wenn beim Zusammenführen (Merge) Felder in der Datenbank nicht überschrieben werden sollen.';
@@ -146,7 +158,7 @@ $lang['reference'] = [
     ],
     'namingMode'   => [
         'field_pattern' => 'aus Quellfeld-Werten',
-        'random_md5' => 'zufällige MD5-Zeichenfolge',
+        'random_md5'    => 'zufällige MD5-Zeichenfolge',
     ]
 ];
 
