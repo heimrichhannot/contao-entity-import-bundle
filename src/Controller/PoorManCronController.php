@@ -89,7 +89,7 @@ class PoorManCronController
     protected function getConfigIds(string $interval): array
     {
         $models = $this->modelUtil->findModelInstancesBy('tl_entity_import_config',
-            ['tl_entity_import_config.useCron=?', 'tl_entity_import_config.cronInterval=?'], [true, $interval]);
+            ['tl_entity_import_config.useCron=?', 'tl_entity_import_config.cronInterval=?', 'tl_entity_import_config.usePoorMansCron=?'], [true, $interval, true]);
 
         if (null === $models) {
             return [];

@@ -76,7 +76,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
         ],
     ],
     'palettes'    => [
-        '__selector__' => ['importMode', 'deleteBeforeImport', 'sortingMode', 'setDateAdded', 'setTstamp', 'generateAlias', 'deletionMode', 'useCron', 'addSkipFieldsOnMerge'],
+        '__selector__' => ['importMode', 'deleteBeforeImport', 'sortingMode', 'setDateAdded', 'setTstamp', 'generateAlias', 'deletionMode', 'useCron', 'usePoorMansCron', 'addSkipFieldsOnMerge'],
         'default'      => '{general_legend},title,targetTable,importMode;{mapping_legend},fieldMappingCopier,fieldMappingPresets,fieldMapping;{fields_legend},setDateAdded,setTstamp,generateAlias;{file_mapping_legend},fileFieldMappingCopier,fileFieldMapping;{sorting_legend},sortingMode;{deletion_legend},deleteBeforeImport,deletionMode;{misc_legend},addCategoriesSupport,addDcMultilingualSupport,addDraftsSupport;{cron_legend},useCron;',
     ],
     'subpalettes' => [
@@ -91,7 +91,8 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
         'setTstamp'                                                                                                                 => 'targetTstampField',
         'generateAlias'                                                                                                             => 'targetAliasField,aliasFieldPattern',
         'deleteBeforeImport'                                                                                                        => 'deleteBeforeImportWhere',
-        'useCron'                                                                                                                   => 'cronInterval,cronDomain,cronLanguage',
+        'useCron'                                                                                                                   => 'cronDomain,cronLanguage,usePoorMansCron',
+        'usePoorMansCron'                                                                                                           => 'cronInterval',
         'addSkipFieldsOnMerge'                                                                                                      => 'skipFieldsOnMerge'
     ],
     'fields'      => [
@@ -534,6 +535,13 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'options'   => \Contao\System::getLanguages(),
             'eval'      => ['tl_class' => 'w50', 'mandatory' => true, 'includeBlankOption' => true, 'chosen' => true],
             'sql'       => "varchar(64) NOT NULL default ''"
+        ],
+        'usePoorMansCron'               => [
+            'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['usePoorMansCron'],
+            'exclude'   => true,
+            'inputType' => 'checkbox',
+            'eval'      => ['tl_class' => 'w50', 'submitOnChange' => true],
+            'sql'       => "char(1) NOT NULL default ''"
         ],
         'deletionMode'                  => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['deletionMode'],

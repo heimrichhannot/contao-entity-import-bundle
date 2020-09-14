@@ -98,6 +98,12 @@ class ExecuteImportCommand extends AbstractLockedCommand
                 $this->io->error("Importer config with ID $configId not found.");
             }
 
+            if (!$configModel->useCron) {
+                $this->io->warning("Importer with config ID $configId hasn't set useCron=1. Skipped.");
+
+                continue;
+            }
+
             if ($configModel->cronLanguage) {
                 $language = $GLOBALS['TL_LANGUAGE'];
 

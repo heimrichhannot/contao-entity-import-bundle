@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.16.0] - 2020-09-14
+- added `usePoorMansCron` in order to allow defining domain and language for non-poor-man's-crons (commands)
+
 ## [0.15.0] - 2020-07-17
 - added RSS import source
 - fixed localizations

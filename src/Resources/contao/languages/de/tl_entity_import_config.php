@@ -104,14 +104,16 @@ $lang['targetDeletionAdditionalWhere'][1] = 'Geben Sie hier zusätzlich zu den I
 $lang['targetDeletionWhere'][0] = 'WHERE-Bedingung für das Löschen';
 $lang['targetDeletionWhere'][1] = 'Geben Sie hier Bedingungen an, die für das Löschen erfüllt sein müssen.';
 
-$lang['useCron'][0]      = 'Cronjob nutzen';
-$lang['useCron'][1]      = 'Wählen Sie diese Option, um den Importer per Cronjob auszulösen.';
-$lang['cronInterval'][0] = 'Cron-Interval';
-$lang['cronInterval'][1] = 'Wählen Sie hier das Interval aus, in dem der Import ausgeführt werden soll.';
-$lang['cronDomain'][0]   = 'Domainname';
-$lang['cronDomain'][1]   = 'Geben Sie hier die Domain ein, unter der der Cronjob ausgeführt wird.';
-$lang['cronLanguage'][0] = 'Sprache';
-$lang['cronLanguage'][1] = 'Wählen Sie hier die Sprache aus, mit der der Cronjob ausgeführt wird.';
+$lang['useCron'][0]         = 'Cronjob/Command nutzen';
+$lang['useCron'][1]         = 'Wählen Sie diese Option, um den Importer per Cronjob oder Command auszulösen.';
+$lang['cronInterval'][0]    = 'Cron-Interval';
+$lang['cronInterval'][1]    = 'Wählen Sie hier das Interval aus, in dem der Import ausgeführt werden soll.';
+$lang['cronDomain'][0]      = 'Domainname';
+$lang['cronDomain'][1]      = 'Geben Sie hier die Domain ein, unter der der Cronjob ausgeführt wird.';
+$lang['cronLanguage'][0]    = 'Sprache';
+$lang['cronLanguage'][1]    = 'Wählen Sie hier die Sprache aus, mit der der Cronjob ausgeführt wird.';
+$lang['usePoorMansCron'][0] = 'Als Poor-Man\'s-Cronjob nutzen';
+$lang['usePoorMansCron'][1] = 'Wählen Sie diese Option, um den Importer per Poor-Man\'s-Cronjob auszulösen.';
 
 $lang['addDcMultilingualSupport'][0] = 'Unterstützung für DC_Multilingual hinzufügen';
 $lang['addDcMultilingualSupport'][1] = 'Wählen Sie diese Option, wenn es sich bei der Zieltabelle um eine Contao-Tabelle mit Unterstützung für DC_Multilingual handelt.';
