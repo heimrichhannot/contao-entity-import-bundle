@@ -84,7 +84,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
         'retrievalType_http'               => 'sourceUrl,httpMethod,httpAuth,fileType',
         'retrievalType_contao_file_system' => 'fileSRC,fileType',
         'retrievalType_absolute_path'      => 'absolutePath',
-        'fileType_csv'                     => 'fileContent,csvHeaderRow,csvDelimiter,csvEnclosure,csvEscape,fieldMappingCopier,fieldMappingPresets,fieldMapping',
+        'fileType_csv'                     => 'fileContent,csvHeaderRow,csvHeaderRow,csvDelimiter,csvEnclosure,csvEscape,fieldMappingCopier,fieldMappingPresets,fieldMapping',
         'fileType_json'                    => 'fileContent,pathToDataArray,fieldMappingCopier,fieldMappingPresets,fieldMapping',
         'fileType_rss'                     => 'fileContent,pathToDataArray,fieldMappingCopier,fieldMappingPresets,fieldMapping',
     ],
@@ -426,6 +426,15 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'eval'      => [
                 'tl_class'       => 'w50',
                 'submitOnChange' => true,
+            ],
+            'sql'       => "char(1) NOT NULL default ''",
+        ],
+        'csvSkipEmptyLines'             => [
+            'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['csvSkipEmptyLines'],
+            'exclude'   => true,
+            'inputType' => 'checkbox',
+            'eval'      => [
+                'tl_class'       => 'w50',
             ],
             'sql'       => "char(1) NOT NULL default ''",
         ],
