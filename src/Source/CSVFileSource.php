@@ -27,7 +27,9 @@ class CSVFileSource extends AbstractFileSource
         $csv->next();
 
         while ($current = $csv->current()) {
-            $data[] = $this->getMappedItemData($current, $this->fieldMapping);
+            if(!($this->sourceModel->csvSkipEmptyLines && array(null) == $current)) {
+                $data[] = $this->getMappedItemData($current, $this->fieldMapping);
+            }
 
             $csv->next();
         }
