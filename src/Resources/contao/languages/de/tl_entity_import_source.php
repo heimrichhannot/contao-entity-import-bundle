@@ -21,6 +21,8 @@ $lang['fileType'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportS
 
 $lang['csvHeaderRow'][0] = 'Kopfdatensatz';
 $lang['csvHeaderRow'][1] = 'Der erste Datensatz enthält die Spaltennamen.';
+$lang['csvSkipEmptyLines'][0] = 'Leere Zeilen überspringen';
+$lang['csvSkipEmptyLines'][1] = 'Sollen leeren Zeilen übersprungen werden?';
 $lang['csvDelimiter'][0] = 'Feld-Trennzeichen';
 $lang['csvDelimiter'][1] = 'Geben Sie hier das Feld-Trennzeichen ein.';
 $lang['csvEnclosure'][0] = 'Text-Trennzeichen';
