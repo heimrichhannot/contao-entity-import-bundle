@@ -14,6 +14,8 @@ $lang['fileType'][1] = 'Select the type of file here.';
 
 $lang['csvHeaderRow'][0] = 'Header data record';
 $lang['csvHeaderRow'][1] = 'The first record contains the column names.';
+$lang['csvSkipEmptyLines'][0] = 'Skip empty lines';
+$lang['csvSkipEmptyLines'][1] = 'Should empty lines be skipped?';
 $lang['csvDelimiter'][0] = 'Field delimiter';
 $lang['csvDelimiter'][1] = 'Enter the field delimiter here.';
 $lang['csvEnclosure'][0] = 'Enclosure';
