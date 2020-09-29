@@ -147,6 +147,16 @@ $presets = array_merge($presets, [
 $event->setPresets($presets);
 ```
 
+### Add quick importers for editors
+
+To be honest: A "quick importer" is a nicer term for "easy importer", so that editors don't get sad ;-) The use case for quick importers
+is to have a user interface which is *way* easier to use for editors.
+
+Simply create an import source and import config as you would normally. Afterwards editors can create quick importers on their own
+and add custom file sources (currently only files of the type CSV are supported).
+
+![alt quick importer example](./docs/img/quick_importer.png)
+
 ## Events
 
 Name | Description
