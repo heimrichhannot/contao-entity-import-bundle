@@ -189,9 +189,12 @@ class EntityImportQuickConfigContainer
         }
 
         $this->addParentEntityToFieldMapping($quickImporter, $importer);
-        $importer->fileSRC = $quickImporter->fileSRC;
+        $sourceModel->fileSRC = $quickImporter->fileSRC;
 
-        $importer = $this->importerFactory->createInstance($importer);
+        $importer = $this->importerFactory->createInstance($importer, [
+            'sourceModel' => $sourceModel,
+        ]);
+
         $result = $importer->getMappedItems();
 
         return $result;
@@ -237,9 +240,11 @@ class EntityImportQuickConfigContainer
         }
 
         $this->addParentEntityToFieldMapping($quickImporter, $importer);
-        $importer->fileSRC = $quickImporter->fileSRC;
+        $sourceModel->fileSRC = $quickImporter->fileSRC;
 
-        $importer = $this->importerFactory->createInstance($importer);
+        $importer = $this->importerFactory->createInstance($importer, [
+            'sourceModel' => $sourceModel,
+        ]);
         $importer->setDryRun($dry);
         $importer->run();
 

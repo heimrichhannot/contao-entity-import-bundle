@@ -95,11 +95,13 @@ class ImporterFactory
 
     public function createInstance($configModel, array $options = []): ?ImporterInterface
     {
+        $sourceModel = $options['sourceModel'] ?? null;
+
         if (is_numeric($configModel) && null === ($configModel = $this->modelUtil->findModelInstanceByPk('tl_entity_import_config', $configModel))) {
             return null;
         }
 
-        if (null === ($sourceModel = $this->modelUtil->findModelInstanceByPk('tl_entity_import_source', $configModel->pid))) {
+        if (null === $sourceModel && null === ($sourceModel = $this->modelUtil->findModelInstanceByPk('tl_entity_import_source', $configModel->pid))) {
             return null;
         }
 
