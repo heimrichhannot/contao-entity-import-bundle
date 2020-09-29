@@ -11,6 +11,7 @@ namespace HeimrichHannot\EntityImportBundle\DataContainer;
 use Contao\Database;
 use Contao\DataContainer;
 use Contao\Message;
+use Contao\Model;
 use Contao\System;
 use HeimrichHannot\EntityImportBundle\Event\AddSourceFieldMappingPresetsEvent;
 use HeimrichHannot\EntityImportBundle\Source\AbstractFileSource;
@@ -224,8 +225,13 @@ class EntityImportSourceContainer
             return '';
         }
 
+        return $this->getFileContent($sourceModel);
+    }
+
+    public function getFileContent(Model $sourceModel)
+    {
         /** @var AbstractFileSource $source */
-        $source = $this->sourceFactory->createInstance($dc->id);
+        $source = $this->sourceFactory->createInstance($sourceModel->id);
 
         switch ($sourceModel->fileType) {
             case static::FILETYPE_CSV:

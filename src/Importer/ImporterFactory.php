@@ -93,9 +93,9 @@ class ImporterFactory
         $this->fileUtil = $fileUtil;
     }
 
-    public function createInstance(int $configModel, array $options = []): ?ImporterInterface
+    public function createInstance($configModel, array $options = []): ?ImporterInterface
     {
-        if (null === ($configModel = $this->modelUtil->findModelInstanceByPk('tl_entity_import_config', $configModel))) {
+        if (is_numeric($configModel) && null === ($configModel = $this->modelUtil->findModelInstanceByPk('tl_entity_import_config', $configModel))) {
             return null;
         }
 

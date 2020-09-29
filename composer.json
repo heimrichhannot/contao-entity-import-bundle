@@ -21,6 +21,7 @@
     "heimrichhannot/contao-be_explanation-bundle": "^2.3",
     "heimrichhannot/contao-multi-column-editor-bundle": "^2.4",
     "heimrichhannot/contao-utils-bundle": "^2.135",
+    "heimrichhannot/contao-list_widget": "^2.1",
     "symfony/stopwatch": "^3.4 || ^4.4"
   },
   "require-dev": {

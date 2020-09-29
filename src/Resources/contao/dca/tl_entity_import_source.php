@@ -336,6 +336,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
         ],
         'fieldMappingCopier'       => [
             'inputType' => 'fieldValueCopier',
+            'exclude'   => true,
             'eval'      => [
                 'fieldValueCopier' => [
                     'table'            => 'tl_entity_import_source',
@@ -360,6 +361,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
         'fieldMapping'             => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['fieldMapping'],
             'inputType' => 'multiColumnEditor',
+            'exclude'   => true,
             'eval'      => [
                 'tl_class'          => 'long clr',
                 'multiColumnEditor' => [

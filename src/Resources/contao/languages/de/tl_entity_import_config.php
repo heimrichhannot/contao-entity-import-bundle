@@ -187,8 +187,6 @@ $lang['error']['configFieldMapping']  = 'Die Feldabbildung des Importes ist nich
 /**
  * Backend Modules
  */
-$lang['import'][0] = 'Import ausführen';
-$lang['import'][1] = 'Import ID %s ausführen';
 $lang['headline']  = 'Import ID %s';
 $lang['label']     = 'Klicken Sie &quot;Import ausführen&quot;, um den Importprozess zu starten.';
 
@@ -219,3 +217,5 @@ $lang['delete'][0] = 'Importer löschen';
 $lang['delete'][1] = 'Importer ID %s löschen';
 $lang['dryRun'][0] = 'Testlauf';
 $lang['dryRun'][1] = 'Testlauf ausführen';
+$lang['import'][0] = 'Import ausführen';
+$lang['import'][1] = 'Import ID %s ausführen';

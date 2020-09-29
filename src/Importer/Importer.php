@@ -169,6 +169,36 @@ class Importer implements ImporterInterface
         return $this->source->getMappedData();
     }
 
+    public function getMappedItems(array $options = []): array
+    {
+        $localizeLabels = $options['localizeLabels'] ?? false;
+
+        $items = $this->getDataFromSource();
+
+        $mappedItems = [];
+
+        $mapping = \Contao\StringUtil::deserialize($this->configModel->fieldMapping, true);
+        $mapping = $this->adjustMappingForDcMultilingual($mapping);
+
+        foreach ($items as $item) {
+            $mappedItem = $this->applyFieldMappingToSourceItem($item, $mapping);
+
+            if ($localizeLabels) {
+                $localizedItem = [];
+
+                foreach ($mappedItem as $field => $value) {
+                    $localizedItem[$this->dcaUtil->getLocalizedFieldName($field, $this->configModel->targetTable)] = $value;
+                }
+
+                $mappedItem = $localizedItem;
+            }
+
+            $mappedItems[] = $mappedItem;
+        }
+
+        return $mappedItems;
+    }
+
     public function setDryRun(bool $dry)
     {
         $this->dryRun = $dry;
@@ -196,6 +226,8 @@ class Importer implements ImporterInterface
     protected function executeImport(array $items): bool
     {
         $this->dcaUtil->loadLanguageFile('default');
+        $this->dcaUtil->loadLanguageFile('tl_entity_import_config');
+
         $database = Database::getInstance();
         $table = $this->configModel->targetTable;
 
