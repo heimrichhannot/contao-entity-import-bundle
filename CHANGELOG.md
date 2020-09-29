@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.18.0] - 2020-09-29
+- added `csvSkipEmptyLines` (thanks to SGehle)
+
 ## [0.17.0] - 2020-09-29
 - added quick importers for editors
 
