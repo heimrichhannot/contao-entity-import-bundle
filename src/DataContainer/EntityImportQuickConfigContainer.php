@@ -176,7 +176,7 @@ class EntityImportQuickConfigContainer
 
     public function getItemsForPreview($config, $widget, $dc)
     {
-        if (null === ($quickImporter = $this->modelUtil->findModelInstanceByPk('tl_entity_import_quick_config', $dc->id)) || !$quickImporter->importerConfig) {
+        if (null === ($quickImporter = $this->modelUtil->findModelInstanceByPk('tl_entity_import_quick_config', $dc->id)) || !$quickImporter->importerConfig || !$quickImporter->fileSRC) {
             return [];
         }
 

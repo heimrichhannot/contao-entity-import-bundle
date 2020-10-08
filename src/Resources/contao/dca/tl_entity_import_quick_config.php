@@ -1,6 +1,7 @@
 <?php
 
 System::getContainer()->get('huh.utils.dca')->loadLanguageFile('tl_entity_import_source');
+System::getContainer()->get('huh.utils.dca')->loadLanguageFile('tl_entity_import_config');
 
 $GLOBALS['TL_DCA']['tl_entity_import_quick_config'] = [
     'config'   => [

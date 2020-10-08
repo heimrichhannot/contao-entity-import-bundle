@@ -12,7 +12,6 @@ class ContaoEntityImportBundleBe {
 
         document.querySelector('#header .inner').style['max-width'] = 'none';
         document.getElementById('container').style['max-width'] = 'none';
-        document.getElementById('main').style['width'] = 'auto';
     }
 }
 
