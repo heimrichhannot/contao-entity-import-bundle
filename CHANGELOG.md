@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.18.4] - 2020-10-20
+- fixed js issue
+
 ## [0.18.3] - 2020-10-08
 - fixed translation issue
 - fixed quick importer empty source issue

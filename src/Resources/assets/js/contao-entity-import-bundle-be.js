@@ -6,7 +6,7 @@ class ContaoEntityImportBundleBe {
     }
 
     static removeWidthLimitForQuickImporters() {
-        if (document.getElementById('tl_entity_import_quick_config').length < 1) {
+        if (document.getElementById('tl_entity_import_quick_config') === null) {
             return;
         }
 
