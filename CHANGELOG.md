@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.18.6] - 2020-11-12
+- fixed check for empty csv file sources
+
 ## [0.18.5] - 2020-11-12
 - added check for empty csv file sources
 

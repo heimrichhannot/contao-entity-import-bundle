@@ -19,7 +19,7 @@ class CSVFileSource extends AbstractFileSource
         $settings = $this->getCsvSettings();
         $file = $this->fileUtil->getFileFromUuid($this->sourceModel->fileSRC);
 
-        if (!$file->exists()) {
+        if (null === $file || !$file->exists()) {
             return [];
         }
 
