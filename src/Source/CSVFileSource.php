@@ -17,9 +17,13 @@ class CSVFileSource extends AbstractFileSource
     {
         $data = [];
         $settings = $this->getCsvSettings();
-        $filePath = $this->fileUtil->getPathFromUuid($this->sourceModel->fileSRC);
+        $file = $this->fileUtil->getFileFromUuid($this->sourceModel->fileSRC);
 
-        $csv = new CsvReader($filePath);
+        if (!$file->exists()) {
+            return [];
+        }
+
+        $csv = new CsvReader($file->path);
         $csv->setDelimiter($settings['delimiter']);
         $csv->setEnclosure($settings['enclosure']);
         $csv->setEscape($settings['escape']);
