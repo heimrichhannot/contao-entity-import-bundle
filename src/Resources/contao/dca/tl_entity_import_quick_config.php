@@ -117,7 +117,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_quick_config'] = [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['fileSRC'],
             'exclude'   => true,
             'inputType' => 'fileTree',
-            'eval'      => ['filesOnly' => true, 'fieldType' => 'radio', 'mandatory' => true, 'tl_class' => 'w50 clr', 'submitOnChange' => true],
+            'eval'      => ['filesOnly' => true, 'fieldType' => 'radio', 'mandatory' => true, 'tl_class' => 'w50', 'submitOnChange' => true],
             'sql'       => "binary(16) NULL",
         ],
         'parentEntity'   => [

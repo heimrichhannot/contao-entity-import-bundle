@@ -106,7 +106,7 @@ class EntityImportQuickConfigContainer
                     $dca['palettes']['default'] = str_replace('importerConfig', 'importerConfig,fileSRC,fileContent,csvPreviewList', $dca['palettes']['default']);
 
                     if (isset($targetDca['config']['ptable']) && $targetDca['config']['ptable'] && Database::getInstance()->fieldExists('pid', $importer->targetTable)) {
-                        $dca['palettes']['default'] = str_replace('importerConfig', 'fileContent,parentEntity', $dca['palettes']['default']);
+                        $dca['palettes']['default'] = str_replace('fileSRC', 'fileSRC,parentEntity', $dca['palettes']['default']);
                     }
 
                     break;

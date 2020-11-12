@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.18.7] - 2020-11-12
+- fixed quick import
+
 ## [0.18.6] - 2020-11-12
 - fixed check for empty csv file sources
 
