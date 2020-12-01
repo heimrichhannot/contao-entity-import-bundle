@@ -238,6 +238,12 @@ class Importer implements ImporterInterface
         try {
             $count = 0;
             $targetTableColumns = $database->getFieldNames($table);
+            $targetTableColumnData = [];
+
+            foreach ($database->listFields($table) as $columnData) {
+                $targetTableColumnData[$columnData['name']] = $columnData;
+            }
+
             $mappedItems = [];
 
             $mode = $this->configModel->importMode;
@@ -270,6 +276,8 @@ class Importer implements ImporterInterface
 
             foreach ($items as $item) {
                 $mappedItem = $this->applyFieldMappingToSourceItem($item, $mapping);
+
+                $mappedItem = $this->fixNotNullErrors($mappedItem, $targetTableColumnData);
 
                 if (!\is_array($mappedItem)) {
                     throw new Exception($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['configFieldMapping']);
@@ -473,6 +481,22 @@ class Importer implements ImporterInterface
         }
 
         return true;
+    }
+
+    protected function fixNotNullErrors($mappedItem, $targetTableColumnData)
+    {
+        $result = [];
+
+        foreach ($mappedItem as $field => $value) {
+            if (null === $value && isset($targetTableColumnData[$field]['null']) &&
+                'NOT NULL' === $targetTableColumnData[$field]['null'] && isset($targetTableColumnData[$field]['default'])) {
+                $result[$field] = $targetTableColumnData[$field]['default'];
+            } else {
+                $result[$field] = $value;
+            }
+        }
+
+        return $result;
     }
 
     /**
