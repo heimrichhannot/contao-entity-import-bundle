@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.18.9] - 2021-01-21
+- added customizable email adress to send errorNotification to
+- added event in `Importer::executeImport`
+
 ## [0.18.8] - 2020-12-01
 - fixed utf-8 issues
 - added checks for not null
