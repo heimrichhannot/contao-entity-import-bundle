@@ -1,13 +1,14 @@
 <?php
 
 /*
- * Copyright (c) 2020 Heimrich & Hannot GmbH
+ * Copyright (c) 2021 Heimrich & Hannot GmbH
  *
  * @license LGPL-3.0-or-later
  */
 
 namespace HeimrichHannot\EntityImportBundle\Source;
 
+use Contao\Controller;
 use Contao\Database;
 use HeimrichHannot\UtilsBundle\Dca\DcaUtil;
 use HeimrichHannot\UtilsBundle\String\StringUtil;
@@ -51,7 +52,14 @@ class DatabaseSource extends AbstractSource
         $db = Database::getInstance($sourceModel->row());
         $where = $sourceModel->dbSourceTableWhere ?: '1=1';
 
-        $records = $db->prepare("SELECT * FROM $sourceModel->dbSourceTable WHERE $where")->execute();
+        try {
+            $records = $db->prepare("SELECT * FROM $sourceModel->dbSourceTable WHERE $where")->execute();
+        } catch (\Exception $e) {
+            // catch and throw new exception to specify error message
+            Controller::loadLanguageFile('default');
+
+            throw new \Exception(sprintf($GLOBALS['TL_LANG']['MSC']['entityImport']['dbConnectionError'], $e->getMessage()));
+        }
 
         $data = [];
 

@@ -1,13 +1,14 @@
 <?php
 
 /*
- * Copyright (c) 2020 Heimrich & Hannot GmbH
+ * Copyright (c) 2021 Heimrich & Hannot GmbH
  *
  * @license LGPL-3.0-or-later
  */
 
 namespace HeimrichHannot\EntityImportBundle\Source;
 
+use Contao\Controller;
 use Contao\Environment;
 use Contao\Model;
 use GuzzleHttp\Client;
@@ -107,10 +108,15 @@ abstract class AbstractSource implements SourceInterface
         try {
             $response = $client->request($method, \Contao\StringUtil::decodeEntities($url), $auth);
         } catch (RequestException $e) {
-            return [
-                'statusCode' => $e->getResponse()->getStatusCode(),
-                'result' => $e->getResponse()->getBody()->getContents(),
-            ];
+            if ($e->getResponse()) {
+                $message = $e->getResponse()->getBody()->getContents() ?: $e->getResponse()->getStatusCode();
+            } else {
+                $message = $e->getMessage();
+            }
+
+            Controller::loadLanguageFile('default');
+
+            throw new \Exception(sprintf($GLOBALS['TL_LANG']['MSC']['entityImport']['sourceNotRetrievable'], $message));
         }
 
         return [

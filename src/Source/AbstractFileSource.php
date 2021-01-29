@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright (c) 2020 Heimrich & Hannot GmbH
+ * Copyright (c) 2021 Heimrich & Hannot GmbH
  *
  * @license LGPL-3.0-or-later
  */
@@ -9,9 +9,11 @@
 namespace HeimrichHannot\EntityImportBundle\Source;
 
 use Ausi\SlugGenerator\SlugGenerator;
+use Contao\Controller;
 use HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer;
 use HeimrichHannot\EntityImportBundle\Event\AfterFileSourceGetContentEvent;
 use HeimrichHannot\EntityImportBundle\Event\BeforeAuthenticationEvent;
+use HeimrichHannot\EntityImportBundle\Util\EntityImportUtil;
 use HeimrichHannot\UtilsBundle\Container\ContainerUtil;
 use HeimrichHannot\UtilsBundle\File\FileUtil;
 use HeimrichHannot\UtilsBundle\String\StringUtil;
@@ -28,7 +30,10 @@ abstract class AbstractFileSource extends AbstractSource
      * @var StringUtil
      */
     protected $stringUtil;
-
+    /**
+     * @var EntityImportUtil
+     */
+    protected $entityImportUtil;
     /**
      * @var EventDispatcherInterface
      */
@@ -42,13 +47,13 @@ abstract class AbstractFileSource extends AbstractSource
     /**
      * AbstractFileSource constructor.
      */
-    public function __construct(EventDispatcherInterface $eventDispatcher, FileUtil $fileUtil, StringUtil $stringUtil, ContainerUtil $containerUtil)
+    public function __construct(EventDispatcherInterface $eventDispatcher, FileUtil $fileUtil, StringUtil $stringUtil, ContainerUtil $containerUtil, EntityImportUtil $entityImportUtil)
     {
         $this->fileUtil = $fileUtil;
         $this->stringUtil = $stringUtil;
         $this->containerUtil = $containerUtil;
         $this->eventDispatcher = $eventDispatcher;
-
+        $this->entityImportUtil = $entityImportUtil;
         parent::__construct();
     }
 
@@ -67,6 +72,13 @@ abstract class AbstractFileSource extends AbstractSource
 
         switch ($this->sourceModel->retrievalType) {
             case EntityImportSourceContainer::RETRIEVAL_TYPE_CONTAO_FILE_SYSTEM:
+                if (!$this->sourceModel->fileSRC) {
+                    Controller::loadLanguageFile('default');
+                    Controller::loadLanguageFile('tl_entity_import_source');
+
+                    throw new \Exception(sprintf($GLOBALS['TL_LANG']['MSC']['entityImport']['noFile'], $GLOBALS['TL_LANG']['tl_entity_import_source']['fileType'][$this->sourceModel->fileType]));
+                }
+
                 $path = $projectDir.'/'.$this->fileUtil->getPathFromUuid($this->sourceModel->fileSRC);
 
                 if (file_exists($path)) {
@@ -99,6 +111,7 @@ abstract class AbstractFileSource extends AbstractSource
                 }
 
                 $result = $this->getContentFromUrl($this->sourceModel->httpMethod, $this->sourceModel->sourceUrl, $event->getAuth());
+
                 $content = $result['result'];
 
                 break;
