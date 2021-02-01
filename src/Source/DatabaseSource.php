@@ -49,7 +49,14 @@ class DatabaseSource extends AbstractSource
         $mapping = $this->adjustMappingForDcMultilingual($mapping);
 
         // retrieve the source records
-        $db = Database::getInstance($sourceModel->row());
+        try {
+            $db = Database::getInstance($sourceModel->row());
+        } catch (\Exception $e) {
+            Controller::loadLanguageFile('default');
+            // db connection exception
+            throw new \Exception(sprintf($GLOBALS['TL_LANG']['MSC']['entityImport']['dbConnectionError'], $e->getMessage()));
+        }
+
         $where = $sourceModel->dbSourceTableWhere ?: '1=1';
 
         try {
@@ -57,7 +64,7 @@ class DatabaseSource extends AbstractSource
         } catch (\Exception $e) {
             // catch and throw new exception to specify error message
             Controller::loadLanguageFile('default');
-
+            // db connection exception
             throw new \Exception(sprintf($GLOBALS['TL_LANG']['MSC']['entityImport']['dbConnectionError'], $e->getMessage()));
         }
 

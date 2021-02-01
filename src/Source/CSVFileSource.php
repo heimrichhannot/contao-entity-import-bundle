@@ -21,7 +21,7 @@ class CSVFileSource extends AbstractFileSource
         if (!$this->sourceModel->fileSRC) {
             Controller::loadLanguageFile('default');
             Controller::loadLanguageFile('tl_entity_import_source');
-
+            // no file exception
             throw new \Exception(sprintf($GLOBALS['TL_LANG']['MSC']['entityImport']['noFile'], $GLOBALS['TL_LANG']['tl_entity_import_source']['fileType'][$this->sourceModel->fileType]));
         }
 

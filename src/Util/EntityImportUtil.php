@@ -152,13 +152,14 @@ class EntityImportUtil
      */
     protected function reloadPageWithoutAction(): void
     {
+        // check if key is set
+        // if not do not redirect -> would cause redirect loop
         $url = $this->urlUtil->getCurrentUrl();
 
         if (false === strpos($url, 'key=import')) {
             return;
         }
 
-        $url = str_replace('key=import&', '', $url);
-        $this->urlUtil->redirect($url);
+        $this->urlUtil->redirect($this->urlUtil->removeQueryString(['key']));
     }
 }

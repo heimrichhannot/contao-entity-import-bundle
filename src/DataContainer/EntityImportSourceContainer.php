@@ -270,8 +270,6 @@ class EntityImportSourceContainer
 
             case static::FILETYPE_RSS:
                 return substr($source->getFileContent(true), 0, 50000);
-
-                break;
         }
 
         return $source->getFileContent(true);
