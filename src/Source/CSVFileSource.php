@@ -1,14 +1,14 @@
 <?php
 
 /*
- * Copyright (c) 2020 Heimrich & Hannot GmbH
+ * Copyright (c) 2021 Heimrich & Hannot GmbH
  *
  * @license LGPL-3.0-or-later
  */
 
 namespace HeimrichHannot\EntityImportBundle\Source;
 
-use Contao\Message;
+use Contao\Controller;
 use Haste\IO\Reader\CsvReader;
 
 class CSVFileSource extends AbstractFileSource
@@ -17,6 +17,14 @@ class CSVFileSource extends AbstractFileSource
     {
         $data = [];
         $settings = $this->getCsvSettings();
+
+        if (!$this->sourceModel->fileSRC) {
+            Controller::loadLanguageFile('default');
+            Controller::loadLanguageFile('tl_entity_import_source');
+            // no file exception
+            throw new \Exception(sprintf($GLOBALS['TL_LANG']['MSC']['entityImport']['noFile'], $GLOBALS['TL_LANG']['tl_entity_import_source']['fileType'][$this->sourceModel->fileType]));
+        }
+
         $file = $this->fileUtil->getFileFromUuid($this->sourceModel->fileSRC);
 
         if (null === $file || !$file->exists()) {
@@ -57,24 +65,22 @@ class CSVFileSource extends AbstractFileSource
 
     protected function getCsvSettings(): array
     {
-        try {
-            if (null === $this->sourceModel->csvDelimiter) {
-                throw new \Exception($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['delimiter']);
-            }
-            $settings['delimiter'] = $this->sourceModel->csvDelimiter;
+        Controller::loadLanguageFile('tl_entity_import_config');
 
-            if (null === $this->sourceModel->csvEnclosure) {
-                throw new \Exception($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['enclosure']);
-            }
-            $settings['enclosure'] = $this->sourceModel->csvEnclosure;
-
-            if (null === $this->sourceModel->csvEscape) {
-                throw new \Exception($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['escape']);
-            }
-            $settings['escape'] = $this->sourceModel->csvEscape;
-        } catch (\Exception $e) {
-            Message::addError(sprintf($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['errorMessage']), $e->getMessage());
+        if (!$this->sourceModel->csvDelimiter) {
+            throw new \Exception($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['delimiter']);
         }
+        $settings['delimiter'] = $this->sourceModel->csvDelimiter;
+
+        if (!$this->sourceModel->csvEnclosure) {
+            throw new \Exception($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['enclosure']);
+        }
+        $settings['enclosure'] = $this->sourceModel->csvEnclosure;
+
+        if (!$this->sourceModel->csvEscape) {
+            throw new \Exception($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['escape']);
+        }
+        $settings['escape'] = $this->sourceModel->csvEscape;
 
         return $settings;
     }
