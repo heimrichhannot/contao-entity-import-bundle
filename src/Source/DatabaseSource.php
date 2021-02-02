@@ -51,18 +51,9 @@ class DatabaseSource extends AbstractSource
         // retrieve the source records
         try {
             $db = Database::getInstance($sourceModel->row());
-        } catch (\Exception $e) {
-            Controller::loadLanguageFile('default');
-            // db connection exception
-            throw new \Exception(sprintf($GLOBALS['TL_LANG']['MSC']['entityImport']['dbConnectionError'], $e->getMessage()));
-        }
-
-        $where = $sourceModel->dbSourceTableWhere ?: '1=1';
-
-        try {
+            $where = $sourceModel->dbSourceTableWhere ?: '1=1';
             $records = $db->prepare("SELECT * FROM $sourceModel->dbSourceTable WHERE $where")->execute();
         } catch (\Exception $e) {
-            // catch and throw new exception to specify error message
             Controller::loadLanguageFile('default');
             // db connection exception
             throw new \Exception(sprintf($GLOBALS['TL_LANG']['MSC']['entityImport']['dbConnectionError'], $e->getMessage()));
