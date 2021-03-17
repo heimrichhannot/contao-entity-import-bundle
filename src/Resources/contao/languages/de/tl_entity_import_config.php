@@ -130,6 +130,12 @@ $lang['addSkipFieldsOnMerge'][1] = 'Wählen Sie diese Option, wenn beim Zusammen
 $lang['skipFieldsOnMerge'][0] = 'Felder';
 $lang['skipFieldsOnMerge'][1] = 'Wählen Sie hier die Felder aus, die beim Zusammenführen nicht überschrieben werden sollen.';
 
+$lang['overrideErrorNotificationEmail'][0] = 'E-Mail-Adresse für Fehlermeldung überschreiben';
+$lang['overrideErrorNotificationEmail'][1] = 'Wählen Sie diese Option, wenn Sie die Email, an die die Fehlermeldung geschickt wird anpassen möchten. Standardmäßig wird die Benachrichtigung an den System-Admin verschickt.';
+
+$lang['errorNotificationEmail'][0] = 'E-Mail-Adresse';
+$lang['errorNotificationEmail'][1] = 'Tragen Sie hier die E-Mail-Adresse ein, an die die Fehlermeldung verschickt werden soll.';
+
 /**
  * Reference
  */

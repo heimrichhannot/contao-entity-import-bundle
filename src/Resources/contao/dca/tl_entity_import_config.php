@@ -76,8 +76,8 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
         ],
     ],
     'palettes'    => [
-        '__selector__' => ['importMode', 'deleteBeforeImport', 'sortingMode', 'setDateAdded', 'setTstamp', 'generateAlias', 'deletionMode', 'useCron', 'usePoorMansCron', 'addSkipFieldsOnMerge'],
-        'default'      => '{general_legend},title,targetTable,importMode;{mapping_legend},fieldMappingCopier,fieldMappingPresets,fieldMapping;{fields_legend},setDateAdded,setTstamp,generateAlias;{file_mapping_legend},fileFieldMappingCopier,fileFieldMapping;{sorting_legend},sortingMode;{deletion_legend},deleteBeforeImport,deletionMode;{misc_legend},addCategoriesSupport,addDcMultilingualSupport,addDraftsSupport;{cron_legend},useCron;',
+        '__selector__' => ['importMode', 'deleteBeforeImport', 'sortingMode', 'setDateAdded', 'setTstamp', 'generateAlias', 'deletionMode', 'useCron', 'usePoorMansCron', 'addSkipFieldsOnMerge', 'overrideErrorNotificationEmail'],
+        'default'      => '{general_legend},title,targetTable,importMode;{mapping_legend},fieldMappingCopier,fieldMappingPresets,fieldMapping;{fields_legend},setDateAdded,setTstamp,generateAlias;{file_mapping_legend},fileFieldMappingCopier,fileFieldMapping;{sorting_legend},sortingMode;{deletion_legend},deleteBeforeImport,deletionMode;{error_legend},overrideErrorNotificationEmail;{misc_legend},addCategoriesSupport,addDcMultilingualSupport,addDraftsSupport;{cron_legend},useCron;',
     ],
     'subpalettes' => [
         'importMode_merge'                                                                                                          => 'mergeIdentifierFields,addSkipFieldsOnMerge',
@@ -93,28 +93,29 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
         'deleteBeforeImport'                                                                                                        => 'deleteBeforeImportWhere',
         'useCron'                                                                                                                   => 'cronDomain,cronLanguage,usePoorMansCron',
         'usePoorMansCron'                                                                                                           => 'cronInterval',
-        'addSkipFieldsOnMerge'                                                                                                      => 'skipFieldsOnMerge'
+        'addSkipFieldsOnMerge'                                                                                                      => 'skipFieldsOnMerge',
+        'overrideErrorNotificationEmail'                                                                                            => 'errorNotificationEmail',
     ],
     'fields'      => [
-        'id'                            => [
+        'id'                             => [
             'sql' => "int(10) unsigned NOT NULL auto_increment",
         ],
-        'pid'                           => [
+        'pid'                            => [
             'foreignKey' => 'tl_entity_import_source.title',
             'sql'        => "int(10) unsigned NOT NULL default '0'",
             'relation'   => ['type' => 'belongsTo', 'load' => 'eager'],
         ],
-        'dateAdded'                     => [
+        'dateAdded'                      => [
             'label'   => &$GLOBALS['TL_LANG']['MSC']['dateAdded'],
             'sorting' => true,
             'flag'    => 6,
             'eval'    => ['rgxp' => 'datim', 'doNotCopy' => true],
             'sql'     => "int(10) unsigned NOT NULL default '0'",
         ],
-        'tstamp'                        => [
+        'tstamp'                         => [
             'sql' => "int(10) unsigned NOT NULL default '0'",
         ],
-        'title'                         => [
+        'title'                          => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['title'],
             'search'    => true,
             'exclude'   => true,
@@ -122,7 +123,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'eval'      => ['mandatory' => true, 'maxlength' => 128, 'tl_class' => 'w50'],
             'sql'       => "varchar(128) NOT NULL default ''",
         ],
-        'targetTable'                   => [
+        'targetTable'                    => [
             'label'            => &$GLOBALS['TL_LANG']['tl_entity_import_config']['targetTable'],
             'search'           => true,
             'exclude'          => true,
@@ -131,7 +132,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'options_callback' => [\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::class, 'getAllTargetTables'],
             'sql'              => "varchar(64) NOT NULL default ''",
         ],
-        'fieldMappingCopier'            => [
+        'fieldMappingCopier'             => [
             'inputType' => 'fieldValueCopier',
             'exclude'   => true,
             'eval'      => [
@@ -146,7 +147,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
                 ]
             ]
         ],
-        'fieldMappingPresets'           => [
+        'fieldMappingPresets'            => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['fieldMappingPresets'],
             'exclude'   => true,
             'inputType' => 'select',
@@ -155,7 +156,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'eval'      => ['tl_class' => 'w50', 'includeBlankOption' => true, 'submitOnChange' => true, 'onchange' => "if(!confirm('" . $GLOBALS['TL_LANG']['MSC']['entityImport']['presetConfirm'] . "')) {this.selectedIndex = 0; return false;}"],
             'sql'       => "varchar(64) NOT NULL default ''"
         ],
-        'fieldMapping'                  => [
+        'fieldMapping'                   => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['fieldMapping'],
             'inputType' => 'multiColumnEditor',
             'exclude'   => true,
@@ -223,7 +224,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             ],
             'sql'       => "blob NULL",
         ],
-        'fileFieldMappingCopier'        => [
+        'fileFieldMappingCopier'         => [
             'inputType' => 'fieldValueCopier',
             'exclude'   => true,
             'eval'      => [
@@ -237,7 +238,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
                 ]
             ]
         ],
-        'fileFieldMapping'              => [
+        'fileFieldMapping'               => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['fileFieldMapping'],
             'inputType' => 'multiColumnEditor',
             'exclude'   => true,
@@ -350,7 +351,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             ],
             'sql'       => "blob NULL",
         ],
-        'importMode'                    => [
+        'importMode'                     => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['importMode'],
             'exclude'   => true,
             'inputType' => 'select',
@@ -362,14 +363,14 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'eval'      => ['tl_class' => 'w50', 'submitOnChange' => true, 'mandatory' => true],
             'sql'       => "varchar(16) NOT NULL default ''",
         ],
-        'deleteBeforeImport'            => [
+        'deleteBeforeImport'             => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['deleteBeforeImport'],
             'exclude'   => true,
             'inputType' => 'checkbox',
             'eval'      => ['submitOnChange' => true, 'tl_class' => 'clr w50'],
             'sql'       => "char(1) NOT NULL default ''",
         ],
-        'deleteBeforeImportWhere'       => [
+        'deleteBeforeImportWhere'        => [
             'label'       => &$GLOBALS['TL_LANG']['tl_entity_import_config']['deleteBeforeImportWhere'],
             'inputType'   => 'textarea',
             'exclude'     => true,
@@ -377,7 +378,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'explanation' => 'insertTags',
             'sql'         => "text NULL",
         ],
-        'mergeIdentifierFields'         => [
+        'mergeIdentifierFields'          => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['mergeIdentifierFields'],
             'inputType' => 'multiColumnEditor',
             'exclude'   => true,
@@ -411,7 +412,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             ],
             'sql'       => "blob NULL",
         ],
-        'sortingMode'                   => [
+        'sortingMode'                    => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['sortingMode'],
             'exclude'   => true,
             'filter'    => true,
@@ -421,7 +422,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'eval'      => ['tl_class' => 'w50', 'includeBlankOption' => true, 'submitOnChange' => true],
             'sql'       => "varchar(16) NOT NULL default ''"
         ],
-        'targetSortingField'            => [
+        'targetSortingField'             => [
             'label'            => &$GLOBALS['TL_LANG']['tl_entity_import_config']['targetSortingField'],
             'exclude'          => true,
             'filter'           => true,
@@ -430,7 +431,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'eval'             => ['tl_class' => 'w50', 'mandatory' => true, 'includeBlankOption' => true, 'chosen' => true],
             'sql'              => "varchar(64) NOT NULL default ''"
         ],
-        'targetSortingOrder'            => [
+        'targetSortingOrder'             => [
             'label'       => &$GLOBALS['TL_LANG']['tl_entity_import_config']['targetSortingOrder'],
             'inputType'   => 'textarea',
             'exclude'     => true,
@@ -438,7 +439,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'explanation' => 'insertTags',
             'sql'         => "text NULL",
         ],
-        'targetSortingContextWhere'     => [
+        'targetSortingContextWhere'      => [
             'label'       => &$GLOBALS['TL_LANG']['tl_entity_import_config']['targetSortingContextWhere'],
             'inputType'   => 'textarea',
             'exclude'     => true,
@@ -446,14 +447,14 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'explanation' => 'insertTags',
             'sql'         => "text NULL",
         ],
-        'setDateAdded'                  => [
+        'setDateAdded'                   => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['setDateAdded'],
             'exclude'   => true,
             'inputType' => 'checkbox',
             'eval'      => ['tl_class' => 'w50', 'submitOnChange' => true],
             'sql'       => "char(1) NOT NULL default ''"
         ],
-        'targetDateAddedField'          => [
+        'targetDateAddedField'           => [
             'label'            => &$GLOBALS['TL_LANG']['tl_entity_import_config']['targetDateAddedField'],
             'exclude'          => true,
             'filter'           => true,
@@ -463,14 +464,14 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'eval'             => ['tl_class' => 'w50', 'includeBlankOption' => true, 'chosen' => true],
             'sql'              => "varchar(64) NOT NULL default ''"
         ],
-        'setTstamp'                     => [
+        'setTstamp'                      => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['setTstamp'],
             'exclude'   => true,
             'inputType' => 'checkbox',
             'eval'      => ['tl_class' => 'w50', 'submitOnChange' => true],
             'sql'       => "char(1) NOT NULL default ''"
         ],
-        'targetTstampField'             => [
+        'targetTstampField'              => [
             'label'            => &$GLOBALS['TL_LANG']['tl_entity_import_config']['targetTstampField'],
             'exclude'          => true,
             'filter'           => true,
@@ -480,14 +481,14 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'eval'             => ['tl_class' => 'w50', 'includeBlankOption' => true, 'chosen' => true],
             'sql'              => "varchar(64) NOT NULL default ''"
         ],
-        'generateAlias'                 => [
+        'generateAlias'                  => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['generateAlias'],
             'exclude'   => true,
             'inputType' => 'checkbox',
             'eval'      => ['tl_class' => 'w50', 'submitOnChange' => true],
             'sql'       => "char(1) NOT NULL default ''"
         ],
-        'targetAliasField'              => [
+        'targetAliasField'               => [
             'label'            => &$GLOBALS['TL_LANG']['tl_entity_import_config']['targetAliasField'],
             'exclude'          => true,
             'filter'           => true,
@@ -497,7 +498,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'eval'             => ['tl_class' => 'w50', 'includeBlankOption' => true, 'chosen' => true, 'mandatory' => true],
             'sql'              => "varchar(64) NOT NULL default ''"
         ],
-        'aliasFieldPattern'             => [
+        'aliasFieldPattern'              => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['aliasFieldPattern'],
             'exclude'   => true,
             'search'    => true,
@@ -505,7 +506,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'eval'      => ['maxlength' => 255, 'tl_class' => 'w50', 'mandatory' => true],
             'sql'       => "varchar(255) NOT NULL default ''"
         ],
-        'useCron'                       => [
+        'useCron'                        => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['useCron'],
             'inputType' => 'checkbox',
             'exclude'   => true,
@@ -515,7 +516,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             ],
             'sql'       => "char(1) NOT NULL default ''",
         ],
-        'cronInterval'                  => [
+        'cronInterval'                   => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['cronInterval'],
             'exclude'   => true,
             'inputType' => 'select',
@@ -524,7 +525,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'eval'      => ['tl_class' => 'w50 clr', 'includeBlankOption' => true, 'mandatory' => true],
             'sql'       => "varchar(12) NOT NULL default ''",
         ],
-        'cronDomain'                    => [
+        'cronDomain'                     => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['cronDomain'],
             'exclude'   => true,
             'search'    => true,
@@ -532,7 +533,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'eval'      => ['maxlength' => 64, 'tl_class' => 'w50', 'mandatory' => true],
             'sql'       => "varchar(64) NOT NULL default ''"
         ],
-        'cronLanguage'                  => [
+        'cronLanguage'                   => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['cronLanguage'],
             'exclude'   => true,
             'inputType' => 'select',
@@ -540,14 +541,14 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'eval'      => ['tl_class' => 'w50', 'mandatory' => true, 'includeBlankOption' => true, 'chosen' => true],
             'sql'       => "varchar(64) NOT NULL default ''"
         ],
-        'usePoorMansCron'               => [
+        'usePoorMansCron'                => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['usePoorMansCron'],
             'exclude'   => true,
             'inputType' => 'checkbox',
             'eval'      => ['tl_class' => 'w50', 'submitOnChange' => true],
             'sql'       => "char(1) NOT NULL default ''"
         ],
-        'deletionMode'                  => [
+        'deletionMode'                   => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['deletionMode'],
             'exclude'   => true,
             'filter'    => true,
@@ -557,7 +558,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'eval'      => ['tl_class' => 'w50', 'includeBlankOption' => true, 'submitOnChange' => true],
             'sql'       => "varchar(16) NOT NULL default ''"
         ],
-        'deletionIdentifierFields'      => [
+        'deletionIdentifierFields'       => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['deletionIdentifierFields'],
             'inputType' => 'multiColumnEditor',
             'exclude'   => true,
@@ -591,7 +592,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             ],
             'sql'       => "blob NULL",
         ],
-        'targetDeletionAdditionalWhere' => [
+        'targetDeletionAdditionalWhere'  => [
             'label'       => &$GLOBALS['TL_LANG']['tl_entity_import_config']['targetDeletionAdditionalWhere'],
             'inputType'   => 'textarea',
             'exclude'     => true,
@@ -599,7 +600,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'explanation' => 'insertTags',
             'sql'         => "text NULL",
         ],
-        'targetDeletionWhere'           => [
+        'targetDeletionWhere'            => [
             'label'       => &$GLOBALS['TL_LANG']['tl_entity_import_config']['targetDeletionWhere'],
             'inputType'   => 'textarea',
             'exclude'     => true,
@@ -607,10 +608,10 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'explanation' => 'insertTags',
             'sql'         => "text NULL",
         ],
-        'errorNotificationLock'         => [
+        'errorNotificationLock'          => [
             'sql' => "char(1) NOT NULL default ''"
         ],
-        'addSkipFieldsOnMerge'          => [
+        'addSkipFieldsOnMerge'           => [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['addSkipFieldsOnMerge'],
             'inputType' => 'checkbox',
             'exclude'   => true,
@@ -620,7 +621,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             ],
             'sql'       => "char(1) NOT NULL default ''",
         ],
-        'skipFieldsOnMerge'             => [
+        'skipFieldsOnMerge'              => [
             'label'            => &$GLOBALS['TL_LANG']['tl_entity_import_config']['skipFieldsOnMerge'],
             'inputType'        => 'checkbox',
             'exclude'          => true,
@@ -631,6 +632,24 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
                 'mandatory' => true
             ],
             'sql'              => "blob NULL",
+        ],
+        'overrideErrorNotificationEmail' => [
+            'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['overrideErrorNotificationEmail'],
+            'inputType' => 'checkbox',
+            'exclude'   => true,
+            'eval'      => [
+                'tl_class'       => 'w50 clr',
+                'submitOnChange' => true
+            ],
+            'sql'       => "char(1) NOT NULL default ''",
+        ],
+        'errorNotificationEmail'         => [
+            'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_config']['errorNotificationEmail'],
+            'exclude'   => true,
+            'search'    => true,
+            'inputType' => 'text',
+            'eval'      => ['rgxp' => 'email', 'tl_class' => 'w50', 'mandatory' => true],
+            'sql'       => "varchar(255) NOT NULL default ''",
         ],
     ],
 ];

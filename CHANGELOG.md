@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.18.11] - 2021-03-17
+- readded customizable email address to send errorNotification to
+
 ## [0.18.10] - 2021-03-17
 - added removal of categories while importing if these are removed from reference entities
 
