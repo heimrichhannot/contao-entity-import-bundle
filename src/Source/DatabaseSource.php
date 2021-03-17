@@ -8,7 +8,6 @@
 
 namespace HeimrichHannot\EntityImportBundle\Source;
 
-use Contao\Controller;
 use Contao\Database;
 use HeimrichHannot\UtilsBundle\Dca\DcaUtil;
 use HeimrichHannot\UtilsBundle\String\StringUtil;
@@ -49,15 +48,10 @@ class DatabaseSource extends AbstractSource
         $mapping = $this->adjustMappingForDcMultilingual($mapping);
 
         // retrieve the source records
-        try {
-            $db = Database::getInstance($sourceModel->row());
-            $where = $sourceModel->dbSourceTableWhere ?: '1=1';
-            $records = $db->prepare("SELECT * FROM $sourceModel->dbSourceTable WHERE $where")->execute();
-        } catch (\Exception $e) {
-            Controller::loadLanguageFile('default');
-            // db connection exception
-            throw new \Exception(sprintf($GLOBALS['TL_LANG']['MSC']['entityImport']['dbConnectionError'], $e->getMessage()));
-        }
+        $db = Database::getInstance($sourceModel->row());
+        $where = $sourceModel->dbSourceTableWhere ?: '1=1';
+
+        $records = $db->prepare("SELECT * FROM $sourceModel->dbSourceTable WHERE $where")->execute();
 
         $data = [];
 

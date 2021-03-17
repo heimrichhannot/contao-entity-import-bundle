@@ -8,7 +8,6 @@
 
 namespace HeimrichHannot\EntityImportBundle\Source;
 
-use Contao\Controller;
 use Contao\Environment;
 use Contao\Model;
 use GuzzleHttp\Client;
@@ -108,16 +107,10 @@ abstract class AbstractSource implements SourceInterface
         try {
             $response = $client->request($method, \Contao\StringUtil::decodeEntities($url), $auth);
         } catch (RequestException $e) {
-            if ($e->getResponse()) {
-                $message = $e->getResponse()->getBody()->getContents() ?: $e->getResponse()->getStatusCode();
-            } else {
-                $message = $e->getMessage();
-            }
-
-            Controller::loadLanguageFile('default');
-            // source not retrivable exception
-
-            throw new \Exception(sprintf($GLOBALS['TL_LANG']['MSC']['entityImport']['sourceNotRetrievable'], $message));
+            return [
+                'statusCode' => $e->getResponse()->getStatusCode(),
+                'result' => $e->getResponse()->getBody()->getContents(),
+            ];
         }
 
         return [

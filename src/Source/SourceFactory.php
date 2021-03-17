@@ -10,7 +10,6 @@ namespace HeimrichHannot\EntityImportBundle\Source;
 
 use HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer;
 use HeimrichHannot\EntityImportBundle\Event\SourceFactoryCreateSourceEvent;
-use HeimrichHannot\EntityImportBundle\Util\EntityImportUtil;
 use HeimrichHannot\UtilsBundle\Container\ContainerUtil;
 use HeimrichHannot\UtilsBundle\Dca\DcaUtil;
 use HeimrichHannot\UtilsBundle\File\FileUtil;
@@ -20,10 +19,6 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class SourceFactory
 {
-    /**
-     * @var EntityImportUtil
-     */
-    protected $entityImportUtil;
     /**
      * @var ModelUtil
      */
@@ -53,7 +48,7 @@ class SourceFactory
     /**
      * SourceFactory constructor.
      */
-    public function __construct(ModelUtil $modelUtil, FileUtil $fileUtil, EventDispatcherInterface $eventDispatcher, StringUtil $stringUtil, ContainerUtil $containerUtil, DcaUtil $dcaUtil, EntityImportUtil $entityImportUtil)
+    public function __construct(ModelUtil $modelUtil, FileUtil $fileUtil, EventDispatcherInterface $eventDispatcher, StringUtil $stringUtil, ContainerUtil $containerUtil, DcaUtil $dcaUtil)
     {
         $this->modelUtil = $modelUtil;
         $this->fileUtil = $fileUtil;
@@ -61,7 +56,6 @@ class SourceFactory
         $this->stringUtil = $stringUtil;
         $this->containerUtil = $containerUtil;
         $this->dcaUtil = $dcaUtil;
-        $this->entityImportUtil = $entityImportUtil;
     }
 
     public function createInstance(int $sourceModel): ?SourceInterface
@@ -81,17 +75,17 @@ class SourceFactory
             case EntityImportSourceContainer::TYPE_FILE:
                 switch ($sourceModel->fileType) {
                     case EntityImportSourceContainer::FILETYPE_JSON:
-                        $source = new JSONFileSource($this->eventDispatcher, $this->fileUtil, $this->stringUtil, $this->containerUtil, $this->entityImportUtil);
+                        $source = new JSONFileSource($this->eventDispatcher, $this->fileUtil, $this->stringUtil, $this->containerUtil);
 
                         break;
 
                     case EntityImportSourceContainer::FILETYPE_CSV:
-                        $source = new CSVFileSource($this->eventDispatcher, $this->fileUtil, $this->stringUtil, $this->containerUtil, $this->entityImportUtil);
+                        $source = new CSVFileSource($this->eventDispatcher, $this->fileUtil, $this->stringUtil, $this->containerUtil);
 
                         break;
 
                     case EntityImportSourceContainer::FILETYPE_RSS:
-                        $source = new RSSFileSource($this->eventDispatcher, $this->fileUtil, $this->stringUtil, $this->containerUtil, $this->entityImportUtil);
+                        $source = new RSSFileSource($this->eventDispatcher, $this->fileUtil, $this->stringUtil, $this->containerUtil);
 
                         break;
                 }

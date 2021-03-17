@@ -40,6 +40,8 @@ class RSSFileSource extends AbstractFileSource
         }
 
         $rss = new \DOMDocument();
+        $rss->loadXML($fileContent);
+
         $items = [];
 
         foreach ($rss->getElementsByTagName('item') as $key => $node) {

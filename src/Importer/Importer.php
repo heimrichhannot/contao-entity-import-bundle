@@ -11,6 +11,7 @@ namespace HeimrichHannot\EntityImportBundle\Importer;
 use Ausi\SlugGenerator\SlugGenerator;
 use Contao\CoreBundle\Exception\RedirectResponseException;
 use Contao\Database;
+use Contao\Email;
 use Contao\File;
 use Contao\Folder;
 use Contao\Message;
@@ -22,11 +23,9 @@ use HeimrichHannot\EntityImportBundle\Event\AfterImportEvent;
 use HeimrichHannot\EntityImportBundle\Event\AfterItemImportEvent;
 use HeimrichHannot\EntityImportBundle\Event\BeforeFileImportEvent;
 use HeimrichHannot\EntityImportBundle\Event\BeforeImportEvent;
-use HeimrichHannot\EntityImportBundle\Event\BeforeImportItemsEvent;
 use HeimrichHannot\EntityImportBundle\Event\BeforeItemImportEvent;
 use HeimrichHannot\EntityImportBundle\Model\EntityImportConfigModel;
 use HeimrichHannot\EntityImportBundle\Source\SourceInterface;
-use HeimrichHannot\EntityImportBundle\Util\EntityImportUtil;
 use HeimrichHannot\RequestBundle\Component\HttpFoundation\Request;
 use HeimrichHannot\UtilsBundle\Container\ContainerUtil;
 use HeimrichHannot\UtilsBundle\Database\DatabaseUtil;
@@ -34,6 +33,7 @@ use HeimrichHannot\UtilsBundle\Dca\DcaUtil;
 use HeimrichHannot\UtilsBundle\File\FileUtil;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
 use HeimrichHannot\UtilsBundle\String\StringUtil;
+use Psr\Log\LogLevel;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -65,10 +65,6 @@ class Importer implements ImporterInterface
      * @var Stopwatch
      */
     protected $stopwatch;
-    /**
-     * @var EntityImportUtil
-     */
-    protected $entityImportUtil;
 
     /**
      * @var DatabaseUtil
@@ -133,8 +129,7 @@ class Importer implements ImporterInterface
         StringUtil $stringUtil,
         DcaUtil $dcaUtil,
         ContainerUtil $containerUtil,
-        FileUtil $fileUtil,
-        EntityImportUtil $entityImportUtil
+        FileUtil $fileUtil
     ) {
         $this->container = $container;
         $this->configModel = $configModel;
@@ -147,7 +142,6 @@ class Importer implements ImporterInterface
         $this->containerUtil = $containerUtil;
         $this->request = $request;
         $this->fileUtil = $fileUtil;
-        $this->entityImportUtil = $entityImportUtil;
     }
 
     /**
@@ -159,13 +153,7 @@ class Importer implements ImporterInterface
 
         $this->stopwatch->start('contao-entity-import-bundle.id'.$this->configModel->id);
 
-        $items = [];
-
-        try {
-            $items = $this->getDataFromSource();
-        } catch (\Exception $e) {
-            $this->entityImportUtil->handleImportError($e->getMessage(), $this->configModel);
-        }
+        $items = $this->getDataFromSource();
 
         $event = $this->eventDispatcher->dispatch(BeforeImportEvent::NAME, new BeforeImportEvent($items, $this->configModel, $this->source, $this->dryRun));
 
@@ -248,9 +236,6 @@ class Importer implements ImporterInterface
         }
 
         try {
-            $event = $this->eventDispatcher->dispatch(BeforeImportItemsEvent::NAME, new BeforeImportItemsEvent($items, $this->configModel, $this->source, $this->dryRun));
-            $items = $event->getItems();
-
             $count = 0;
             $targetTableColumns = $database->getFieldNames($table);
             $targetTableColumnData = [];
@@ -468,7 +453,25 @@ class Importer implements ImporterInterface
                 $this->databaseUtil->update('tl_entity_import_config', ['errorNotificationLock' => ''], 'tl_entity_import_config.id=?', [$this->configModel->id]);
             }
         } catch (\Exception $e) {
-            $this->entityImportUtil->handleImportError($e->getMessage(), $this->configModel);
+            $config = $this->getDebugConfig();
+
+            if (!$this->configModel->errorNotificationLock && !$this->dryRun) {
+                if (isset($config['contao_log']) && $config['contao_log']) {
+                    $this->containerUtil->log($e, 'executeImport', LogLevel::ERROR);
+                }
+
+                if (isset($config['email']) && $config['email']) {
+                    $email = new Email();
+                    $email->subject = sprintf($GLOBALS['TL_LANG']['MSC']['entityImport']['exceptionEmailSubject'], $this->configModel->title);
+                    $email->text = sprintf('An error occurred on domain "%s"', $this->configModel->cronDomain).' : '.$e->getMessage();
+                    $email->sendTo($GLOBALS['TL_CONFIG']['adminEmail']);
+                }
+
+                $this->databaseUtil->update('tl_entity_import_config', ['errorNotificationLock' => '1'], 'tl_entity_import_config.id=?', [$this->configModel->id]);
+            }
+
+            Message::addError(sprintf($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['errorImport'], $count,
+                $this->containerUtil->isDev() ? str_replace("\n", '<br>', $e) : $e->getMessage()));
 
             return false;
         }
@@ -522,6 +525,8 @@ class Importer implements ImporterInterface
             return;
         }
 
+        $categoryManager = System::getContainer()->get('huh.categories.manager');
+
         $table = $this->configModel->targetTable;
 
         $dca = &$GLOBALS['TL_DCA'][$table];
@@ -544,13 +549,13 @@ class Importer implements ImporterInterface
 
                 if (!empty($categories)) {
                     // insert the associations if not already existing
-                    $existing = System::getContainer()->get('huh.categories.manager')->findByEntityAndCategoryFieldAndTable(
+                    $existing = $categoryManager->findByEntityAndCategoryFieldAndTable(
                         $targetId, $targetField, $table
                     );
 
                     if (null === $existing) {
                         if (!$this->dryRun) {
-                            System::getContainer()->get('huh.categories.manager')->createAssociations(
+                            $categoryManager->createAssociations(
                                 $targetId, $targetField, $table, $categories
                             );
                         }
@@ -561,11 +566,16 @@ class Importer implements ImporterInterface
 
                         if (!empty($idsToInsert)) {
                             if (!$this->dryRun) {
-                                System::getContainer()->get('huh.categories.manager')->createAssociations(
+                                $categoryManager->createAssociations(
                                     $targetId, $targetField, $table, $idsToInsert
                                 );
                             }
                         }
+                    }
+                } else {
+                    if (!$this->dryRun) {
+                        // remove associations potentially added before
+                        $categoryManager->removeAllAssociations($targetId, $targetField, $table);
                     }
                 }
             }

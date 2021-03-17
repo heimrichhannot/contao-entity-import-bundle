@@ -10,6 +10,7 @@ namespace HeimrichHannot\EntityImportBundle\DataContainer;
 
 use Contao\Database;
 use Contao\DataContainer;
+use Contao\Message;
 use Contao\Model;
 use Contao\System;
 use HeimrichHannot\EntityImportBundle\Event\AddSourceFieldMappingPresetsEvent;
@@ -58,10 +59,6 @@ class EntityImportSourceContainer
     protected $database;
     protected $cache;
     /**
-     * @var EntityImportUtil
-     */
-    protected $entityImportUtil;
-    /**
      * @var FileUtil
      */
     private $fileUtil;
@@ -91,7 +88,7 @@ class EntityImportSourceContainer
      */
     private $databaseUtil;
 
-    public function __construct(SourceFactory $sourceFactory, FileUtil $fileUtil, ModelUtil $modelUtil, DcaUtil $dcaUtil, EntityImportUtil $util, EventDispatcherInterface $eventDispatcher, DatabaseUtil $databaseUtil, EntityImportUtil $entityImportUtil)
+    public function __construct(SourceFactory $sourceFactory, FileUtil $fileUtil, ModelUtil $modelUtil, DcaUtil $dcaUtil, EntityImportUtil $util, EventDispatcherInterface $eventDispatcher, DatabaseUtil $databaseUtil)
     {
         $this->activeBundles = System::getContainer()->getParameter('kernel.bundles');
         $this->sourceFactory = $sourceFactory;
@@ -101,7 +98,6 @@ class EntityImportSourceContainer
         $this->util = $util;
         $this->eventDispatcher = $eventDispatcher;
         $this->databaseUtil = $databaseUtil;
-        $this->entityImportUtil = $entityImportUtil;
     }
 
     public function setPreset(?DataContainer $dc)
@@ -140,9 +136,6 @@ class EntityImportSourceContainer
                             array_combine($options, $options)
                         );
                     } catch (\Exception $e) {
-                        $this->entityImportUtil->handleSourceConfigError(sprintf($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['errorMessage'], $e->getMessage()));
-
-                        break;
                     }
                 }
 
@@ -157,14 +150,7 @@ class EntityImportSourceContainer
                         $source = $this->sourceFactory->createInstance($sourceModel->id);
 
                         $options = [];
-
-                        try {
-                            $fields = $source->getHeadingLine();
-                        } catch (\Exception $e) {
-                            $this->entityImportUtil->handleSourceConfigError(sprintf($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['errorMessage'], $e->getMessage()));
-
-                            break;
-                        }
+                        $fields = $source->getHeadingLine();
 
                         foreach ($fields as $index => $field) {
                             if ($sourceModel->csvHeaderRow) {
@@ -191,13 +177,7 @@ class EntityImportSourceContainer
                         /** @var RSSFileSource $source */
                         $source = $this->sourceFactory->createInstance($sourceModel->id);
 
-                        try {
-                            $options = $source->getPostFieldsAsOptions();
-                        } catch (\Exception $e) {
-                            $this->entityImportUtil->handleSourceConfigError($e->getMessage());
-
-                            break;
-                        }
+                        $options = $source->getPostFieldsAsOptions();
 
                         $this->util->transformFieldMappingSourceValueToSelect(
                             array_combine($options, $options)
@@ -245,13 +225,7 @@ class EntityImportSourceContainer
             return '';
         }
 
-        try {
-            $content = $this->getFileContent($sourceModel);
-        } catch (\Exception $e) {
-            return '';
-        }
-
-        return $content;
+        return $this->getFileContent($sourceModel);
     }
 
     public function getFileContent(Model $sourceModel)
@@ -270,6 +244,8 @@ class EntityImportSourceContainer
 
             case static::FILETYPE_RSS:
                 return substr($source->getFileContent(true), 0, 50000);
+
+                break;
         }
 
         return $source->getFileContent(true);
@@ -284,7 +260,7 @@ class EntityImportSourceContainer
         try {
             $options = array_values(Database::getInstance($source->row())->listTables(null, true));
         } catch (\Exception $e) {
-            $this->entityImportUtil->handleSourceConfigError(sprintf($GLOBALS['TL_LANG']['MSC']['entityImport']['dbConnectionError'], $e->getMessage()));
+            Message::addError(sprintf($GLOBALS['TL_LANG']['MSC']['entityImport']['dbConnectionError'], $e->getMessage()));
 
             return [];
         }

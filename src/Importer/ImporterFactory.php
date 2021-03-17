@@ -10,7 +10,6 @@ namespace HeimrichHannot\EntityImportBundle\Importer;
 
 use HeimrichHannot\EntityImportBundle\Source\SourceFactory;
 use HeimrichHannot\EntityImportBundle\Source\SourceInterface;
-use HeimrichHannot\EntityImportBundle\Util\EntityImportUtil;
 use HeimrichHannot\RequestBundle\Component\HttpFoundation\Request;
 use HeimrichHannot\UtilsBundle\Container\ContainerUtil;
 use HeimrichHannot\UtilsBundle\Database\DatabaseUtil;
@@ -23,10 +22,6 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class ImporterFactory
 {
-    /**
-     * @var EntityImportUtil
-     */
-    protected $entityImportUtil;
     /**
      * @var DatabaseUtil
      */
@@ -84,8 +79,7 @@ class ImporterFactory
         DcaUtil $dcaUtil,
         SourceFactory $sourceFactory,
         ContainerUtil $containerUtil,
-        FileUtil $fileUtil,
-        EntityImportUtil $entityImportUtil
+        FileUtil $fileUtil
     ) {
         $this->databaseUtil = $databaseUtil;
         $this->eventDispatcher = $eventDispatcher;
@@ -97,7 +91,6 @@ class ImporterFactory
         $this->containerUtil = $containerUtil;
         $this->request = $request;
         $this->fileUtil = $fileUtil;
-        $this->entityImportUtil = $entityImportUtil;
     }
 
     public function createInstance($configModel, array $options = []): ?ImporterInterface
@@ -131,8 +124,7 @@ class ImporterFactory
             $this->stringUtil,
             $this->dcaUtil,
             $this->containerUtil,
-            $this->fileUtil,
-            $this->entityImportUtil
+            $this->fileUtil
         );
     }
 }

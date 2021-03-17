@@ -1,8 +1,8 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [0.19.0] - 2021-02-01
-- changed exception handling to differ between frontend and backend error handling
+## [0.18.10] - 2021-03-17
+- added removal of categories while importing if these are removed from reference entities
 
 ## [0.18.9] - 2021-01-21
 - added customizable email adress to send errorNotification to
