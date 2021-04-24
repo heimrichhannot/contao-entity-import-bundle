@@ -22,7 +22,8 @@
     "heimrichhannot/contao-multi-column-editor-bundle": "^2.4",
     "heimrichhannot/contao-utils-bundle": "^2.135",
     "heimrichhannot/contao-list_widget": "^2.1",
-    "symfony/stopwatch": "^3.4 || ^4.4"
+    "symfony/stopwatch": "^3.4 || ^4.4",
+    "php-http/guzzle6-adapter": "^1.1"
   },
   "require-dev": {
     "contao/test-case": "1.1.*",
@@ -31,7 +32,6 @@
     "phpunit/phpunit": ">=6.0 <6.5",
     "phpunit/phpunit-mock-objects": "^4.0|^5.0",
     "phpunit/php-token-stream": "^1.4|^2.0|^3.0",
-    "php-http/guzzle6-adapter": "^1.1",
     "php-http/message-factory": "^1.0.2",
     "satooshi/php-coveralls": "^2.0",
     "symfony/phpunit-bridge": "^3.2"
