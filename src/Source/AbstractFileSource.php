@@ -91,14 +91,14 @@ abstract class AbstractFileSource extends AbstractSource
                     $content = $this->getValueFromRemoteCache($cacheKey);
 
                     if (empty($content)) {
-                        $this->storeValueToRemoteCache($this->sourceModel->sourceUrl, $cacheKey, $this->sourceModel->httpMethod, $event->getAuth());
+                        $this->storeValueToRemoteCache($this->sourceModel->sourceUrl, $cacheKey, $this->sourceModel->httpMethod, $event->getAuth(), ["verify" => (!$this->sourceModel->dontCheckSSL)]);
                         $content = $this->getValueFromRemoteCache($cacheKey);
                     }
 
                     break;
                 }
 
-                $result = $this->getContentFromUrl($this->sourceModel->httpMethod, $this->sourceModel->sourceUrl, $event->getAuth());
+                $result = $this->getContentFromUrl($this->sourceModel->httpMethod, $this->sourceModel->sourceUrl, $event->getAuth(), ["verify" => (!$this->sourceModel->dontCheckSSL))]);
                 $content = $result['result'];
 
                 break;
