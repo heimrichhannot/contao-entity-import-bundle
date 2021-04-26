@@ -284,7 +284,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
                     'maxRowCount' => 1,
                     'sortable'    => true,
                     'fields'      => [
-                        'name'  => [
+                        'username'  => [
                             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['httpAuth']['username'],
                             'exclude'   => true,
                             'inputType' => 'text',
@@ -292,7 +292,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
                                 'groupStyle' => 'width: 49%',
                             ],
                         ],
-                        'value' => [
+                        'password' => [
                             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['httpAuth']['password'],
                             'exclude'   => true,
                             'inputType' => 'text',
