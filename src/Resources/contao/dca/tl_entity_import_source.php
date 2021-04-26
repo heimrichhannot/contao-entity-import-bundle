@@ -81,7 +81,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
 
     // Subpalettes
     'subpalettes' => [
-        'retrievalType_http'               => 'dontCheckSSL,sourceUrl,httpMethod,httpAuth,fileType',
+        'retrievalType_http'               => 'sourceUrl,httpMethod,dontCheckSSL,httpAuth,fileType',
         'retrievalType_contao_file_system' => 'fileSRC,fileType',
         'retrievalType_absolute_path'      => 'absolutePath',
         'fileType_csv'                     => 'fileContent,csvHeaderRow,csvSkipEmptyLines,csvDelimiter,csvEnclosure,csvEscape,fieldMappingCopier,fieldMappingPresets,fieldMapping',
@@ -257,7 +257,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'label'     => &$GLOBALS['TL_LANG']['tl_entity_import_source']['dontCheckSSL'],
             'exclude'   => true,
             'inputType' => 'checkbox',
-            'eval'      => ['submitOnChange' => true, 'tl_class' => 'w50 m12'],
+            'eval'      => ['submitOnChange' => true, 'tl_class' => 'w50 m12 clr'],
             'sql'       => "char(1) NOT NULL default ''",
         ],
         'httpMethod'               => [
