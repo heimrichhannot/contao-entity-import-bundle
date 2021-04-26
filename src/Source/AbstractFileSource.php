@@ -77,10 +77,17 @@ abstract class AbstractFileSource extends AbstractSource
 
             case EntityImportSourceContainer::RETRIEVAL_TYPE_HTTP:
                 $auth = [];
+                $options = [];
 
                 if (null !== $this->sourceModel->httpAuth) {
                     $httpAuth = \Contao\StringUtil::deserialize($this->sourceModel->httpAuth, true);
                     $auth = ['auth' => [$httpAuth['username'], $httpAuth['password']]];
+                    $options = $auth;
+                }
+
+                // Check if SSL verification should be done
+                if($this->sourceModel->dontCheckSSL) {
+                    $options['verify'] = false;
                 }
 
                 $event = $this->eventDispatcher->dispatch(BeforeAuthenticationEvent::NAME, new BeforeAuthenticationEvent($auth, $this->sourceModel));
@@ -91,14 +98,14 @@ abstract class AbstractFileSource extends AbstractSource
                     $content = $this->getValueFromRemoteCache($cacheKey);
 
                     if (empty($content)) {
-                        $this->storeValueToRemoteCache($this->sourceModel->sourceUrl, $cacheKey, $this->sourceModel->httpMethod, $event->getAuth(), ["verify" => (!$this->sourceModel->dontCheckSSL)]);
+                        $this->storeValueToRemoteCache($this->sourceModel->sourceUrl, $cacheKey, $this->sourceModel->httpMethod, $options);
                         $content = $this->getValueFromRemoteCache($cacheKey);
                     }
 
                     break;
                 }
 
-                $result = $this->getContentFromUrl($this->sourceModel->httpMethod, $this->sourceModel->sourceUrl, $event->getAuth(), ["verify" => (!$this->sourceModel->dontCheckSSL))]);
+                $result = $this->getContentFromUrl($this->sourceModel->httpMethod, $this->sourceModel->sourceUrl, $options);
                 $content = $result['result'];
 
                 break;

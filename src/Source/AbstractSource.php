@@ -100,12 +100,12 @@ abstract class AbstractSource implements SourceInterface
         return $result;
     }
 
-    protected function getContentFromUrl(string $method, string $url, array $auth = [], array $HTTPClientOptions = []): array
+    protected function getContentFromUrl(string $method, string $url, array $options = []): array
     {
-        $client = new Client($HTTPClientOptions);
+        $client = new Client();
 
         try {
-            $response = $client->request($method, \Contao\StringUtil::decodeEntities($url), $auth);
+            $response = $client->request($method, \Contao\StringUtil::decodeEntities($url), $options);
         } catch (RequestException $e) {
             if($e->hasResponse()){
                 return [
@@ -136,11 +136,11 @@ abstract class AbstractSource implements SourceInterface
         return $filesystemCache->deleteItem('entity-import-remote.'.$cacheKey);
     }
 
-    protected function storeValueToRemoteCache(string $url, string $cacheKey, string $method, array $auth = [], array $HTTPClientOptions = [])
+    protected function storeValueToRemoteCache(string $url, string $cacheKey, string $method, array $options = [])
     {
         $filesystemCache = $this->getFilesystemCache();
 
-        $response = $this->getContentFromUrl($method, $url, $auth, $HTTPClientOptions);
+        $response = $this->getContentFromUrl($method, $url, $options);
 
         if (200 === $response['statusCode']) {
             $filesystemCache->set('entity-import-remote.'.$cacheKey, $response['result']);
