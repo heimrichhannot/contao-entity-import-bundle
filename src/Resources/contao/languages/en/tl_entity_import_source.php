@@ -48,6 +48,8 @@ $lang['retrievalType'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityIm
 $lang['type'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::TYPE_DATABASE]                              = 'Database';
 $lang['type'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::TYPE_FILE]                                  = 'File';
 
+$lang['dontCheckSSL'][0]         = 'Don\'t check SSL';
+$lang['dontCheckSSL'][1]         = 'Activate this option in order to prevent the checking of SSL certificates for this request. Use this with caution!';
 $lang['sourceUrl'][0]            = 'Url';
 $lang['sourceUrl'][1]            = 'Enter the URL to the file here.';
 $lang['absolutePath'][0]         = 'Absolute file path';
