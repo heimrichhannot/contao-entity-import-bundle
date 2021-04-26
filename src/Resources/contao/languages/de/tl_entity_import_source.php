@@ -55,8 +55,8 @@ $lang['retrievalType'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityIm
 $lang['retrievalType'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::RETRIEVAL_TYPE_CONTAO_FILE_SYSTEM] = 'Contao Dateiverwaltung';
 $lang['retrievalType'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::RETRIEVAL_TYPE_ABSOLUTE_PATH]      = 'Absoluter Pfad';
 
-$lang['dontCheckSSL'][0]             = 'SSL nicht verifizieren';
-$lang['dontCheckSSL'][1]             = 'Klicken sie diese Checkbox an, damit bei der Verbindung das SSL-Zertifikat nicht überprüft wird. (Nutzen sie diese Option nur, wenn sie wissen was sie tun!)';
+$lang['dontCheckSSL'][0]             = 'SSL-Verifikation deaktivieren';
+$lang['dontCheckSSL'][1]             = 'Wählen Sie diese Option, damit bei der Verbindung das SSL-Zertifikat nicht überprüft wird. Nutzen sie diese Option nur, wenn Sie wissen was Sie tun!';
 $lang['sourceUrl'][0]                = 'URL';
 $lang['sourceUrl'][1]                = 'Geben Sie hier die URL zur Datei ein.';
 $lang['absolutePath'][0]             = 'Absoluter Dateipfad';
