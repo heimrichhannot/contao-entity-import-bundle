@@ -32,7 +32,7 @@ class CSVFileSource extends AbstractFileSource
 
         while ($current = $csv->current()) {
             // TODO make configurable?
-            $current = array_map('utf8_encode', $current);
+            $current = mb_convert_encoding($current, 'UTF-8');
 
             if (!$this->sourceModel->csvSkipEmptyLines || [null] !== $current) {
                 $data[] = $this->getMappedItemData($current, $this->fieldMapping);
