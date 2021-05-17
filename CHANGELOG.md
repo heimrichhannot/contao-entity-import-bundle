@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.18.12] - 2021-05-17
+- fixed utf8 encoding function to mb_convert_encoding in CSVFileSource
+
 ## [0.18.11] - 2021-03-17
 - readded customizable email address to send errorNotification to
 
