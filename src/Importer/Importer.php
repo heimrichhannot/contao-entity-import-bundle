@@ -552,6 +552,7 @@ class Importer implements ImporterInterface
         $categoryManager = System::getContainer()->get('huh.categories.manager');
 
         $table = $this->configModel->targetTable;
+        $sourceTable = $this->source->getSourceModel()->dbSourceTable;
 
         $dca = &$GLOBALS['TL_DCA'][$table];
 
@@ -569,9 +570,13 @@ class Importer implements ImporterInterface
             if ((isset($dca['fields'][$targetField]['eval']['isCategoryField']) && $dca['fields'][$targetField]['eval']['isCategoryField'] ||
                 isset($dca['fields'][$targetField]['eval']['isCategoriesField']) && $dca['fields'][$targetField]['eval']['isCategoriesField'])
             ) {
-                $categories = \Contao\StringUtil::deserialize($item[$mappingElement['mappingValue']], true);
+                $categories = $categoryManager->findAssociationsByParentTableAndEntityAndField(
+                    $sourceTable, $item['externalId'], $mappingElement['mappingValue']
+                );
 
-                if (!empty($categories)) {
+                if (null !== $categories) {
+                    $categories = $categories->fetchEach('category');
+
                     // insert the associations if not already existing
                     $existing = $categoryManager->findByEntityAndCategoryFieldAndTable(
                         $targetId, $targetField, $table

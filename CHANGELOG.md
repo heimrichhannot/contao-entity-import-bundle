@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.19.1] - 2021-06-22
+
+- fixed categories import (now associations are used instead of the record's field)
+
 ## [0.19.0] - 2021-06-22
 
 - added optional support for terminal42/contao-changelanguage
