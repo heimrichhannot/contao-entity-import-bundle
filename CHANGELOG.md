@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.19.0] - 2021-06-22
+
+- added optional support for terminal42/contao-changelanguage
+
 ## [0.18.13] - 2021-06-21
 
 - fixed missing legend localization

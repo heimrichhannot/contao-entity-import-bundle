@@ -179,6 +179,7 @@ class Importer implements ImporterInterface
 
         $mapping = \Contao\StringUtil::deserialize($this->configModel->fieldMapping, true);
         $mapping = $this->adjustMappingForDcMultilingual($mapping);
+        $mapping = $this->adjustMappingForChangeLanguage($mapping);
 
         foreach ($items as $item) {
             $mappedItem = $this->applyFieldMappingToSourceItem($item, $mapping);
@@ -232,7 +233,7 @@ class Importer implements ImporterInterface
         $table = $this->configModel->targetTable;
 
         if (!$database->tableExists($table)) {
-            new Exception($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['tableDoesNotExist']);
+            throw new Exception($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['tableDoesNotExist']);
         }
 
         try {
@@ -250,6 +251,7 @@ class Importer implements ImporterInterface
 
             $mapping = \Contao\StringUtil::deserialize($this->configModel->fieldMapping, true);
             $mapping = $this->adjustMappingForDcMultilingual($mapping);
+            $mapping = $this->adjustMappingForChangeLanguage($mapping);
 
             $this->dbIdMapping = [];
             $this->dbItemMapping = [];
@@ -429,6 +431,28 @@ class Importer implements ImporterInterface
                     if (!$this->dryRun) {
                         $this->databaseUtil->update($table, [
                             $table.'.draftParent' => $this->dbIdMapping[$itemMapping['source']['draftParent']],
+                        ], "$table.id=?", [$itemMapping['target']->id]);
+                    }
+                }
+            }
+
+            // change language -> fix languageMain (can only be done after all items are imported due to order issues otherwise)
+            if (class_exists('\Terminal42\ChangeLanguage\Language') && $this->configModel->addChangeLanguageSupport) {
+                foreach ($this->dbItemMapping as $itemMapping) {
+                    if (!$itemMapping['source']['languageMain']) {
+                        continue;
+                    }
+
+                    // map the languageMain id
+                    $newsroomPost = $this->databaseUtil->findOneResultBy($table, [
+                        $table.'.'.$this->configModel->changeLanguageTargetExternalIdField.'=?',
+                    ], [
+                        $itemMapping['source']['languageMain'],
+                    ]);
+
+                    if (!$this->dryRun && $newsroomPost->numRows > 0) {
+                        $this->databaseUtil->update($table, [
+                            $table.'.languageMain' => $newsroomPost->id,
                         ], "$table.id=?", [$itemMapping['target']->id]);
                     }
                 }
@@ -935,6 +959,21 @@ class Importer implements ImporterInterface
                 ];
             }
         }
+
+        return $mapping;
+    }
+
+    protected function adjustMappingForChangeLanguage(array $mapping)
+    {
+        if (!class_exists('\Terminal42\ChangeLanguage\Language') || !$this->configModel->addChangeLanguageSupport) {
+            return $mapping;
+        }
+
+        $mapping[] = [
+            'columnName' => 'languageMain',
+            'valueType' => 'source_value',
+            'mappingValue' => 'languageMain',
+        ];
 
         return $mapping;
     }

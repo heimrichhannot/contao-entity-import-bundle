@@ -81,7 +81,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
     'palettes' => [
         '__selector__' => ['type', 'retrievalType', 'fileType'],
         'default' => '{title_legend},title,type;',
-        HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::TYPE_DATABASE => '{title_legend},title,type;{db_legend},dbDriver,dbHost,dbUser,dbPass,dbDatabase,dbPconnect,dbCharset,dbPort,dbSocket,dbSourceTableExplanation,dbSourceTable,dbSourceTableWhere,addDcMultilingualSupport,fieldMappingCopier,fieldMappingPresets,fieldMapping;',
+        HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::TYPE_DATABASE => '{title_legend},title,type;{db_legend},dbDriver,dbHost,dbUser,dbPass,dbDatabase,dbPconnect,dbCharset,dbPort,dbSocket,dbSourceTableExplanation,dbSourceTable,dbSourceTableWhere,addDcMultilingualSupport,addChangeLanguageSupport,fieldMappingCopier,fieldMappingPresets,fieldMapping;',
         HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::TYPE_FILE => '{title_legend},title,type;{file_legend},retrievalType;',
     ],
 
@@ -491,6 +491,17 @@ $dca = &$GLOBALS['TL_DCA']['tl_entity_import_source'];
 if (class_exists('\Terminal42\DcMultilingualBundle\Terminal42DcMultilingualBundle')) {
     $dca['fields']['addDcMultilingualSupport'] = [
         'label' => &$GLOBALS['TL_LANG']['tl_entity_import_source']['addDcMultilingualSupport'],
+        'exclude' => true,
+        'inputType' => 'checkbox',
+        'eval' => ['tl_class' => 'w50'],
+        'sql' => "char(1) NOT NULL default ''",
+    ];
+}
+
+// change_language
+if (class_exists('\Terminal42\ChangeLanguage\Language')) {
+    $dca['fields']['addChangeLanguageSupport'] = [
+        'label' => &$GLOBALS['TL_LANG']['tl_entity_import_source']['addChangeLanguageSupport'],
         'exclude' => true,
         'inputType' => 'checkbox',
         'eval' => ['tl_class' => 'w50'],

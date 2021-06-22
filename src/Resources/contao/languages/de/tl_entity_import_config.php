@@ -127,6 +127,12 @@ $lang['addDcMultilingualSupport'][1] = 'Wählen Sie diese Option, wenn es sich b
 $lang['addCategoriesSupport'][0] = 'Unterstützung für heimrichhannot/contao-categories-bundle hinzufügen';
 $lang['addCategoriesSupport'][1] = 'Wählen Sie diese Option, um entsprechende Felder zu beachten.';
 
+$lang['addChangeLanguageSupport'][0] = 'Unterstützung für terminal42/contao-changelanguage hinzufügen (ACHTUNG: Erklärung lesen!)';
+$lang['addChangeLanguageSupport'][1] = 'ACHTUNG: Der Importer der Entität in der Fallback-Sprache muss vor diesem Importer laufen (Cron-Reihenfolge!). Wählen Sie diese Option, um das languageMain-Feld korrekt zu migrieren.';
+
+$lang['changeLanguageTargetExternalIdField'][0] = 'ID-Feld zum Auffinden der importierten Entität';
+$lang['changeLanguageTargetExternalIdField'][1] = 'Wählen Sie hier das Feld, welches die ID des importierten Datensatzes enthält.';
+
 $lang['addDraftsSupport'][0] = 'Unterstützung für heimrichhannot/contao-drafts-bundle hinzufügen';
 $lang['addDraftsSupport'][1] = 'Wählen Sie diese Option, um entsprechende Felder zu beachten.';
 

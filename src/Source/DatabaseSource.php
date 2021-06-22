@@ -46,6 +46,7 @@ class DatabaseSource extends AbstractSource
         $mapping = \Contao\StringUtil::deserialize($this->sourceModel->fieldMapping, true);
 
         $mapping = $this->adjustMappingForDcMultilingual($mapping);
+        $mapping = $this->adjustMappingForChangeLanguage($mapping);
 
         // retrieve the source records
         $db = Database::getInstance($sourceModel->row());
@@ -124,6 +125,30 @@ class DatabaseSource extends AbstractSource
                 ];
             }
         }
+
+        return $mapping;
+    }
+
+    protected function adjustMappingForChangeLanguage(array $mapping)
+    {
+        // DC_Multilingual
+        if (!class_exists('\Terminal42\ChangeLanguage\Language') || !$this->sourceModel->addChangeLanguageSupport) {
+            return $mapping;
+        }
+
+        // id is needed mandatory for fixing the foreign key (languageMain) with the new ids
+        $mapping[] = [
+            'name' => '__id',
+            'valueType' => 'source_value',
+            'sourceValue' => 'id',
+            'skip' => true,
+        ];
+
+        $mapping[] = [
+            'name' => 'languageMain',
+            'valueType' => 'source_value',
+            'sourceValue' => 'languageMain',
+        ];
 
         return $mapping;
     }
