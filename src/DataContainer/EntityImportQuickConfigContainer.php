@@ -103,7 +103,7 @@ class EntityImportQuickConfigContainer
         if (EntityImportSourceContainer::RETRIEVAL_TYPE_CONTAO_FILE_SYSTEM === $sourceModel->retrievalType) {
             switch ($sourceModel->fileType) {
                 case EntityImportSourceContainer::FILETYPE_CSV:
-                    $dca['palettes']['default'] = str_replace('importerConfig', 'importerConfig,fileSRC,fileContent,csvPreviewList', $dca['palettes']['default']);
+                    $dca['palettes']['default'] = str_replace('importerConfig', 'importerConfig,fileSRC,fileContent,csvHeaderRow,csvPreviewList', $dca['palettes']['default']);
 
                     if (isset($targetDca['config']['ptable']) && $targetDca['config']['ptable'] && Database::getInstance()->fieldExists('pid', $importer->targetTable)) {
                         $dca['palettes']['default'] = str_replace('fileSRC', 'fileSRC,parentEntity', $dca['palettes']['default']);
@@ -197,6 +197,10 @@ class EntityImportQuickConfigContainer
 
         $result = $importer->getMappedItems();
 
+        if ($quickImporter->csvHeaderRow) {
+            unset($result[0]);
+        }
+
         return $result;
     }
 
@@ -241,6 +245,7 @@ class EntityImportQuickConfigContainer
 
         $this->addParentEntityToFieldMapping($quickImporter, $importer);
         $sourceModel->fileSRC = $quickImporter->fileSRC;
+        $sourceModel->csvHeaderRow = $quickImporter->csvHeaderRow;
 
         $importer = $this->importerFactory->createInstance($importer, [
             'sourceModel' => $sourceModel,

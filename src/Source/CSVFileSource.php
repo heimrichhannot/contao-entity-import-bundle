@@ -32,6 +32,10 @@ class CSVFileSource extends AbstractFileSource
 
         while ($current = $csv->current()) {
             // TODO make configurable?
+            // fix encoding (excel for example...)
+            $current = array_map('utf8_encode', $current);
+
+            // prepare for storing to db
             $current = mb_convert_encoding($current, 'UTF-8');
 
             if (!$this->sourceModel->csvSkipEmptyLines || [null] !== $current) {

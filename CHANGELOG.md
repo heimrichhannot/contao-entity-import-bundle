@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.19.2] - 2021-07-30
+
+- Added: `csvHeaderRow` for quick importers
+- Fixed: utf-8 encoding of csv files
+
 ## [0.19.1] - 2021-06-22
 
 - fixed categories import (now associations are used instead of the record's field)
