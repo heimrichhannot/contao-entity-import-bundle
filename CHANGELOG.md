@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.19.3] - 2021-09-01
+
+- Added: php8 support
+
 ## [0.19.2] - 2021-07-30
 
 - Added: `csvHeaderRow` for quick importers
