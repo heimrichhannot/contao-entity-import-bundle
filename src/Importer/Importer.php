@@ -285,8 +285,6 @@ class Importer implements ImporterInterface
                     throw new Exception($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['configFieldMapping']);
                 }
 
-                $mappedItems[] = $mappedItem;
-
                 $columnsNotExisting = array_diff(array_keys($mappedItem), $targetTableColumns);
 
                 if (!empty($columnsNotExisting)) {
@@ -337,10 +335,11 @@ class Importer implements ImporterInterface
                         return $item[$field];
                     }, $identifierFields));
 
-                    if ($key && isset($this->dbMergeCache[$key])) {
+                    if ($key && isset($this->dbMergeCache[$key]) &&
+                        ($existingRecord = $this->databaseUtil->findResultByPk($table, $this->dbMergeCache[$key])) && $existingRecord->numRows > 0) {
                         $this->updateMappingItemForSkippedFields($mappedItem);
 
-                        $existing = (object) $this->dbMergeCache[$key];
+                        $existing = (object) $existingRecord->row();
 
                         $set = $this->setDateAdded($existing);
                         $set = array_merge($set, $this->generateAlias($existing));
@@ -468,7 +467,7 @@ class Importer implements ImporterInterface
             if ($count > 0) {
                 $duration = str_replace('.', ',', round($event->getDuration() / 1000, 2));
 
-                Message::addConfirmation(sprintf($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['successfulImport'], $count, $duration));
+                Message::addConfirmation(sprintf($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['successfulImport'], $count, $duration, System::getReadableSize(memory_get_peak_usage())));
             } else {
                 Message::addInfo(sprintf($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['emptyFile']));
             }
@@ -640,7 +639,7 @@ class Importer implements ImporterInterface
                 continue;
             }
 
-            $cache[$key] = $records->row();
+            $cache[$key] = $records->id;
         }
 
         $this->dbMergeCache = $cache;
@@ -658,7 +657,7 @@ class Importer implements ImporterInterface
         $table = $this->configModel->targetTable;
 
         if ($this->configModel->deleteBeforeImport && !$this->dryRun) {
-            $this->databaseUtil->delete($table, $this->configModel->deleteBeforeImportWhere);
+            $this->databaseUtil->delete($table, html_entity_decode($this->configModel->deleteBeforeImportWhere));
         }
     }
 
@@ -685,7 +684,7 @@ class Importer implements ImporterInterface
                 }
 
                 if ($this->configModel->targetDeletionAdditionalWhere) {
-                    $conditions[] = '('.$this->configModel->targetDeletionAdditionalWhere.')';
+                    $conditions[] = '('.html_entity_decode($this->configModel->targetDeletionAdditionalWhere).')';
                 }
 
                 if (!$this->dryRun && !empty($conditions)) {
@@ -696,7 +695,7 @@ class Importer implements ImporterInterface
 
             case EntityImportConfigContainer::DELETION_MODE_TARGET_FIELDS:
                 if ($this->configModel->deleteBeforeImport && !$this->dryRun) {
-                    $this->databaseUtil->delete($table, $this->configModel->targetDeletionWhere);
+                    $this->databaseUtil->delete($table, html_entity_decode($this->configModel->targetDeletionWhere));
                 }
 
                 break;
@@ -875,7 +874,7 @@ class Importer implements ImporterInterface
     protected function applySorting()
     {
         $field = $this->configModel->targetSortingField;
-        $where = $this->stringUtil->replaceInsertTags($this->configModel->targetSortingContextWhere, false);
+        $where = $this->stringUtil->replaceInsertTags(html_entity_decode($this->configModel->targetSortingContextWhere), false);
         $order = $this->configModel->targetSortingOrder;
 
         if (!$this->configModel->sortingMode || !$field || !$where || !$order) {

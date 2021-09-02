@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.20.1] - 2021-09-02
+
+- Added: memory usage in success message
+- Fixed: sql escape issues for where clauses
+- Fixed: performance optimzation
+
 ## [0.20.0] - 2021-09-02
 
 - Added: new event `AfterCsvFileSourceGetRowEvent`
