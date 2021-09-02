@@ -154,9 +154,9 @@ class EntityImportSourceContainer
 
                         foreach ($fields as $index => $field) {
                             if ($sourceModel->csvHeaderRow) {
-                                $options[' '.$index] = $field.' ['.$index.']';
+                                $options[' '.$index] = $field.' ['.$GLOBALS['TL_LANG']['MSC']['entityImport']['column'].' '.$index.']';
                             } else {
-                                $options[' '.$index] = '['.$index.']';
+                                $options[' '.$index] = $GLOBALS['TL_LANG']['MSC']['entityImport']['column'].' '.$index;
                             }
                         }
 

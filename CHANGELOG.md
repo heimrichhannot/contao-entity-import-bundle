@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.19.4] - 2021-09-02
+
+- Fixed: placeholders for sources
+- Fixed: maxlength issues in sources
+
 ## [0.19.3] - 2021-09-01
 
 - Added: php8 support

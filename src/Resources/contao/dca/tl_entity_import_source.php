@@ -452,7 +452,8 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'inputType' => 'text',
             'default' => ',',
             'eval' => [
-                'maxlength' => '1',
+                'decodeEntities' => true,
+                'maxlength' => 1,
                 'tl_class' => 'w50',
                 'submitOnChange' => true,
             ],
@@ -464,8 +465,9 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'inputType' => 'text',
             'default' => '"',
             'eval' => [
+                'decodeEntities' => true,
                 'tl_class' => 'w50',
-                'maxlength' => '1',
+                'maxlength' => 1,
                 'submitOnChange' => true,
             ],
             'sql' => "char(1) NOT NULL default ''",
@@ -476,9 +478,10 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'inputType' => 'text',
             'default' => ';',
             'eval' => [
+                'decodeEntities' => true,
                 'tl_class' => 'w50',
                 'submitOnChange' => true,
-                'maxlength' => '1',
+                'maxlength' => 1,
             ],
             'sql' => "char(1) NOT NULL default ''",
         ],
