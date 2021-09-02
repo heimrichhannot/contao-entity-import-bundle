@@ -163,6 +163,7 @@ Name | Description
 -----|------------
 `AddConfigFieldMappingPresetsEvent` | Add config field mapping presets
 `AddSourceFieldMappingPresetsEvent` | Add source field mapping presets
+`AfterCsvFileSourceGetRowEvent` | Modify csv rows e.g. for fixing file encoding issues
 `AfterFileSourceGetContentEvent` | Configure the data after receiving from source
 `AfterImportEvent` | Get imported data after finished import
 `AfterItemImportEvent` | Get imported item data after finished import

@@ -32,7 +32,7 @@ abstract class AbstractFileSource extends AbstractSource
     /**
      * @var EventDispatcherInterface
      */
-    private $eventDispatcher;
+    protected $eventDispatcher;
 
     /**
      * @var ContainerUtil

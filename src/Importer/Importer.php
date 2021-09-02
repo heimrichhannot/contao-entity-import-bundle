@@ -215,9 +215,9 @@ class Importer implements ImporterInterface
             }
 
             if ('source_value' === $mappingElement['valueType']) {
-                $mapped[$mappingElement['columnName']] = $item[$mappingElement['mappingValue']];
+                $mapped[$mappingElement['columnName']] = trim($item[$mappingElement['mappingValue']]);
             } elseif ('static_value' === $mappingElement['valueType']) {
-                $mapped[$mappingElement['columnName']] = $this->stringUtil->replaceInsertTags($mappingElement['staticValue']);
+                $mapped[$mappingElement['columnName']] = trim($this->stringUtil->replaceInsertTags($mappingElement['staticValue']));
             }
         }
 

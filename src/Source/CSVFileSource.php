@@ -10,6 +10,7 @@ namespace HeimrichHannot\EntityImportBundle\Source;
 
 use Contao\Message;
 use Haste\IO\Reader\CsvReader;
+use HeimrichHannot\EntityImportBundle\Event\AfterCsvFileSourceGetRowEvent;
 
 class CSVFileSource extends AbstractFileSource
 {
@@ -31,12 +32,8 @@ class CSVFileSource extends AbstractFileSource
         $csv->next();
 
         while ($current = $csv->current()) {
-            // TODO make configurable?
-            // fix encoding (excel for example...)
-            $current = array_map('utf8_encode', $current);
-
-            // prepare for storing to db
-            $current = mb_convert_encoding($current, 'UTF-8');
+            $event = $this->eventDispatcher->dispatch(AfterCsvFileSourceGetRowEvent::NAME, new AfterCsvFileSourceGetRowEvent($current, $this->sourceModel));
+            $current = $event->getRow();
 
             if (!$this->sourceModel->csvSkipEmptyLines || [null] !== $current) {
                 $data[] = $this->getMappedItemData($current, $this->fieldMapping);

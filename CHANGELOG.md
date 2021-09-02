@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.20.0] - 2021-09-02
+
+- Added: new event `AfterCsvFileSourceGetRowEvent`
+- Removed: utf encoding/decoding in csv file source (**BC-Break**)
+- Added: `trim()` for all imported data (in extremely rare cases this might be a **BC-Break**)
+
 ## [0.19.4] - 2021-09-02
 
 - Fixed: placeholders for sources
