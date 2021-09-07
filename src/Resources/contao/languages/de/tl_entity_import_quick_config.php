@@ -21,7 +21,7 @@ $lang['parentEntity'][1] = 'Wählen Sie hier die gewünschte Elternentität aus.
 $lang['csvPreviewList'][0] = 'Vorschau';
 $lang['csvHeaderRow'][0] = 'Kopfdatensatz';
 $lang['csvHeaderRow'][1] = 'Der erste Datensatz enthält die Spaltennamen.';
-
+$lang['explanationImportCouldTakeLong'] = '<strong>Hinweis:</strong> Je nach zu importierender Datenmenge kann der Import einige Minuten in Anspruch nehmen. Bitte laden Sie die Seite nicht neu, nachdem Sie auf "Speichern" geklickt haben bzw. das Formular neu geladen wurde.';
 /*
  * Legends
  */

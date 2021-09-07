@@ -493,8 +493,8 @@ class Importer implements ImporterInterface
                 $this->databaseUtil->update('tl_entity_import_config', ['errorNotificationLock' => '1'], 'tl_entity_import_config.id=?', [$this->configModel->id]);
             }
 
-            Message::addError(sprintf($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['errorImport'], $count,
-                $this->containerUtil->isDev() ? str_replace("\n", '<br>', $e) : $e->getMessage()));
+            Message::addError(sprintf($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['errorImport'],
+                $this->containerUtil->isDev() ? str_replace("\n", '<br>', $e->getMessage()) : ''));
 
             return false;
         }

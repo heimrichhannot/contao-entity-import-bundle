@@ -13,8 +13,14 @@ use Contao\Database;
 use Contao\DataContainer;
 use Contao\StringUtil;
 use Contao\System;
+use HeimrichHannot\EntityImportBundle\Event\BeforeImportEvent;
+use HeimrichHannot\EntityImportBundle\Event\BeforeItemImportEvent;
 use HeimrichHannot\EntityImportBundle\Importer\ImporterFactory;
+use HeimrichHannot\EntityImportBundle\Source\SourceFactory;
+use HeimrichHannot\EntityImportBundle\Source\SourceInterface;
+use HeimrichHannot\ListWidget\ListWidget;
 use HeimrichHannot\RequestBundle\Component\HttpFoundation\Request;
+use HeimrichHannot\UtilsBundle\Database\DatabaseUtil;
 use HeimrichHannot\UtilsBundle\Dca\DcaUtil;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
 use HeimrichHannot\UtilsBundle\Url\UrlUtil;
@@ -22,6 +28,8 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class EntityImportQuickConfigContainer
 {
+    protected DatabaseUtil  $databaseUtil;
+    protected SourceFactory $sourceFactory;
     /**
      * @var EventDispatcherInterface
      */
@@ -53,7 +61,9 @@ class EntityImportQuickConfigContainer
         Request $request,
         ImporterFactory $importerFactory,
         UrlUtil $urlUtil,
-        DcaUtil $dcaUtil
+        DcaUtil $dcaUtil,
+        DatabaseUtil $databaseUtil,
+        SourceFactory $sourceFactory
     ) {
         $this->eventDispatcher = $eventDispatcher;
         $this->modelUtil = $modelUtil;
@@ -61,6 +71,8 @@ class EntityImportQuickConfigContainer
         $this->importerFactory = $importerFactory;
         $this->urlUtil = $urlUtil;
         $this->dcaUtil = $dcaUtil;
+        $this->databaseUtil = $databaseUtil;
+        $this->sourceFactory = $sourceFactory;
     }
 
     public function getImporterConfigs()
@@ -103,15 +115,137 @@ class EntityImportQuickConfigContainer
         if (EntityImportSourceContainer::RETRIEVAL_TYPE_CONTAO_FILE_SYSTEM === $sourceModel->retrievalType) {
             switch ($sourceModel->fileType) {
                 case EntityImportSourceContainer::FILETYPE_CSV:
-                    $dca['palettes']['default'] = str_replace('importerConfig', 'importerConfig,fileSRC,fileContent,csvHeaderRow,csvPreviewList', $dca['palettes']['default']);
+                    $dca['palettes']['default'] = str_replace('importerConfig', 'importerConfig,fileSRC,csvHeaderRow,csvPreviewList', $dca['palettes']['default']);
 
                     if (isset($targetDca['config']['ptable']) && $targetDca['config']['ptable'] && Database::getInstance()->fieldExists('pid', $importer->targetTable)) {
                         $dca['palettes']['default'] = str_replace('fileSRC', 'fileSRC,parentEntity', $dca['palettes']['default']);
                     }
 
+                    // large dataset? -> ajax list
+                    if ($importer->useCacheForQuickImporters) {
+                        unset($dca['fields']['csvPreviewList']['eval']['listWidget']['items_callback']);
+
+                        $dca['fields']['csvPreviewList']['eval']['listWidget']['ajax'] = true;
+                        $dca['fields']['csvPreviewList']['eval']['listWidget']['table'] = 'tl_entity_import_cache';
+                        $dca['fields']['csvPreviewList']['eval']['listWidget']['ajaxConfig'] = [
+                            'load_items_callback' => [self::class, 'loadCsvRowsFromCache'],
+                            'prepare_items_callback' => [self::class, 'prepareCachedCsvRows'],
+                        ];
+                    }
+
                     break;
             }
         }
+    }
+
+    public function loadCsvRowsFromCache($config, $options = [], $context = null, $dc = null)
+    {
+        $options = [
+            'table' => $config['table'],
+            'columns' => $config['columns'],
+            // filtering
+            'column' => [$config['table'].'.cache_ptable = ?', $config['table'].'.cache_pid = ?'],
+            'value' => ['tl_entity_import_quick_config', $dc->id],
+        ];
+
+        return ListWidget::loadItems($config, $options, $context, $dc);
+    }
+
+    public function cacheCsvRows(DataContainer $dc)
+    {
+        // cache might be invalid now -> delete tl_md_recipient
+        $this->databaseUtil->delete('tl_entity_import_cache', 'cache_ptable=? AND cache_pid=?', ['tl_entity_import_quick_config', $dc->id]);
+
+        // cache the rows
+        if (null === ($quickImporter = $this->modelUtil->findModelInstanceByPk('tl_entity_import_quick_config', $dc->id)) ||
+            !$quickImporter->importerConfig || !$quickImporter->fileSRC) {
+            return;
+        }
+
+        if (null === ($importerConfig = $this->modelUtil->findModelInstanceByPk('tl_entity_import_config', $quickImporter->importerConfig))) {
+            return;
+        }
+
+        if (null === ($sourceModel = $this->modelUtil->findModelInstanceByPk('tl_entity_import_source', $importerConfig->pid))) {
+            return;
+        }
+
+        if (EntityImportSourceContainer::RETRIEVAL_TYPE_CONTAO_FILE_SYSTEM !== $sourceModel->retrievalType ||
+            EntityImportSourceContainer::FILETYPE_CSV !== $sourceModel->fileType) {
+            return;
+        }
+
+        $this->addParentEntityToFieldMapping($quickImporter, $importerConfig);
+        $sourceModel->fileSRC = $quickImporter->fileSRC;
+
+        $importer = $this->importerFactory->createInstance($importerConfig, [
+            'sourceModel' => $sourceModel,
+        ]);
+
+        /**
+         * @var SourceInterface
+         */
+        $source = $this->sourceFactory->createInstance($sourceModel->id);
+
+        // set domain
+        $source->setDomain($importerConfig->cronDomain);
+
+        // TODO process in pieces
+        $items = $importer->getMappedItems();
+
+        $event = $this->eventDispatcher->dispatch(BeforeImportEvent::NAME, new BeforeImportEvent($items, $importerConfig, $source, true));
+
+        $items = $event->getItems();
+
+        if ($quickImporter->csvHeaderRow) {
+            unset($items[0]);
+        }
+
+        $itemsToInsert = [];
+
+        foreach ($items as $item) {
+            // call the event (else db constraints might fail)
+            /** @var BeforeItemImportEvent $event */
+            $event = $this->eventDispatcher->dispatch(BeforeItemImportEvent::NAME, new BeforeItemImportEvent(
+                $item,
+                $item,
+                $importerConfig,
+                $source,
+                false,
+                true
+            ));
+
+            $itemsToInsert[] = $event->getMappedItem();
+        }
+
+        $this->databaseUtil->doBulkInsert('tl_entity_import_cache', $itemsToInsert, [
+            'cache_ptable' => 'tl_entity_import_quick_config',
+            'cache_pid' => $dc->id,
+        ]);
+    }
+
+    public function prepareCachedCsvRows($items, $config, $options = [], $context = null, $dc = null): array
+    {
+        $itemData = [];
+
+        if (!$items) {
+            return $itemData;
+        }
+
+        while ($items->next()) {
+            $itemModel = $items->current();
+            $item = [];
+
+            foreach ($config['columns'] as $key => $column) {
+                $item[] = [
+                    'value' => $itemModel->{$column['db']},
+                ];
+            }
+
+            $itemData[] = $item;
+        }
+
+        return $itemData;
     }
 
     public function getParentEntitiesAsOptions(\Contao\DataContainer $dc)

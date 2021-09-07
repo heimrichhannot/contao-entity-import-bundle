@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.20.2] - 2021-09-07
+
+- Added: cache for csv quick importers (activate in importer config and carefully read the field caption)
+- Fixed: error message for import command
+- Fixed: style fixes for quick importers in the backend
+
 ## [0.20.1] - 2021-09-02
 
 - Added: memory usage in success message

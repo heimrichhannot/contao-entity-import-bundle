@@ -1,7 +1,9 @@
 services:
   _defaults:
     autowire: true
+    public: true
 
   HeimrichHannot\EntityImportBundle\Importer\ImporterFactory: ~
   HeimrichHannot\EntityImportBundle\Source\SourceFactory: ~
   HeimrichHannot\EntityImportBundle\Util\EntityImportUtil: ~
+  HeimrichHannot\EntityImportBundle\EventListener\Contao\LoadDataContainerListener: ~

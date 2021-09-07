@@ -18,6 +18,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_quick_config'] = [
         ],
         'onsubmit_callback' => [
             ['huh.utils.dca', 'setDateAdded'],
+            [\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportQuickConfigContainer::class, 'cacheCsvRows'],
         ],
         'oncopy_callback' => [
             ['huh.utils.dca', 'setDateAddedOnCopy'],
@@ -83,7 +84,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_quick_config'] = [
         ],
     ],
     'palettes' => [
-        'default' => '{general_legend},title,importerConfig;',
+        'default' => '{general_legend},explanationImportCouldTakeLong,title,importerConfig;',
     ],
     'fields' => [
         'id' => [
@@ -134,6 +135,14 @@ $GLOBALS['TL_DCA']['tl_entity_import_quick_config'] = [
             'options_callback' => [\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportQuickConfigContainer::class, 'getParentEntitiesAsOptions'],
             'eval' => ['tl_class' => 'w50', 'includeBlankOption' => true, 'chosen' => true, 'submitOnChange' => true],
             'sql' => "int(10) unsigned NOT NULL default '0'",
+        ],
+        'explanationImportCouldTakeLong' => [
+            'inputType' => 'explanation',
+            'eval' => [
+                'text' => &$GLOBALS['TL_LANG']['tl_entity_import_quick_config']['explanationImportCouldTakeLong'],
+                'class' => 'tl_info',
+                'tl_class' => 'long clr',
+            ],
         ],
         'csvPreviewList' => [
             'label' => &$GLOBALS['TL_LANG']['tl_entity_import_quick_config']['csvPreviewList'],

@@ -148,6 +148,9 @@ $lang['overrideErrorNotificationEmail'][1] = 'Wählen Sie diese Option, wenn Sie
 $lang['errorNotificationEmail'][0] = 'E-Mail-Adresse';
 $lang['errorNotificationEmail'][1] = 'Tragen Sie hier die E-Mail-Adresse ein, an die die Fehlermeldung verschickt werden soll.';
 
+$lang['useCacheForQuickImporters'][0] = 'Datenbank-Cache für Schnell-Importer nutzen (aktuell nur CSV-Quelle; Datenbank danach aktualisieren!)';
+$lang['useCacheForQuickImporters'][1] = 'Aktivieren Sie diese Option, wenn sich in Ihrer Quelle sehr viele Objekte befinden. Sie müssen nach der Aktivierung die Datenbank aktualisieren und vorab ggf. den Symfony-Cache löschen.';
+
 /*
  * Reference
  */
@@ -183,7 +186,7 @@ $lang['reference'] = [
 /*
  * Messages
  */
-$lang['importConfirm'] = 'Soll der Import ID %s wirklich durchgeführt werden?';
+$lang['importConfirm'] = 'Soll der Import ID %s wirklich durchgeführt werden? Je nach Datenmenge kann der Import einige Minuten in Anspruch nehmen.';
 
 /*
  * Errors
@@ -194,7 +197,7 @@ $lang['error']['tableFieldsDiffer'] = 'Die Felder vom Quelle und Ziel unterschei
 $lang['error']['noIdentifierFields'] = 'Die Identifikatorfelder wurden nicht gesetzt.';
 $lang['error']['successfulImport'] = 'Es wurden %s Einträge importiert bzw. aktualisiert (benötigte Zeit: %ss, max. benötigter Speicher: %s).';
 $lang['error']['emptyFile'] = 'Es wurden keine Daten zum Importieren gefunden.';
-$lang['error']['errorImport'] = 'Bei %s Einträgen sind beim Import Fehler aufgetreten.<br><br>Fehler:<br><br>%s';
+$lang['error']['errorImport'] = 'Beim Importieren ist ein Fehler aufgetreten.<br><br>Fehler:<br><br>%s';
 $lang['error']['delimiter'] = 'Das Feld-Trennzeichen für die CSV-Quelle wurde nicht gesetzt.';
 $lang['error']['enclosure'] = 'Das Text-Trennzeichen für die CSV-Quelle wurde nicht gesetzt.';
 $lang['error']['escape'] = 'Escape für csv ist nicht definiert.';
