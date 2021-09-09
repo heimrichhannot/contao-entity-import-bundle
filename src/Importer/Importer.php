@@ -215,9 +215,14 @@ class Importer implements ImporterInterface
             }
 
             if ('source_value' === $mappingElement['valueType']) {
-                $mapped[$mappingElement['columnName']] = trim($item[$mappingElement['mappingValue']]);
+                $mapped[$mappingElement['columnName']] = $item[$mappingElement['mappingValue']];
             } elseif ('static_value' === $mappingElement['valueType']) {
-                $mapped[$mappingElement['columnName']] = trim($this->stringUtil->replaceInsertTags($mappingElement['staticValue']));
+                $mapped[$mappingElement['columnName']] = $this->stringUtil->replaceInsertTags($mappingElement['staticValue']);
+            }
+
+            // only trim if string -> else e.g. int or null would be translated to string leading to mysql errors
+            if (isset($mapped[$mappingElement['columnName']]) && \is_string($mapped[$mappingElement['columnName']])) {
+                $mapped[$mappingElement['columnName']] = trim($mapped[$mappingElement['columnName']]);
             }
         }
 

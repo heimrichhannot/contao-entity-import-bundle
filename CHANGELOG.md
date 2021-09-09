@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.20.3] - 2021-09-09
+
+- Fixed: `trim()` is only applied to item data if the data is of type "string"
+
 ## [0.20.2] - 2021-09-07
 
 - Added: cache for csv quick importers (activate in importer config and carefully read the field caption)
