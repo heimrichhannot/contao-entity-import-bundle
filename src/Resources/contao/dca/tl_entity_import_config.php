@@ -83,7 +83,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
     ],
     'palettes' => [
         '__selector__' => ['importMode', 'deleteBeforeImport', 'sortingMode', 'setDateAdded', 'setTstamp', 'generateAlias', 'deletionMode', 'useCron', 'usePoorMansCron', 'addSkipFieldsOnMerge', 'overrideErrorNotificationEmail'],
-        'default' => '{general_legend},title,targetTable,importMode;{mapping_legend},fieldMappingCopier,fieldMappingPresets,fieldMapping;{fields_legend},setDateAdded,setTstamp,generateAlias;{file_mapping_legend},fileFieldMappingCopier,fileFieldMapping;{sorting_legend},sortingMode;{deletion_legend},deleteBeforeImport,deletionMode;{error_legend},overrideErrorNotificationEmail;{misc_legend},useCacheForQuickImporters,addCategoriesSupport,addDcMultilingualSupport,addChangeLanguageSupport,addDraftsSupport;{cron_legend},useCron;',
+        'default' => '{general_legend},title,targetTable,importMode;{mapping_legend},fieldMappingCopier,fieldMappingPresets,fieldMapping;{fields_legend},setDateAdded,setTstamp,generateAlias;{file_mapping_legend},fileFieldMappingCopier,fileFieldMapping;{sorting_legend},sortingMode;{deletion_legend},deleteBeforeImport,deletionMode;{error_legend},overrideErrorNotificationEmail;{misc_legend},processInChunks,useCacheForQuickImporters,addCategoriesSupport,addDcMultilingualSupport,addChangeLanguageSupport,addDraftsSupport;{cron_legend},useCron;',
     ],
     'subpalettes' => [
         'importMode_merge' => 'mergeIdentifierFields,addSkipFieldsOnMerge',
@@ -652,6 +652,13 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'inputType' => 'text',
             'eval' => ['rgxp' => 'email', 'tl_class' => 'w50', 'mandatory' => true],
             'sql' => "varchar(255) NOT NULL default ''",
+        ],
+        'processInChunks' => [
+            'label' => &$GLOBALS['TL_LANG']['tl_entity_import_config']['processInChunks'],
+            'exclude' => true,
+            'inputType' => 'checkbox',
+            'eval' => ['tl_class' => 'w50'],
+            'sql' => "char(1) NOT NULL default ''",
         ],
         'useCacheForQuickImporters' => [
             'label' => &$GLOBALS['TL_LANG']['tl_entity_import_config']['useCacheForQuickImporters'],

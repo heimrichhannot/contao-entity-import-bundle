@@ -34,14 +34,20 @@ class AfterImportEvent extends Event
     private $dryRun;
 
     /**
+     * @var array
+     */
+    private $options;
+
+    /**
      * AfterImportEvent constructor.
      */
-    public function __construct(array $items, Model $configModel, SourceInterface $source, bool $dryRun = false)
+    public function __construct(array $items, Model $configModel, SourceInterface $source, bool $dryRun = false, array $options = [])
     {
         $this->items = $items;
         $this->configModel = $configModel;
         $this->source = $source;
         $this->dryRun = $dryRun;
+        $this->options = $options;
     }
 
     public function getItems(): array
@@ -77,5 +83,10 @@ class AfterImportEvent extends Event
     public function isDryRun(): bool
     {
         return $this->dryRun;
+    }
+
+    public function getOptions(): array
+    {
+        return $this->options;
     }
 }

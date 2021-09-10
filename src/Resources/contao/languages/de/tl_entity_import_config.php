@@ -151,6 +151,9 @@ $lang['errorNotificationEmail'][1] = 'Tragen Sie hier die E-Mail-Adresse ein, an
 $lang['useCacheForQuickImporters'][0] = 'Datenbank-Cache für Schnell-Importer nutzen (aktuell nur CSV-Quelle; Datenbank danach aktualisieren!)';
 $lang['useCacheForQuickImporters'][1] = 'Aktivieren Sie diese Option, wenn sich in Ihrer Quelle sehr viele Objekte befinden. Sie müssen nach der Aktivierung die Datenbank aktualisieren und vorab ggf. den Symfony-Cache löschen.';
 
+$lang['processInChunks'][0] = 'Import in Teilen (aktuell nur CSV-Quelle)';
+$lang['processInChunks'][1] = 'Aktivieren Sie diese Option, wenn Sie den Import nicht "im ganzen" sondern in Teilen vornehmen möchten, um Speicher zu sparen. ACHTUNG: Bestimmte Events werden dann pro Durchlauf aufgerufen. Prüfen Sie in Event-Listenern die Options-Parameter "itemOffset", "itemLimit" und "itemTotalCount".';
+
 /*
  * Reference
  */
@@ -197,7 +200,8 @@ $lang['error']['tableFieldsDiffer'] = 'Die Felder vom Quelle und Ziel unterschei
 $lang['error']['noIdentifierFields'] = 'Die Identifikatorfelder wurden nicht gesetzt.';
 $lang['error']['successfulImport'] = 'Es wurden %s Einträge importiert bzw. aktualisiert (benötigte Zeit: %ss, max. benötigter Speicher: %s).';
 $lang['error']['emptyFile'] = 'Es wurden keine Daten zum Importieren gefunden.';
-$lang['error']['errorImport'] = 'Beim Importieren ist ein Fehler aufgetreten.<br><br>Fehler:<br><br>%s';
+$lang['error']['errorImport'] = 'Beim Importieren ist ein Fehler aufgetreten.';
+$lang['error']['error'] = 'Fehler';
 $lang['error']['delimiter'] = 'Das Feld-Trennzeichen für die CSV-Quelle wurde nicht gesetzt.';
 $lang['error']['enclosure'] = 'Das Text-Trennzeichen für die CSV-Quelle wurde nicht gesetzt.';
 $lang['error']['escape'] = 'Escape für csv ist nicht definiert.';

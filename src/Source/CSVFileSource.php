@@ -14,11 +14,44 @@ use HeimrichHannot\EntityImportBundle\Event\AfterCsvFileSourceGetRowEvent;
 
 class CSVFileSource extends AbstractFileSource
 {
-    public function getMappedData(): array
+    public function getTotalItemCount(): int
+    {
+        $count = 0;
+        $settings = $this->getCsvSettings();
+        $file = $this->fileUtil->getFileFromUuid($this->sourceModel->fileSRC);
+
+        if (null === $file || !$file->exists()) {
+            return 0;
+        }
+
+        $csv = new CsvReader($file->path);
+        $csv->setDelimiter($settings['delimiter']);
+        $csv->setEnclosure($settings['enclosure']);
+        $csv->setEscape($settings['escape']);
+        $csv->rewind();
+        $csv->next();
+
+        while ($csv->current()) {
+            ++$count;
+            $csv->next();
+        }
+
+        if ($this->sourceModel->csvHeaderRow) {
+            --$count;
+        }
+
+        return $count;
+    }
+
+    public function getMappedData(array $options = []): array
     {
         $data = [];
         $settings = $this->getCsvSettings();
         $file = $this->fileUtil->getFileFromUuid($this->sourceModel->fileSRC);
+
+        $limit = $options['itemLimit'] ?? 0;
+        $offset = $options['itemOffset'] ?? 0;
+        $processInChunks = $limit > 0;
 
         if (null === $file || !$file->exists()) {
             return [];
@@ -31,12 +64,29 @@ class CSVFileSource extends AbstractFileSource
         $csv->rewind();
         $csv->next();
 
+        $i = 0;
+
         while ($current = $csv->current()) {
+            if ($processInChunks && $i > $limit + $offset - 1) {
+                break;
+            }
+
+            if ($processInChunks && $i < $offset) {
+                ++$i;
+                $csv->next();
+
+                continue;
+            }
+
             $event = $this->eventDispatcher->dispatch(AfterCsvFileSourceGetRowEvent::NAME, new AfterCsvFileSourceGetRowEvent($current, $this->sourceModel));
             $current = $event->getRow();
 
             if (!$this->sourceModel->csvSkipEmptyLines || [null] !== $current) {
                 $data[] = $this->getMappedItemData($current, $this->fieldMapping);
+            }
+
+            if ($processInChunks) {
+                ++$i;
             }
 
             $csv->next();

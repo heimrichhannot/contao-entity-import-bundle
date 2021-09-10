@@ -85,6 +85,14 @@ abstract class AbstractSource implements SourceInterface
         $this->domain = $domain;
     }
 
+    /**
+     * Override in sources supporting processing in chunks.
+     */
+    public function getTotalItemCount(): int
+    {
+        return 0;
+    }
+
     protected function getMappedItemData(?array $element, array $mapping): array
     {
         $result = [];

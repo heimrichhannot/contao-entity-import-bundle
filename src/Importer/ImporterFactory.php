@@ -8,15 +8,15 @@
 
 namespace HeimrichHannot\EntityImportBundle\Importer;
 
+use Contao\CoreBundle\Framework\ContaoFramework;
 use HeimrichHannot\EntityImportBundle\Source\SourceFactory;
 use HeimrichHannot\EntityImportBundle\Source\SourceInterface;
 use HeimrichHannot\RequestBundle\Component\HttpFoundation\Request;
-use HeimrichHannot\UtilsBundle\Container\ContainerUtil;
 use HeimrichHannot\UtilsBundle\Database\DatabaseUtil;
 use HeimrichHannot\UtilsBundle\Dca\DcaUtil;
 use HeimrichHannot\UtilsBundle\File\FileUtil;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
-use HeimrichHannot\UtilsBundle\String\StringUtil;
+use HeimrichHannot\UtilsBundle\Util\Utils;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
@@ -42,10 +42,6 @@ class ImporterFactory
      */
     private $sourceFactory;
     /**
-     * @var StringUtil
-     */
-    private $stringUtil;
-    /**
      * @var DcaUtil
      */
     private $dcaUtil;
@@ -54,10 +50,6 @@ class ImporterFactory
      */
     private $container;
     /**
-     * @var ContainerUtil
-     */
-    private $containerUtil;
-    /**
      * @var Request
      */
     private $request;
@@ -65,32 +57,41 @@ class ImporterFactory
      * @var FileUtil
      */
     private $fileUtil;
+    /**
+     * @var Utils
+     */
+    private $utils;
+
+    /**
+     * @var ContaoFramework
+     */
+    private $framework;
 
     /**
      * Importer constructor.
      */
     public function __construct(
         ContainerInterface $container,
+        ContaoFramework $framework,
         DatabaseUtil $databaseUtil,
         EventDispatcherInterface $eventDispatcher,
         Request $request,
         ModelUtil $modelUtil,
-        StringUtil $stringUtil,
         DcaUtil $dcaUtil,
         SourceFactory $sourceFactory,
-        ContainerUtil $containerUtil,
-        FileUtil $fileUtil
+        FileUtil $fileUtil,
+        Utils $utils
     ) {
         $this->databaseUtil = $databaseUtil;
         $this->eventDispatcher = $eventDispatcher;
         $this->modelUtil = $modelUtil;
         $this->sourceFactory = $sourceFactory;
-        $this->stringUtil = $stringUtil;
         $this->dcaUtil = $dcaUtil;
         $this->container = $container;
-        $this->containerUtil = $containerUtil;
         $this->request = $request;
         $this->fileUtil = $fileUtil;
+        $this->utils = $utils;
+        $this->framework = $framework;
     }
 
     public function createInstance($configModel, array $options = []): ?ImporterInterface
@@ -115,16 +116,15 @@ class ImporterFactory
 
         return new Importer(
             $this->container,
+            $this->framework,
             $configModel,
             $source,
             $this->eventDispatcher,
             $this->request,
             $this->databaseUtil,
-            $this->modelUtil,
-            $this->stringUtil,
             $this->dcaUtil,
-            $this->containerUtil,
-            $this->fileUtil
+            $this->fileUtil,
+            $this->utils
         );
     }
 }

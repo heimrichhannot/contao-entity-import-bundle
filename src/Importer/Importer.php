@@ -9,7 +9,9 @@
 namespace HeimrichHannot\EntityImportBundle\Importer;
 
 use Ausi\SlugGenerator\SlugGenerator;
+use Contao\Controller;
 use Contao\CoreBundle\Exception\RedirectResponseException;
+use Contao\CoreBundle\Framework\ContaoFramework;
 use Contao\Database;
 use Contao\Email;
 use Contao\File;
@@ -27,14 +29,13 @@ use HeimrichHannot\EntityImportBundle\Event\BeforeItemImportEvent;
 use HeimrichHannot\EntityImportBundle\Model\EntityImportConfigModel;
 use HeimrichHannot\EntityImportBundle\Source\SourceInterface;
 use HeimrichHannot\RequestBundle\Component\HttpFoundation\Request;
-use HeimrichHannot\UtilsBundle\Container\ContainerUtil;
 use HeimrichHannot\UtilsBundle\Database\DatabaseUtil;
 use HeimrichHannot\UtilsBundle\Dca\DcaUtil;
 use HeimrichHannot\UtilsBundle\File\FileUtil;
-use HeimrichHannot\UtilsBundle\Model\ModelUtil;
-use HeimrichHannot\UtilsBundle\String\StringUtil;
+use HeimrichHannot\UtilsBundle\Util\Utils;
 use Psr\Log\LogLevel;
 use Symfony\Component\Config\Definition\Exception\Exception;
+use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Stopwatch\Stopwatch;
@@ -72,14 +73,6 @@ class Importer implements ImporterInterface
     private $databaseUtil;
 
     /**
-     * @var ModelUtil
-     */
-    private $modelUtil;
-    /**
-     * @var StringUtil
-     */
-    private $stringUtil;
-    /**
      * @var DcaUtil
      */
     private $dcaUtil;
@@ -87,25 +80,12 @@ class Importer implements ImporterInterface
      * @var ContainerInterface
      */
     private $container;
-    /**
-     * @var ContainerUtil
-     */
-    private $containerUtil;
 
     /**
      * @var array|null
      */
     private $dbMergeCache;
 
-    /**
-     * @var array|null
-     */
-    private $dbIdMapping;
-
-    /**
-     * @var array|null
-     */
-    private $dbItemMapping;
     /**
      * @var Request
      */
@@ -114,43 +94,147 @@ class Importer implements ImporterInterface
      * @var FileUtil
      */
     private $fileUtil;
+    /**
+     * @var Utils
+     */
+    private $utils;
+
+    /**
+     * @var SymfonyStyle
+     */
+    private $io;
+
+    /**
+     * @var ContaoFramework
+     */
+    private $framework;
 
     /**
      * Importer constructor.
      */
     public function __construct(
         ContainerInterface $container,
+        ContaoFramework $framework,
         Model $configModel,
         SourceInterface $source,
         EventDispatcherInterface $eventDispatcher,
         Request $request,
         DatabaseUtil $databaseUtil,
-        ModelUtil $modelUtil,
-        StringUtil $stringUtil,
         DcaUtil $dcaUtil,
-        ContainerUtil $containerUtil,
-        FileUtil $fileUtil
+        FileUtil $fileUtil,
+        Utils $utils
     ) {
         $this->container = $container;
         $this->configModel = $configModel;
         $this->source = $source;
         $this->databaseUtil = $databaseUtil;
         $this->eventDispatcher = $eventDispatcher;
-        $this->modelUtil = $modelUtil;
-        $this->stringUtil = $stringUtil;
         $this->dcaUtil = $dcaUtil;
-        $this->containerUtil = $containerUtil;
         $this->request = $request;
         $this->fileUtil = $fileUtil;
+        $this->utils = $utils;
+        $this->framework = $framework;
+    }
+
+    public function setInputOutput(SymfonyStyle $io): void
+    {
+        $this->io = $io;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function run(): bool
+    public function run(): array
     {
         $this->stopwatch = new Stopwatch();
 
+        if ($this->configModel->processInChunks) {
+            $count = 0;
+            $duration = 0;
+
+            $chunkSize = 1000;
+            $totalCount = $this->source->getTotalItemCount();
+            $cycles = $totalCount / $chunkSize;
+            $dbIdMapping = new \SplFixedArray($totalCount);
+            $dbItemMapping = new \SplFixedArray($totalCount);
+
+            $mappedItems = new \SplFixedArray($totalCount);
+
+            for ($i = 0; $i <= $cycles; ++$i) {
+                $this->stopwatch->reset();
+                $this->stopwatch->start('contao-entity-import-bundle.id'.$this->configModel->id);
+
+                $options = [
+                    'itemLimit' => $chunkSize,
+                    'itemOffset' => $i * $chunkSize,
+                    'itemTotalCount' => $totalCount,
+                ];
+
+                $items = $this->getDataFromSource($options);
+
+                $event = $this->eventDispatcher->dispatch(BeforeImportEvent::NAME, new BeforeImportEvent($items, $this->configModel, $this->source, $this->dryRun, $options));
+
+                $chunkResult = $this->executeImport($event->getItems(), $options);
+
+                // error? -> skip loop and throw error
+                if ('error' === $chunkResult['state']) {
+                    return $chunkResult;
+                }
+
+                $count += $chunkResult['count'];
+                $duration += $chunkResult['duration'];
+
+                for ($j = 0; $j < \count($chunkResult['mappedItems']); ++$j) {
+                    $mappedItems[$j + $i * $chunkSize] = $chunkResult['mappedItems'][$j];
+                }
+
+                for ($j = 0; $j < \count($chunkResult['dbIdMapping']); ++$j) {
+                    $dbIdMapping[$j + $i * $chunkSize] = $chunkResult['dbIdMapping'][$j];
+                }
+
+                for ($j = 0; $j < \count($chunkResult['dbItemMapping']); ++$j) {
+                    $dbItemMapping[$j + $i * $chunkSize] = $chunkResult['dbItemMapping'][$j];
+                }
+
+                // last loop?
+                if ($i === (int) floor($cycles)) {
+                    $this->stopwatch->start('contao-entity-import-bundle.id'.$this->configModel->id);
+
+                    try {
+                        $this->postProcess(
+                            $this->configModel->targetTable,
+                            $mappedItems,
+                            $dbIdMapping,
+                            $dbItemMapping
+                        );
+                    } catch (\Exception $e) {
+                        $this->stopwatch->stop('contao-entity-import-bundle.id'.$this->configModel->id);
+
+                        $this->sendErrorEmail($e->getMessage());
+
+                        return [
+                            'state' => 'error',
+                            'error' => $e->getMessage(),
+                        ];
+                    }
+
+                    $event = $this->stopwatch->stop('contao-entity-import-bundle.id'.$this->configModel->id);
+
+                    $duration += $event->getDuration();
+                }
+
+                $this->eventDispatcher->dispatch(AfterImportEvent::NAME, new AfterImportEvent($items, $this->configModel, $this->source, $this->dryRun, $options));
+            }
+
+            return [
+                'state' => 'success',
+                'count' => $count,
+                'duration' => $duration,
+                'mappedItems' => $mappedItems,
+                'dbIdMapping' => $dbIdMapping,
+                'dbItemMapping' => $dbItemMapping,
+            ];
+        }
         $this->stopwatch->start('contao-entity-import-bundle.id'.$this->configModel->id);
 
         $items = $this->getDataFromSource();
@@ -164,16 +248,16 @@ class Importer implements ImporterInterface
         return $result;
     }
 
-    public function getDataFromSource(): array
+    public function getDataFromSource(array $options = []): array
     {
-        return $this->source->getMappedData();
+        return $this->source->getMappedData($options);
     }
 
     public function getMappedItems(array $options = []): array
     {
         $localizeLabels = $options['localizeLabels'] ?? false;
 
-        $items = $this->getDataFromSource();
+        $items = $this->getDataFromSource($options);
 
         $mappedItems = [];
 
@@ -200,9 +284,143 @@ class Importer implements ImporterInterface
         return $mappedItems;
     }
 
-    public function setDryRun(bool $dry)
+    public function setDryRun(bool $dry): void
     {
         $this->dryRun = $dry;
+    }
+
+    public function outputResultMessages(array $result): void
+    {
+        $this->framework->getAdapter(System::class)->loadLanguageFile('tl_entity_import_config');
+
+        if ('error' === $result['state']) {
+            $message = $GLOBALS['TL_LANG']['tl_entity_import_config']['error']['errorImport'];
+
+            if ($this->utils->container()->isDev()) {
+                if ($this->io) {
+                    $message .= "\n\n".$GLOBALS['TL_LANG']['tl_entity_import_config']['error']['error'].':'."\n\n".($result['error'] ?? '');
+                } else {
+                    $message .= '<br><br>'.$GLOBALS['TL_LANG']['tl_entity_import_config']['error']['error'].':'.'<br><br>'.($result['error'] ?? '');
+                }
+            }
+
+            if ($this->io) {
+                $this->io->error($message);
+            } else {
+                Message::addError($message);
+            }
+        } else {
+            $count = $result['count'];
+            $duration = $result['duration'];
+
+            $duration = str_replace('.', ',', round($duration / 1000, 2));
+
+            if ($count > 0) {
+                if ($this->io) {
+                    $this->io->success(sprintf(
+                        $GLOBALS['TL_LANG']['tl_entity_import_config']['error']['successfulImport'], $count, $duration,
+                        System::getReadableSize(memory_get_peak_usage())
+                    ));
+                } else {
+                    Message::addConfirmation(sprintf(
+                        $GLOBALS['TL_LANG']['tl_entity_import_config']['error']['successfulImport'], $count, $duration,
+                        System::getReadableSize(memory_get_peak_usage())
+                    ));
+                }
+            } else {
+                if ($this->io) {
+                    $this->io->warning(sprintf($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['emptyFile']));
+                } else {
+                    Message::addInfo(sprintf($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['emptyFile']));
+                }
+            }
+        }
+    }
+
+    public function sendErrorEmail(string $errorMessage)
+    {
+        $config = $this->getDebugConfig();
+
+        if ($this->configModel->errorNotificationLock || $this->dryRun) {
+            return;
+        }
+
+        if (isset($config['contao_log']) && $config['contao_log']) {
+            $this->utils->container()->log($errorMessage, 'Importer::executeImport', LogLevel::ERROR);
+        }
+
+        if (isset($config['email']) && $config['email']) {
+            $email = new Email();
+            $email->subject = sprintf($GLOBALS['TL_LANG']['MSC']['entityImport']['exceptionEmailSubject'], $this->configModel->title);
+            $email->text = sprintf('An error occurred on domain "%s"', $this->configModel->cronDomain).' : '.$errorMessage;
+            $email->sendTo($this->configModel->errorNotificationEmail ?: $GLOBALS['TL_CONFIG']['adminEmail']);
+        }
+
+        $this->databaseUtil->update('tl_entity_import_config', ['errorNotificationLock' => '1'], 'tl_entity_import_config.id=?', [$this->configModel->id]);
+    }
+
+    public function postProcess(string $table, $mappedItems, $dbIdMapping, $dbItemMapping)
+    {
+        // DC_Multilingual -> fix langPid (can only be done after all items are imported due to order issues otherwise)
+        if (class_exists('\Terminal42\DcMultilingualBundle\Terminal42DcMultilingualBundle') &&
+            $this->configModel->addDcMultilingualSupport) {
+            $langPidField = $GLOBALS['TL_DCA'][$table]['config']['langPid'] ?? 'langPid';
+
+            foreach ($dbItemMapping as $itemMapping) {
+                if (!$itemMapping['source']['langPid']) {
+                    continue;
+                }
+
+                if (!$this->dryRun) {
+                    $this->databaseUtil->update($table, [
+                        $table.'.'.$langPidField => $dbIdMapping[$itemMapping['source']['langPid']],
+                    ], "$table.id=?", [$itemMapping['target']->id]);
+                }
+            }
+        }
+
+        // Drafts -> fix draftParent (can only be done after all items are imported due to order issues otherwise)
+        if (class_exists('\HeimrichHannot\DraftsBundle\ContaoDraftsBundle') &&
+            $this->configModel->addDraftsSupport) {
+            foreach ($dbItemMapping as $itemMapping) {
+                if (!$itemMapping['source']['draftParent']) {
+                    continue;
+                }
+
+                if (!$this->dryRun) {
+                    $this->databaseUtil->update($table, [
+                        $table.'.draftParent' => $dbIdMapping[$itemMapping['source']['draftParent']],
+                    ], "$table.id=?", [$itemMapping['target']->id]);
+                }
+            }
+        }
+
+        // change language -> fix languageMain (can only be done after all items are imported due to order issues otherwise)
+        if (class_exists('\Terminal42\ChangeLanguage\Language') && $this->configModel->addChangeLanguageSupport) {
+            foreach ($dbItemMapping as $itemMapping) {
+                if (!$itemMapping['source']['languageMain']) {
+                    continue;
+                }
+
+                // map the languageMain id
+                $newsroomPost = $this->databaseUtil->findOneResultBy($table, [
+                    $table.'.'.$this->configModel->changeLanguageTargetExternalIdField.'=?',
+                ], [
+                    $itemMapping['source']['languageMain'],
+                ]);
+
+                if (!$this->dryRun && $newsroomPost->numRows > 0) {
+                    $this->databaseUtil->update($table, [
+                        $table.'.languageMain' => $newsroomPost->id,
+                    ], "$table.id=?", [$itemMapping['target']->id]);
+                }
+            }
+        }
+
+        $this->deleteAfterImport($mappedItems);
+        $this->applySorting();
+
+        $this->databaseUtil->commitTransaction();
     }
 
     protected function applyFieldMappingToSourceItem(array $item, array $mapping): ?array
@@ -215,21 +433,18 @@ class Importer implements ImporterInterface
             }
 
             if ('source_value' === $mappingElement['valueType']) {
-                $mapped[$mappingElement['columnName']] = $item[$mappingElement['mappingValue']];
+                $mapped[$mappingElement['columnName']] = trim($item[$mappingElement['mappingValue']]);
             } elseif ('static_value' === $mappingElement['valueType']) {
-                $mapped[$mappingElement['columnName']] = $this->stringUtil->replaceInsertTags($mappingElement['staticValue']);
-            }
-
-            // only trim if string -> else e.g. int or null would be translated to string leading to mysql errors
-            if (isset($mapped[$mappingElement['columnName']]) && \is_string($mapped[$mappingElement['columnName']])) {
-                $mapped[$mappingElement['columnName']] = trim($mapped[$mappingElement['columnName']]);
+                $mapped[$mappingElement['columnName']] = trim(
+                    $this->framework->getAdapter(Controller::class)->replaceInsertTags($mappingElement['staticValue'])
+                );
             }
         }
 
         return $mapped;
     }
 
-    protected function executeImport(array $items): bool
+    protected function executeImport(array $items, array $options = []): array
     {
         $this->dcaUtil->loadLanguageFile('default');
         $this->dcaUtil->loadLanguageFile('tl_entity_import_config');
@@ -250,7 +465,7 @@ class Importer implements ImporterInterface
                 $targetTableColumnData[$columnData['name']] = $columnData;
             }
 
-            $mappedItems = [];
+            $mappedItems = new \SplFixedArray(\count($items));
 
             $mode = $this->configModel->importMode;
 
@@ -258,8 +473,8 @@ class Importer implements ImporterInterface
             $mapping = $this->adjustMappingForDcMultilingual($mapping);
             $mapping = $this->adjustMappingForChangeLanguage($mapping);
 
-            $this->dbIdMapping = [];
-            $this->dbItemMapping = [];
+            $dbIdMapping = [];
+            $dbItemMapping = [];
 
             if ('merge' === $mode) {
                 $mergeIdentifiers = \Contao\StringUtil::deserialize($this->configModel->mergeIdentifierFields, true);
@@ -281,7 +496,7 @@ class Importer implements ImporterInterface
 
             $this->databaseUtil->beginTransaction();
 
-            foreach ($items as $item) {
+            foreach ($items as $i => $item) {
                 $mappedItem = $this->applyFieldMappingToSourceItem($item, $mapping);
 
                 $mappedItem = $this->fixNotNullErrors($mappedItem, $targetTableColumnData);
@@ -381,12 +596,18 @@ class Importer implements ImporterInterface
 
                 // store mapping e.g. for DC_Multilingual -> only possible if an id field exists
                 if (isset($item['__id'])) {
-                    $this->dbIdMapping[$item['__id']] = $importedRecord->id;
+                    $dbIdMapping[$item['__id']] = $importedRecord->id;
                 }
 
-                $this->dbItemMapping[] = [
-                    'source' => $item,
-                    'target' => $importedRecord,
+                $dbItemMapping[] = [
+                    'source' => [
+                        'langPid' => $item['langPid'],
+                        'draftParent' => $item['draftParent'],
+                        'languageMain' => $item['languageMain'],
+                    ],
+                    'target' => [
+                        'id' => $importedRecord->id,
+                    ],
                 ];
 
                 // categories bundle
@@ -403,112 +624,44 @@ class Importer implements ImporterInterface
                     $this->dryRun
                 ));
 
-                $mappedItems[] = $event->getMappedItem();
+                $mappedItems[$i] = $event->getMappedItem();
             }
 
-            // DC_Multilingual -> fix langPid (can only be done after all items are imported due to order issues otherwise)
-            if (class_exists('\Terminal42\DcMultilingualBundle\Terminal42DcMultilingualBundle') &&
-                $this->configModel->addDcMultilingualSupport) {
-                $langPidField = $GLOBALS['TL_DCA'][$table]['config']['langPid'] ?? 'langPid';
-
-                foreach ($this->dbItemMapping as $itemMapping) {
-                    if (!$itemMapping['source']['langPid']) {
-                        continue;
-                    }
-
-                    if (!$this->dryRun) {
-                        $this->databaseUtil->update($table, [
-                            $table.'.'.$langPidField => $this->dbIdMapping[$itemMapping['source']['langPid']],
-                        ], "$table.id=?", [$itemMapping['target']->id]);
-                    }
-                }
-            }
-
-            // Drafts -> fix draftParent (can only be done after all items are imported due to order issues otherwise)
-            if (class_exists('\HeimrichHannot\DraftsBundle\ContaoDraftsBundle') &&
-                $this->configModel->addDraftsSupport) {
-                foreach ($this->dbItemMapping as $itemMapping) {
-                    if (!$itemMapping['source']['draftParent']) {
-                        continue;
-                    }
-
-                    if (!$this->dryRun) {
-                        $this->databaseUtil->update($table, [
-                            $table.'.draftParent' => $this->dbIdMapping[$itemMapping['source']['draftParent']],
-                        ], "$table.id=?", [$itemMapping['target']->id]);
-                    }
-                }
-            }
-
-            // change language -> fix languageMain (can only be done after all items are imported due to order issues otherwise)
-            if (class_exists('\Terminal42\ChangeLanguage\Language') && $this->configModel->addChangeLanguageSupport) {
-                foreach ($this->dbItemMapping as $itemMapping) {
-                    if (!$itemMapping['source']['languageMain']) {
-                        continue;
-                    }
-
-                    // map the languageMain id
-                    $newsroomPost = $this->databaseUtil->findOneResultBy($table, [
-                        $table.'.'.$this->configModel->changeLanguageTargetExternalIdField.'=?',
-                    ], [
-                        $itemMapping['source']['languageMain'],
-                    ]);
-
-                    if (!$this->dryRun && $newsroomPost->numRows > 0) {
-                        $this->databaseUtil->update($table, [
-                            $table.'.languageMain' => $newsroomPost->id,
-                        ], "$table.id=?", [$itemMapping['target']->id]);
-                    }
-                }
-            }
-
-            $this->deleteAfterImport($mappedItems);
-            $this->applySorting();
-
-            $this->databaseUtil->commitTransaction();
-
-            $event = $this->stopwatch->stop('contao-entity-import-bundle.id'.$this->configModel->id);
-
-            if ($count > 0) {
-                $duration = str_replace('.', ',', round($event->getDuration() / 1000, 2));
-
-                Message::addConfirmation(sprintf($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['successfulImport'], $count, $duration, System::getReadableSize(memory_get_peak_usage())));
-            } else {
-                Message::addInfo(sprintf($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['emptyFile']));
-            }
-
-            if ($this->configModel->errorNotificationLock) {
-                $this->databaseUtil->update('tl_entity_import_config', ['errorNotificationLock' => ''], 'tl_entity_import_config.id=?', [$this->configModel->id]);
+            // if processing in chunks is activated, postProcess() needs to be done after all chunks have been done
+            if (!$this->configModel->processInChunks) {
+                $this->postProcess($table, $mappedItems, $dbIdMapping, $dbItemMapping);
             }
         } catch (\Exception $e) {
-            $config = $this->getDebugConfig();
+            $this->stopwatch->stop('contao-entity-import-bundle.id'.$this->configModel->id);
 
-            if (!$this->configModel->errorNotificationLock && !$this->dryRun) {
-                if (isset($config['contao_log']) && $config['contao_log']) {
-                    $this->containerUtil->log($e, 'executeImport', LogLevel::ERROR);
-                }
+            $this->sendErrorEmail($e->getMessage());
 
-                if (isset($config['email']) && $config['email']) {
-                    $email = new Email();
-                    $email->subject = sprintf($GLOBALS['TL_LANG']['MSC']['entityImport']['exceptionEmailSubject'], $this->configModel->title);
-                    $email->text = sprintf('An error occurred on domain "%s"', $this->configModel->cronDomain).' : '.$e->getMessage();
-                    $email->sendTo($this->configModel->errorNotificationEmail ?: $GLOBALS['TL_CONFIG']['adminEmail']);
-                }
-
-                $this->databaseUtil->update('tl_entity_import_config', ['errorNotificationLock' => '1'], 'tl_entity_import_config.id=?', [$this->configModel->id]);
-            }
-
-            Message::addError(sprintf($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['errorImport'],
-                $this->containerUtil->isDev() ? str_replace("\n", '<br>', $e->getMessage()) : ''));
-
-            return false;
+            return [
+                'state' => 'error',
+                'error' => $e->getMessage(),
+            ];
         }
 
         if ($this->request->getGet('redirect_url')) {
             throw new RedirectResponseException(html_entity_decode($this->request->getGet('redirect_url')));
         }
 
-        return true;
+        $event = $this->stopwatch->stop('contao-entity-import-bundle.id'.$this->configModel->id);
+
+        $duration = $event->getDuration();
+
+        if ($this->configModel->errorNotificationLock) {
+            $this->databaseUtil->update('tl_entity_import_config', ['errorNotificationLock' => ''], 'tl_entity_import_config.id=?', [$this->configModel->id]);
+        }
+
+        return [
+            'state' => 'success',
+            'count' => $count,
+            'duration' => $duration,
+            'mappedItems' => $mappedItems,
+            'dbIdMapping' => $dbIdMapping,
+            'dbItemMapping' => $dbItemMapping,
+        ];
     }
 
     protected function fixNotNullErrors($mappedItem, $targetTableColumnData)
@@ -617,11 +770,15 @@ class Importer implements ImporterInterface
 
     protected function initDbCacheForMerge(array $mergeIdentifiers)
     {
+        if (\is_array($this->dbMergeCache)) {
+            return;
+        }
+
         $this->dbMergeCache = [];
 
         $table = $this->configModel->targetTable;
 
-        if (null === ($records = $this->databaseUtil->findResultsBy($table, null, null)) || $records->numRows < 1) {
+        if (null === ($records = $this->databaseUtil->findResultsBy($table, ['pid=?'], [2])) || $records->numRows < 1) {
             $this->dbMergeCache = [];
 
             return;
@@ -666,7 +823,7 @@ class Importer implements ImporterInterface
         }
     }
 
-    protected function deleteAfterImport(array $mappedSourceItems)
+    protected function deleteAfterImport($mappedSourceItems)
     {
         $table = $this->configModel->targetTable;
 
@@ -681,11 +838,17 @@ class Importer implements ImporterInterface
                 $conditions = [];
 
                 foreach ($deletionIdentifiers as $deletionIdentifier) {
-                    $sourceValues = array_map(function ($item) use ($deletionIdentifier) {
-                        return '"'.$item[$deletionIdentifier['source']].'"';
-                    }, $mappedSourceItems);
+                    $identifiers = '';
 
-                    $conditions[] = '('.$table.'.'.$deletionIdentifier['target'].' NOT IN ('.implode(',', $sourceValues).'))';
+                    foreach ($mappedSourceItems as $i => $value) {
+                        $identifiers .= '"'.$value[$deletionIdentifier['source']].'",';
+                    }
+
+                    $identifiers = rtrim($identifiers, ',');
+
+                    if ($identifiers) {
+                        $conditions[] = '('.$table.'.'.$deletionIdentifier['target'].' NOT IN ('.$identifiers.'))';
+                    }
                 }
 
                 if ($this->configModel->targetDeletionAdditionalWhere) {
@@ -787,7 +950,7 @@ class Importer implements ImporterInterface
 
             // retrieve the file
             $content = $this->fileUtil->retrieveFileContent(
-                $item[$mapping['mappingField']], $this->containerUtil->isBackend()
+                $item[$mapping['mappingField']], $this->utils->container()->isBackend()
             );
 
             // sleep after http requests because of a possible rate limiting
@@ -879,7 +1042,11 @@ class Importer implements ImporterInterface
     protected function applySorting()
     {
         $field = $this->configModel->targetSortingField;
-        $where = $this->stringUtil->replaceInsertTags(html_entity_decode($this->configModel->targetSortingContextWhere), false);
+
+        $where = $this->framework->getAdapter(Controller::class)->replaceInsertTags(
+            html_entity_decode($this->configModel->targetSortingContextWhere), false
+        );
+
         $order = $this->configModel->targetSortingOrder;
 
         if (!$this->configModel->sortingMode || !$field || !$where || !$order) {

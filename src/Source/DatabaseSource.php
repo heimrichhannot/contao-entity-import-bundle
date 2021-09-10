@@ -40,7 +40,7 @@ class DatabaseSource extends AbstractSource
         parent::__construct();
     }
 
-    public function getMappedData(): array
+    public function getMappedData(array $options = []): array
     {
         $sourceModel = $this->sourceModel;
         $mapping = \Contao\StringUtil::deserialize($this->sourceModel->fieldMapping, true);
