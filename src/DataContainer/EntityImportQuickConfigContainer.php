@@ -190,7 +190,6 @@ class EntityImportQuickConfigContainer
         // set domain
         $source->setDomain($importerConfig->cronDomain);
 
-        // TODO process in pieces
         $items = $importer->getMappedItems();
 
         $event = $this->eventDispatcher->dispatch(BeforeImportEvent::NAME, new BeforeImportEvent($items, $importerConfig, $source, true));
@@ -384,8 +383,10 @@ class EntityImportQuickConfigContainer
         $importer = $this->importerFactory->createInstance($importer, [
             'sourceModel' => $sourceModel,
         ]);
+
         $importer->setDryRun($dry);
-        $importer->run();
+        $result = $importer->run();
+        $importer->outputResultMessages($result);
 
         throw new RedirectResponseException($this->urlUtil->removeQueryString(['key', 'id']));
     }

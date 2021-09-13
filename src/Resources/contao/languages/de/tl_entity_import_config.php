@@ -29,6 +29,9 @@ $lang['mergeIdentifierFields']['source'][1] = 'Wählen Sie hier das Quellfeld au
 $lang['mergeIdentifierFields']['target'][0] = 'Feld in Zieltabelle';
 $lang['mergeIdentifierFields']['target'][1] = 'Wählen Sie hier ein Feld aus der Zieltabelle aus.';
 
+$lang['mergeIdentifierAdditionalWhere'][0] = 'Zusätzliche WHERE-Bedingung für die Zusammenführung (erhöht Performance)';
+$lang['mergeIdentifierAdditionalWhere'][1] = 'Geben Sie hier zusätzlich zu den Identifikationsfelder Bedingungen an, die für die Zusammenführung erfüllt sein müssen.';
+
 $lang['fieldMapping'][0] = 'Feldabbildung';
 $lang['fieldMapping'][1] = 'Geben Sie hier die Zuordnung der ausgewählten Felder der Quelle mit den vorhandenen Tabellenspalten.';
 $lang['fieldMapping']['columnName'][0] = 'Zielfeld';
@@ -197,7 +200,8 @@ $lang['error']['tableFieldsDiffer'] = 'Die Felder vom Quelle und Ziel unterschei
 $lang['error']['noIdentifierFields'] = 'Die Identifikatorfelder wurden nicht gesetzt.';
 $lang['error']['successfulImport'] = 'Es wurden %s Einträge importiert bzw. aktualisiert (benötigte Zeit: %ss, max. benötigter Speicher: %s).';
 $lang['error']['emptyFile'] = 'Es wurden keine Daten zum Importieren gefunden.';
-$lang['error']['errorImport'] = 'Beim Importieren ist ein Fehler aufgetreten.<br><br>Fehler:<br><br>%s';
+$lang['error']['errorImport'] = 'Beim Importieren ist ein Fehler aufgetreten.';
+$lang['error']['error'] = 'Fehler';
 $lang['error']['delimiter'] = 'Das Feld-Trennzeichen für die CSV-Quelle wurde nicht gesetzt.';
 $lang['error']['enclosure'] = 'Das Text-Trennzeichen für die CSV-Quelle wurde nicht gesetzt.';
 $lang['error']['escape'] = 'Escape für csv ist nicht definiert.';

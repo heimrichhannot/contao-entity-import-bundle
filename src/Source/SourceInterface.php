@@ -14,7 +14,7 @@ interface SourceInterface
 {
     public function getMapping(): array;
 
-    public function getMappedData(): array;
+    public function getMappedData(array $options = []): array;
 
     public function getSourceModel(): Model;
 

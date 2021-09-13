@@ -17,7 +17,6 @@ use Contao\StringUtil;
 use HeimrichHannot\EntityImportBundle\Event\AddConfigFieldMappingPresetsEvent;
 use HeimrichHannot\EntityImportBundle\Importer\ImporterFactory;
 use HeimrichHannot\RequestBundle\Component\HttpFoundation\Request;
-use HeimrichHannot\UtilsBundle\Arrays\ArrayUtil;
 use HeimrichHannot\UtilsBundle\Database\DatabaseUtil;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
 use HeimrichHannot\UtilsBundle\Url\UrlUtil;
@@ -63,10 +62,6 @@ class EntityImportConfigContainer
      */
     private $databaseUtil;
     /**
-     * @var ArrayUtil
-     */
-    private $arrayUtil;
-    /**
      * @var EventDispatcherInterface
      */
     private $eventDispatcher;
@@ -74,14 +69,19 @@ class EntityImportConfigContainer
     /**
      * EntityImportConfigContainer constructor.
      */
-    public function __construct(Request $request, ImporterFactory $importerFactory, UrlUtil $urlUtil, ModelUtil $modelUtil, DatabaseUtil $databaseUtil, ArrayUtil $arrayUtil, EventDispatcherInterface $eventDispatcher)
-    {
+    public function __construct(
+        Request $request,
+        ImporterFactory $importerFactory,
+        UrlUtil $urlUtil,
+        ModelUtil $modelUtil,
+        DatabaseUtil $databaseUtil,
+        EventDispatcherInterface $eventDispatcher
+    ) {
         $this->request = $request;
         $this->urlUtil = $urlUtil;
         $this->modelUtil = $modelUtil;
         $this->importerFactory = $importerFactory;
         $this->databaseUtil = $databaseUtil;
-        $this->arrayUtil = $arrayUtil;
         $this->eventDispatcher = $eventDispatcher;
     }
 
@@ -214,7 +214,8 @@ class EntityImportConfigContainer
 
         $importer = $this->importerFactory->createInstance($configModel->id);
         $importer->setDryRun($dry);
-        $importer->run();
+        $result = $importer->run();
+        $importer->outputResultMessages($result);
 
         throw new RedirectResponseException($this->urlUtil->addQueryString('id='.$sourceModel->id, $this->urlUtil->removeQueryString(['key', 'id'])));
     }
