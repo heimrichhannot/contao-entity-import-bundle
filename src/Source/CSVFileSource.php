@@ -14,7 +14,7 @@ use HeimrichHannot\EntityImportBundle\Event\AfterCsvFileSourceGetRowEvent;
 
 class CSVFileSource extends AbstractFileSource
 {
-    public function getMappedData(): array
+    public function getMappedData(array $options = []): array
     {
         $data = [];
         $settings = $this->getCsvSettings();

@@ -12,7 +12,7 @@ use Contao\StringUtil;
 
 class JSONFileSource extends AbstractFileSource
 {
-    public function getMappedData(): array
+    public function getMappedData(array $options = []): array
     {
         $fileContent = $this->getFileContent();
 

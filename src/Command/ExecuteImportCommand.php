@@ -9,7 +9,6 @@
 namespace HeimrichHannot\EntityImportBundle\Command;
 
 use Contao\CoreBundle\Command\AbstractLockedCommand;
-use Contao\Message;
 use HeimrichHannot\EntityImportBundle\Importer\ImporterFactory;
 use HeimrichHannot\EntityImportBundle\Importer\ImporterInterface;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
@@ -114,21 +113,10 @@ class ExecuteImportCommand extends AbstractLockedCommand
             /** @var ImporterInterface $importer */
             $importer = $this->importerFactory->createInstance($configModel->id);
             $importer->setDryRun($importerDryRun);
+            $importer->setInputOutput($this->io);
             $result = $importer->run();
 
-            if ($result) {
-                $this->io->success("Importer with config ID $configId finished successfully");
-            } else {
-                $this->io->error("Importer with config ID $configId failed");
-
-                // transform backend messages to string
-                $messages = Message::generate();
-                $messages = str_replace('<br>', "\n", $messages);
-                $messages = strip_tags($messages);
-                Message::reset();
-
-                $this->io->error($messages);
-            }
+            $importer->outputResultMessages($result);
 
             if ($configModel->cronLanguage) {
                 $GLOBALS['TL_LANGUAGE'] = $language;

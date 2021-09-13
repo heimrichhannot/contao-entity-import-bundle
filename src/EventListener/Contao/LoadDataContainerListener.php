@@ -56,6 +56,10 @@ class LoadDataContainerListener
 
         $dca = &$GLOBALS['TL_DCA']['tl_entity_import_cache'];
 
+        if (!$db->fieldExists('useCacheForQuickImporters', 'tl_entity_import_config')) {
+            return;
+        }
+
         // add cache fields to tl_entity_import_cache
         if (null === ($importers = $this->modelUtil->findModelInstancesBy('tl_entity_import_config', [
                 'tl_entity_import_config.useCacheForQuickImporters=?',

@@ -8,6 +8,8 @@
 
 namespace HeimrichHannot\EntityImportBundle\Importer;
 
+use Symfony\Component\Console\Style\SymfonyStyle;
+
 interface ImporterInterface
 {
     const LOCK_KEY = 'contao_entity_import_bundle.%s.id%s';
@@ -15,7 +17,11 @@ interface ImporterInterface
 
     public function getDataFromSource(): array;
 
-    public function run(): bool;
+    public function run(): array;
 
-    public function setDryRun(bool $dry);
+    public function setDryRun(bool $dry): void;
+
+    public function setInputOutput(SymfonyStyle $io): void;
+
+    public function outputResultMessages(array $result): void;
 }

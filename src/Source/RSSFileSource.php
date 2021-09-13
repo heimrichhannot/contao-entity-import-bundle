@@ -70,7 +70,7 @@ class RSSFileSource extends AbstractFileSource
         return $items;
     }
 
-    public function getMappedData(): array
+    public function getMappedData(array $options = []): array
     {
         $sourceModel = $this->sourceModel;
         $mapping = \Contao\StringUtil::deserialize($sourceModel->fieldMapping, true);

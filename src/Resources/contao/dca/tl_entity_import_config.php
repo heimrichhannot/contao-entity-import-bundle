@@ -86,7 +86,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
         'default' => '{general_legend},title,targetTable,importMode;{mapping_legend},fieldMappingCopier,fieldMappingPresets,fieldMapping;{fields_legend},setDateAdded,setTstamp,generateAlias;{file_mapping_legend},fileFieldMappingCopier,fileFieldMapping;{sorting_legend},sortingMode;{deletion_legend},deleteBeforeImport,deletionMode;{error_legend},overrideErrorNotificationEmail;{misc_legend},useCacheForQuickImporters,addCategoriesSupport,addDcMultilingualSupport,addChangeLanguageSupport,addDraftsSupport;{cron_legend},useCron;',
     ],
     'subpalettes' => [
-        'importMode_merge' => 'mergeIdentifierFields,addSkipFieldsOnMerge',
+        'importMode_merge' => 'mergeIdentifierFields,mergeIdentifierAdditionalWhere,addSkipFieldsOnMerge',
         'sortingMode_'.\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::SORTING_MODE_TARGET_FIELDS => 'targetSortingField,targetSortingOrder,targetSortingContextWhere',
         'deletionMode_'.\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::DELETION_MODE_MIRROR => 'deletionIdentifierFields,targetDeletionAdditionalWhere',
         'deletionMode_'.\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::DELETION_MODE_TARGET_FIELDS => 'targetDeletionWhere',
@@ -413,6 +413,14 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
                 ],
             ],
             'sql' => 'blob NULL',
+        ],
+        'mergeIdentifierAdditionalWhere' => [
+            'label' => &$GLOBALS['TL_LANG']['tl_entity_import_config']['mergeIdentifierAdditionalWhere'],
+            'inputType' => 'textarea',
+            'exclude' => true,
+            'eval' => ['class' => 'monospace', 'rte' => 'ace|sql', 'tl_class' => 'w50', 'decodeEntities' => true],
+            'explanation' => 'insertTags',
+            'sql' => 'text NULL',
         ],
         'sortingMode' => [
             'label' => &$GLOBALS['TL_LANG']['tl_entity_import_config']['sortingMode'],
