@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.20.4] - 2021-09-13
+
+- Added: command input/output is now passed to the importer
+- Added: progress bar in command mode
+- Added: `mergeIdentifierAdditionalWhere` for importer config -> enhance performance for db merge cache creation
+- Changed: refactored error/success message handling -> importers now not only return bool but an array containing more context
+
 ## [0.20.3] - 2021-09-09
 
 - Fixed: `trim()` is only applied to item data if the data is of type "string"
