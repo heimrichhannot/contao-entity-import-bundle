@@ -61,7 +61,7 @@ class LoadProgressListener
 
             default:
                 $state = ProgressBar::STATE_IN_PROGRESS;
-                $class = 'tl_confirm';
+                $class = '';
         }
 
         $data = [

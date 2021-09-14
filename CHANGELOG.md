@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.21.1] - 2021-09-14
+
+- Fixed: progress bar issue
+
 ## [0.21.0] - 2021-09-14
 
 - Added: support for using command import even in the web context (including a progress bar)
