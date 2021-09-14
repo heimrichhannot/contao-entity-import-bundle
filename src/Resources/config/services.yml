@@ -1,9 +1,11 @@
 services:
   _defaults:
     autowire: true
+    autoconfigure: true
     public: true
+
+  HeimrichHannot\EntityImportBundle\:
+    resource: '../../{Command,Controller,DataContainer,EventListener,Util}/*'
 
   HeimrichHannot\EntityImportBundle\Importer\ImporterFactory: ~
   HeimrichHannot\EntityImportBundle\Source\SourceFactory: ~
-  HeimrichHannot\EntityImportBundle\Util\EntityImportUtil: ~
-  HeimrichHannot\EntityImportBundle\EventListener\Contao\LoadDataContainerListener: ~

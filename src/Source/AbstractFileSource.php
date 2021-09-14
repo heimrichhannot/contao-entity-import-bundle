@@ -19,25 +19,10 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 abstract class AbstractFileSource extends AbstractSource
 {
-    /**
-     * @var FileUtil
-     */
-    protected $fileUtil;
-
-    /**
-     * @var StringUtil
-     */
-    protected $stringUtil;
-
-    /**
-     * @var EventDispatcherInterface
-     */
-    protected $eventDispatcher;
-
-    /**
-     * @var ContainerUtil
-     */
-    private $containerUtil;
+    protected FileUtil $fileUtil;
+    protected StringUtil $stringUtil;
+    protected EventDispatcherInterface $eventDispatcher;
+    protected ContainerUtil $containerUtil;
 
     /**
      * AbstractFileSource constructor.

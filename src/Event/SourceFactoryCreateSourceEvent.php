@@ -16,18 +16,9 @@ class SourceFactoryCreateSourceEvent extends Event
 {
     public const NAME = 'huh.entity_import.source_factory_create_source_event';
 
-    /**
-     * @var SourceInterface
-     */
-    private $source;
-    /**
-     * @var Model
-     */
-    private $sourceModel;
+    private SourceInterface $source;
+    private Model $sourceModel;
 
-    /**
-     * ImporterFactoryCreateFileSourceEvent constructor.
-     */
     public function __construct(?SourceInterface $source, Model $sourceModel)
     {
         $this->source = $source;

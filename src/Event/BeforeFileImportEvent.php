@@ -16,41 +16,14 @@ class BeforeFileImportEvent extends Event
 {
     public const NAME = 'huh.entity_import.before_file_import_event';
 
-    /**
-     * @var string
-     */
-    protected $path;
-
-    /**
-     * @var mixed
-     */
+    protected string $path;
     protected $content;
-    /**
-     * @var array
-     */
-    protected $mappedItem;
+    protected array $mappedItem;
+    protected array $item;
+    protected Model $configModel;
+    protected SourceInterface $source;
+    protected bool $dryRun;
 
-    /**
-     * @var array
-     */
-    protected $item;
-
-    /**
-     * @var Model
-     */
-    protected $configModel;
-    /**
-     * @var SourceInterface
-     */
-    protected $source;
-    /**
-     * @var bool
-     */
-    private $dryRun;
-
-    /**
-     * BeforeImportEvent constructor.
-     */
     public function __construct(?string $path, $content, array $mappedItem, array $item, Model $configModel, SourceInterface $source, bool $dryRun = false)
     {
         $this->path = $path;

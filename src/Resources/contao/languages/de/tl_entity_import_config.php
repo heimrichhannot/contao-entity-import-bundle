@@ -115,7 +115,7 @@ $lang['targetDeletionWhere'][1] = 'Geben Sie hier Bedingungen an, die für das L
 
 $lang['useCron'][0] = 'Cronjob/Command nutzen';
 $lang['useCron'][1] = 'Wählen Sie diese Option, um den Importer per Cronjob oder Command auszulösen.';
-$lang['cronInterval'][0] = 'Cron-Interval';
+$lang['cronInterval'][0] = 'Cronjob-Interval';
 $lang['cronInterval'][1] = 'Wählen Sie hier das Interval aus, in dem der Import ausgeführt werden soll.';
 $lang['cronDomain'][0] = 'Domainname';
 $lang['cronDomain'][1] = 'Geben Sie hier die Domain ein, unter der der Cronjob ausgeführt wird.';
@@ -131,7 +131,7 @@ $lang['addCategoriesSupport'][0] = 'Unterstützung für heimrichhannot/contao-ca
 $lang['addCategoriesSupport'][1] = 'Wählen Sie diese Option, um entsprechende Felder zu beachten.';
 
 $lang['addChangeLanguageSupport'][0] = 'Unterstützung für terminal42/contao-changelanguage hinzufügen (ACHTUNG: Erklärung lesen!)';
-$lang['addChangeLanguageSupport'][1] = 'ACHTUNG: Der Importer der Entität in der Fallback-Sprache muss vor diesem Importer laufen (Cron-Reihenfolge!). Wählen Sie diese Option, um das languageMain-Feld korrekt zu migrieren.';
+$lang['addChangeLanguageSupport'][1] = 'ACHTUNG: Der Importer der Entität in der Fallback-Sprache muss vor diesem Importer laufen (Cronjob-Reihenfolge!). Wählen Sie diese Option, um das languageMain-Feld korrekt zu migrieren.';
 
 $lang['changeLanguageTargetExternalIdField'][0] = 'ID-Feld zum Auffinden der importierten Entität';
 $lang['changeLanguageTargetExternalIdField'][1] = 'Wählen Sie hier das Feld, welches die ID des importierten Datensatzes enthält.';
@@ -153,6 +153,30 @@ $lang['errorNotificationEmail'][1] = 'Tragen Sie hier die E-Mail-Adresse ein, an
 
 $lang['useCacheForQuickImporters'][0] = 'Datenbank-Cache für Schnell-Importer nutzen (aktuell nur CSV-Quelle; Datenbank danach aktualisieren!)';
 $lang['useCacheForQuickImporters'][1] = 'Aktivieren Sie diese Option, wenn sich in Ihrer Quelle sehr viele Objekte befinden. Sie müssen nach der Aktivierung die Datenbank aktualisieren und vorab ggf. den Symfony-Cache löschen.';
+
+$lang['useCronInWebContext'][0] = 'Import auch im Web-Kontext per Cronjob ausführen (siehe README)';
+$lang['useCronInWebContext'][1] = 'Aktivieren Sie diese Option, der Import auch im Web-Kontext per Cronjob. Dies bietet sich vor allem an, wenn der "normale" Import zu viel Speicher verbraucht.';
+
+$lang['state'][0] = 'Importstatus';
+$lang['state'][1] = 'In diesem Feld wird der Status des Imports gespeichert.';
+
+$lang['importStarted'][0] = 'Import gestartet am';
+$lang['importStarted'][1] = 'In diesem Feld wird Zeitpunkt gespeichert, an dem der Import gestartet wurde.';
+
+$lang['importFinished'][0] = 'Import beendet am';
+$lang['importFinished'][1] = 'In diesem Feld wird Zeitpunkt gespeichert, an dem der Import beendet wurde.';
+
+$lang['importProgressTotal'][0] = 'Zu importierende Objekte';
+$lang['importProgressTotal'][1] = 'In diesem Feld wird gespeichert, wie viele Objekte insgesamt importiert werden sollen.';
+
+$lang['importProgressCurrent'][0] = 'Bereits importierte Objekte';
+$lang['importProgressCurrent'][1] = 'In diesem Feld wird gespeichert, wie viele Objekte bereits importiert wurden.';
+
+$lang['importProgressSkipped'][0] = 'Übersprungene Objekte';
+$lang['importProgressSkipped'][1] = 'In diesem Feld wird gespeichert, wie viele Objekte übersprungen wurden.';
+
+$lang['importProgressResult'][0] = 'Ergebnis';
+$lang['importProgressResult'][1] = 'In diesem Feld wird das Ergebnis der gespeichert.';
 
 /*
  * Reference
@@ -184,6 +208,10 @@ $lang['reference'] = [
         'field_pattern' => 'aus Quellfeld-Werten',
         'random_md5' => 'zufällige MD5-Zeichenfolge',
     ],
+    \HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::STATE_READY_FOR_IMPORT => 'Bereit für den Import',
+    \HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::STATE_SUCCESS => 'Import erfolgreich',
+    \HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::STATE_FAILED => 'Import fehlgeschlagen',
+    'importProgressDescription' => 'Der Importvorgang wurde gestartet. Je nach zu importierender Datenmenge kann der Import einige Minuten in Anspruch nehmen. Bitte haben Sie einen Moment Geduld...',
 ];
 
 /*

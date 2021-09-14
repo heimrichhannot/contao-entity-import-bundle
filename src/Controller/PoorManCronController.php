@@ -8,35 +8,17 @@
 
 namespace HeimrichHannot\EntityImportBundle\Controller;
 
-use Contao\CoreBundle\Framework\ContaoFramework;
 use HeimrichHannot\EntityImportBundle\Importer\ImporterFactory;
 use HeimrichHannot\EntityImportBundle\Importer\ImporterInterface;
-use HeimrichHannot\UtilsBundle\Arrays\ArrayUtil;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
 
 class PoorManCronController
 {
-    /**
-     * @var ContaoFramework
-     */
-    private $framework;
-    /**
-     * @var ArrayUtil
-     */
-    private $arrayUtil;
-    /**
-     * @var ImporterFactory
-     */
-    private $importerFactory;
-    /**
-     * @var ModelUtil
-     */
-    private $modelUtil;
+    protected ImporterFactory $importerFactory;
+    protected ModelUtil       $modelUtil;
 
-    public function __construct(ContaoFramework $framework, ImporterFactory $importerFactory, ArrayUtil $arrayUtil, ModelUtil $modelUtil)
+    public function __construct(ImporterFactory $importerFactory, ModelUtil $modelUtil)
     {
-        $this->framework = $framework;
-        $this->arrayUtil = $arrayUtil;
         $this->importerFactory = $importerFactory;
         $this->modelUtil = $modelUtil;
     }

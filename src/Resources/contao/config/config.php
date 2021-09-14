@@ -32,6 +32,11 @@ $GLOBALS['TL_MODELS']['tl_entity_import_cache'] = 'HeimrichHannot\EntityImportBu
 $GLOBALS['TL_HOOKS']['loadDataContainer'][] = [\HeimrichHannot\EntityImportBundle\EventListener\Contao\LoadDataContainerListener::class, '__invoke'];
 
 /*
+ * Backend widgets
+ */
+$GLOBALS['BE_FFL']['entityImportProgress'] = 'HeimrichHannot\EntityImportBundle\Widget\ImportProgress';
+
+/*
  * Crons
  */
 $GLOBALS['TL_CRON']['minutely'][] = [HeimrichHannot\EntityImportBundle\Controller\PoorManCronController::class, 'runMinutely'];

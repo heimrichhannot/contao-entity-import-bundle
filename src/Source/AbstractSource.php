@@ -16,25 +16,10 @@ use Symfony\Component\Cache\Simple\FilesystemCache;
 
 abstract class AbstractSource implements SourceInterface
 {
-    /**
-     * @var array
-     */
-    protected $fieldMapping;
-
-    /**
-     * @var Model
-     */
-    protected $sourceModel;
-
-    /**
-     * @var FilesystemCache
-     */
-    protected $filesystemCache;
-
-    /**
-     * @var string
-     */
-    protected $domain;
+    protected array $fieldMapping;
+    protected Model $sourceModel;
+    protected FilesystemCache $filesystemCache;
+    protected string $domain;
 
     public function __construct()
     {

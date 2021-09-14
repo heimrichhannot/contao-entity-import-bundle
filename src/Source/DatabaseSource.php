@@ -10,19 +10,9 @@ namespace HeimrichHannot\EntityImportBundle\Source;
 
 use Contao\Database;
 use HeimrichHannot\UtilsBundle\Dca\DcaUtil;
-use HeimrichHannot\UtilsBundle\String\StringUtil;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class DatabaseSource extends AbstractSource
 {
-    /**
-     * @var EventDispatcherInterface
-     */
-    private $eventDispatcher;
-    /**
-     * @var StringUtil
-     */
-    private $stringUtil;
     /**
      * @var DcaUtil
      */
@@ -31,10 +21,8 @@ class DatabaseSource extends AbstractSource
     /**
      * AbstractFileSource constructor.
      */
-    public function __construct(EventDispatcherInterface $eventDispatcher, StringUtil $stringUtil, DcaUtil $dcaUtil)
+    public function __construct(DcaUtil $dcaUtil)
     {
-        $this->eventDispatcher = $eventDispatcher;
-        $this->stringUtil = $stringUtil;
         $this->dcaUtil = $dcaUtil;
 
         parent::__construct();

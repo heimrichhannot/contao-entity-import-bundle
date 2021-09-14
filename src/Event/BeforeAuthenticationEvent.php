@@ -15,18 +15,9 @@ class BeforeAuthenticationEvent extends Event
 {
     public const NAME = 'huh.entity_import.before_authentication_event';
 
-    /**
-     * @var array
-     */
-    private $auth;
-    /**
-     * @var Model
-     */
-    private $sourceModel;
+    private array $auth;
+    private Model $sourceModel;
 
-    /**
-     * BeforeAuthenticationEvent constructor.
-     */
     public function __construct(array $auth, Model $sourceModel)
     {
         $this->auth = $auth;

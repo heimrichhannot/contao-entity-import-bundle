@@ -8,6 +8,7 @@
 
 namespace HeimrichHannot\EntityImportBundle\DataContainer;
 
+use Contao\Controller;
 use Contao\CoreBundle\Exception\RedirectResponseException;
 use Contao\Database;
 use Contao\DataContainer;
@@ -30,30 +31,12 @@ class EntityImportQuickConfigContainer
 {
     protected DatabaseUtil  $databaseUtil;
     protected SourceFactory $sourceFactory;
-    /**
-     * @var EventDispatcherInterface
-     */
-    private $eventDispatcher;
-    /**
-     * @var ModelUtil
-     */
-    private $modelUtil;
-    /**
-     * @var Request
-     */
-    private $request;
-    /**
-     * @var ImporterFactory
-     */
-    private $importerFactory;
-    /**
-     * @var UrlUtil
-     */
-    private $urlUtil;
-    /**
-     * @var DcaUtil
-     */
-    private $dcaUtil;
+    protected EventDispatcherInterface $eventDispatcher;
+    protected ModelUtil $modelUtil;
+    protected Request $request;
+    protected ImporterFactory $importerFactory;
+    protected UrlUtil $urlUtil;
+    protected DcaUtil $dcaUtil;
 
     public function __construct(
         ModelUtil $modelUtil,
@@ -92,6 +75,17 @@ class EntityImportQuickConfigContainer
         return $options;
     }
 
+    public function getDryRunOperation($row, $href, $label, $title, $icon, $attributes)
+    {
+        if (null !== ($config = $this->modelUtil->findModelInstanceByPk('tl_entity_import_config', $row['importerConfig']))) {
+            if ($config->useCronInWebContext) {
+                return '';
+            }
+        }
+
+        return '<a href="'.Controller::addToUrl($href.'&amp;id='.$row['id']).'&rt='.\RequestToken::get().'" title="'.\StringUtil::specialchars($title).'"'.$attributes.'>'.\Image::getHtml($icon, $label).'</a> ';
+    }
+
     public function modifyDca(DataContainer $dc)
     {
         if (null === ($quickImporter = $this->modelUtil->findModelInstanceByPk('tl_entity_import_quick_config', $dc->id)) || !$quickImporter->importerConfig) {
@@ -111,6 +105,12 @@ class EntityImportQuickConfigContainer
         $this->dcaUtil->loadDc($importer->targetTable);
 
         $targetDca = &$GLOBALS['TL_DCA'][$importer->targetTable];
+
+        if (EntityImportConfigContainer::STATE_READY_FOR_IMPORT === $importer->state) {
+            $dca['palettes']['default'] = '{general_legend},importProgress;';
+
+            return;
+        }
 
         if (EntityImportSourceContainer::RETRIEVAL_TYPE_CONTAO_FILE_SYSTEM === $sourceModel->retrievalType) {
             switch ($sourceModel->fileType) {
@@ -368,22 +368,30 @@ class EntityImportQuickConfigContainer
             return;
         }
 
-        if (null === ($importer = $this->modelUtil->findModelInstanceByPk('tl_entity_import_config', $quickImporter->importerConfig))) {
+        if (null === ($importerConfig = $this->modelUtil->findModelInstanceByPk('tl_entity_import_config', $quickImporter->importerConfig))) {
             return;
         }
 
-        if (null === ($sourceModel = $this->modelUtil->findModelInstanceByPk('tl_entity_import_source', $importer->pid))) {
+        if (null === ($sourceModel = $this->modelUtil->findModelInstanceByPk('tl_entity_import_source', $importerConfig->pid))) {
             return;
         }
 
-        $this->addParentEntityToFieldMapping($quickImporter, $importer);
+        $this->addParentEntityToFieldMapping($quickImporter, $importerConfig);
         $sourceModel->fileSRC = $quickImporter->fileSRC;
         $sourceModel->csvHeaderRow = $quickImporter->csvHeaderRow;
 
-        $importer = $this->importerFactory->createInstance($importer, [
+        $importer = $this->importerFactory->createInstance($importerConfig, [
             'sourceModel' => $sourceModel,
         ]);
 
+        if ($importerConfig->useCronInWebContext) {
+            $importerConfig->importStarted = $importerConfig->importProgressCurrent = $importerConfig->importProgressTotal = $importerConfig->importProgressSkipped = 0;
+            $importerConfig->state = EntityImportConfigContainer::STATE_READY_FOR_IMPORT;
+            $importerConfig->importProgressResult = '';
+            $importerConfig->save();
+
+            throw new RedirectResponseException($this->urlUtil->addQueryString('act=edit', $this->urlUtil->removeQueryString(['key'])));
+        }
         $importer->setDryRun($dry);
         $result = $importer->run();
         $importer->outputResultMessages($result);

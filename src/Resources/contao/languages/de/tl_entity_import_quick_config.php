@@ -22,6 +22,14 @@ $lang['csvPreviewList'][0] = 'Vorschau';
 $lang['csvHeaderRow'][0] = 'Kopfdatensatz';
 $lang['csvHeaderRow'][1] = 'Der erste Datensatz enthält die Spaltennamen.';
 $lang['explanationImportCouldTakeLong'] = '<strong>Hinweis:</strong> Je nach zu importierender Datenmenge kann der Import einige Minuten in Anspruch nehmen. Bitte laden Sie die Seite nicht neu, nachdem Sie auf "Speichern" geklickt haben bzw. das Formular neu geladen wurde.';
+
+/*
+ * Reference
+ */
+$lang['reference'] = [
+    'importProgressDescription' => 'Der Importvorgang wurde gestartet. Je nach zu importierender Datenmenge kann der Import einige Minuten in Anspruch nehmen. Bitte haben Sie einen Moment Geduld...',
+];
+
 /*
  * Legends
  */

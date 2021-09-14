@@ -21,6 +21,8 @@ interface ImporterInterface
 
     public function setDryRun(bool $dry): void;
 
+    public function setWebCronMode(bool $dry): void;
+
     public function setInputOutput(SymfonyStyle $io): void;
 
     public function outputResultMessages(array $result): void;

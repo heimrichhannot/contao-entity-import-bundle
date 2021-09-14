@@ -19,31 +19,12 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class SourceFactory
 {
-    /**
-     * @var ModelUtil
-     */
-    private $modelUtil;
-    /**
-     * @var FileUtil
-     */
-    private $fileUtil;
-
-    /**
-     * @var EventDispatcherInterface
-     */
-    private $eventDispatcher;
-    /**
-     * @var StringUtil
-     */
-    private $stringUtil;
-    /**
-     * @var ContainerUtil
-     */
-    private $containerUtil;
-    /**
-     * @var DcaUtil
-     */
-    private $dcaUtil;
+    protected ModelUtil $modelUtil;
+    protected FileUtil $fileUtil;
+    protected EventDispatcherInterface $eventDispatcher;
+    protected StringUtil $stringUtil;
+    protected ContainerUtil $containerUtil;
+    protected DcaUtil $dcaUtil;
 
     /**
      * SourceFactory constructor.

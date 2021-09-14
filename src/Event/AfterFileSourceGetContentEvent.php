@@ -15,14 +15,8 @@ class AfterFileSourceGetContentEvent extends Event
 {
     public const NAME = 'huh.entity_import.after_file_source_get_content_event';
 
-    /**
-     * @var string
-     */
-    protected $content = '';
-    /**
-     * @var Model
-     */
-    protected $sourceModel;
+    protected string $content = '';
+    protected Model $sourceModel;
 
     public function __construct(string $content, Model $sourceModel)
     {

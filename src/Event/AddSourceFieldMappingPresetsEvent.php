@@ -15,14 +15,8 @@ class AddSourceFieldMappingPresetsEvent extends Event
 {
     public const NAME = 'huh.entity_import.add_source_field_mapping_presets';
 
-    /**
-     * @var array
-     */
-    protected $presets;
-    /**
-     * @var Model
-     */
-    protected $sourceModel;
+    protected array $presets;
+    protected Model $sourceModel;
 
     public function __construct(array $presets, Model $sourceModel)
     {

@@ -8,7 +8,9 @@
 
 namespace HeimrichHannot\EntityImportBundle\Model;
 
-class EntityImportCacheModel extends \Model
+use Contao\Model;
+
+class EntityImportCacheModel extends Model
 {
     protected static $strTable = 'tl_entity_import_cache';
 }

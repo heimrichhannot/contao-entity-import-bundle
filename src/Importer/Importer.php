@@ -42,72 +42,21 @@ use Symfony\Component\Stopwatch\Stopwatch;
 
 class Importer implements ImporterInterface
 {
-    /**
-     * @var SourceInterface
-     */
-    protected $source;
-
-    /**
-     * @var EntityImportConfigModel
-     */
-    protected $configModel;
-
-    /**
-     * @var bool
-     */
-    protected $dryRun = false;
-
-    /**
-     * @var EventDispatcherInterface
-     */
-    protected $eventDispatcher;
-
-    /**
-     * @var Stopwatch
-     */
-    protected $stopwatch;
-
-    /**
-     * @var DatabaseUtil
-     */
-    private $databaseUtil;
-
-    /**
-     * @var DcaUtil
-     */
-    private $dcaUtil;
-    /**
-     * @var ContainerInterface
-     */
-    private $container;
-
-    /**
-     * @var array|null
-     */
-    private $dbMergeCache;
-
-    /**
-     * @var Request
-     */
-    private $request;
-    /**
-     * @var FileUtil
-     */
-    private $fileUtil;
-    /**
-     * @var Utils
-     */
-    private $utils;
-
-    /**
-     * @var SymfonyStyle
-     */
-    private $io;
-
-    /**
-     * @var ContaoFramework
-     */
-    private $framework;
+    protected SourceInterface $source;
+    protected EntityImportConfigModel $configModel;
+    protected bool $dryRun = false;
+    protected bool $webCronMode = false;
+    protected EventDispatcherInterface $eventDispatcher;
+    protected Stopwatch $stopwatch;
+    protected DatabaseUtil $databaseUtil;
+    protected DcaUtil $dcaUtil;
+    protected ContainerInterface $container;
+    protected $dbMergeCache;
+    protected Request $request;
+    protected FileUtil $fileUtil;
+    protected Utils $utils;
+    protected SymfonyStyle $io;
+    protected ContaoFramework $framework;
 
     /**
      * Importer constructor.
@@ -150,10 +99,26 @@ class Importer implements ImporterInterface
 
         $this->stopwatch->start('contao-entity-import-bundle.id'.$this->configModel->id);
 
-        $items = $this->getDataFromSource();
+        try {
+            $items = $this->getDataFromSource();
+        } catch (\Exception $e) {
+            $this->eventDispatcher->dispatch(AfterImportEvent::NAME, new AfterImportEvent([], $this->configModel, $this->source, $this->dryRun));
+
+            return [
+                'state' => 'error',
+                'error' => $e->getMessage(),
+            ];
+        }
+
+        $itemCount = \count($items);
 
         if ($this->io) {
-            $this->io->progressStart(\count($items));
+            $this->io->progressStart($itemCount);
+        }
+
+        if ($this->webCronMode) {
+            $this->configModel->importProgressTotal = $itemCount;
+            $this->configModel->save();
         }
 
         $event = $this->eventDispatcher->dispatch(BeforeImportEvent::NAME, new BeforeImportEvent($items, $this->configModel, $this->source, $this->dryRun));
@@ -210,6 +175,11 @@ class Importer implements ImporterInterface
         $this->dryRun = $dry;
     }
 
+    public function setWebCronMode(bool $webCronMode): void
+    {
+        $this->webCronMode = $webCronMode;
+    }
+
     public function outputResultMessages(array $result): void
     {
         $this->framework->getAdapter(System::class)->loadLanguageFile('tl_entity_import_config');
@@ -225,6 +195,12 @@ class Importer implements ImporterInterface
                 }
             }
 
+            if ($this->webCronMode) {
+                $this->configModel->refresh();
+                $this->configModel->importProgressResult = $message;
+                $this->configModel->save();
+            }
+
             if ($this->io) {
                 $this->io->error($message);
             } else {
@@ -237,22 +213,35 @@ class Importer implements ImporterInterface
             $duration = str_replace('.', ',', round($duration / 1000, 2));
 
             if ($count > 0) {
+                $message = sprintf(
+                    $GLOBALS['TL_LANG']['tl_entity_import_config']['error']['successfulImport'], $count, $duration,
+                    System::getReadableSize(memory_get_peak_usage())
+                );
+
+                if ($this->webCronMode) {
+                    $this->configModel->refresh();
+                    $this->configModel->importProgressResult = $message;
+                    $this->configModel->save();
+                }
+
                 if ($this->io) {
-                    $this->io->success(sprintf(
-                        $GLOBALS['TL_LANG']['tl_entity_import_config']['error']['successfulImport'], $count, $duration,
-                        System::getReadableSize(memory_get_peak_usage())
-                    ));
+                    $this->io->success($message);
                 } else {
-                    Message::addConfirmation(sprintf(
-                        $GLOBALS['TL_LANG']['tl_entity_import_config']['error']['successfulImport'], $count, $duration,
-                        System::getReadableSize(memory_get_peak_usage())
-                    ));
+                    Message::addConfirmation($message);
                 }
             } else {
+                $message = sprintf($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['emptyFile']);
+
+                if ($this->webCronMode) {
+                    $this->configModel->refresh();
+                    $this->configModel->importProgressResult = $message;
+                    $this->configModel->save();
+                }
+
                 if ($this->io) {
-                    $this->io->warning(sprintf($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['emptyFile']));
+                    $this->io->warning($message);
                 } else {
-                    Message::addInfo(sprintf($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['emptyFile']));
+                    Message::addInfo($message);
                 }
             }
         }
@@ -450,6 +439,11 @@ class Importer implements ImporterInterface
 
                 // developer can decide to skip the item in an event listener if certain criteria is met
                 if ($event->isSkipped()) {
+                    if ($this->webCronMode) {
+                        $this->configModel->importProgressSkipped = $this->configModel->importProgressSkipped + 1;
+                        $this->configModel->save();
+                    }
+
                     continue;
                 }
 
@@ -552,6 +546,11 @@ class Importer implements ImporterInterface
 
                 if ($this->io) {
                     $this->io->progressAdvance(1);
+                }
+
+                if ($this->webCronMode) {
+                    $this->configModel->importProgressCurrent = $this->configModel->importProgressCurrent + 1;
+                    $this->configModel->save();
                 }
             }
 

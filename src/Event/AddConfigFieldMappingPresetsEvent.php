@@ -15,14 +15,8 @@ class AddConfigFieldMappingPresetsEvent extends Event
 {
     public const NAME = 'huh.entity_import.add_config_field_mapping_presets';
 
-    /**
-     * @var array
-     */
-    protected $presets;
-    /**
-     * @var Model
-     */
-    protected $configModel;
+    protected array $presets;
+    protected Model $configModel;
 
     public function __construct(array $presets, Model $configModel)
     {

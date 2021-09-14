@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.21.0] - 2021-09-14
+
+- Added: support for using command import even in the web context (including a progress bar)
+- Removed: contao 4.4 support -> 4.9+ now
+- Changed: refactored yml files and service classes
+
 ## [0.20.4] - 2021-09-13
 
 - Added: command input/output is now passed to the importer

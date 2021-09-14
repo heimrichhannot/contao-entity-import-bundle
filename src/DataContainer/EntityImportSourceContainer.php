@@ -20,8 +20,6 @@ use HeimrichHannot\EntityImportBundle\Source\RSSFileSource;
 use HeimrichHannot\EntityImportBundle\Source\SourceFactory;
 use HeimrichHannot\EntityImportBundle\Util\EntityImportUtil;
 use HeimrichHannot\UtilsBundle\Database\DatabaseUtil;
-use HeimrichHannot\UtilsBundle\Dca\DcaUtil;
-use HeimrichHannot\UtilsBundle\File\FileUtil;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
@@ -58,43 +56,18 @@ class EntityImportSourceContainer
     protected $activeBundles;
     protected $database;
     protected $cache;
-    /**
-     * @var FileUtil
-     */
-    private $fileUtil;
 
-    /**
-     * @var ModelUtil
-     */
-    private $modelUtil;
-    /**
-     * @var SourceFactory
-     */
-    private $sourceFactory;
-    /**
-     * @var DcaUtil
-     */
-    private $dcaUtil;
-    /**
-     * @var EntityImportUtil
-     */
-    private $util;
-    /**
-     * @var EventDispatcherInterface
-     */
-    private $eventDispatcher;
-    /**
-     * @var DatabaseUtil
-     */
-    private $databaseUtil;
+    protected ModelUtil $modelUtil;
+    protected SourceFactory $sourceFactory;
+    protected EntityImportUtil $util;
+    protected EventDispatcherInterface $eventDispatcher;
+    protected DatabaseUtil $databaseUtil;
 
-    public function __construct(SourceFactory $sourceFactory, FileUtil $fileUtil, ModelUtil $modelUtil, DcaUtil $dcaUtil, EntityImportUtil $util, EventDispatcherInterface $eventDispatcher, DatabaseUtil $databaseUtil)
+    public function __construct(SourceFactory $sourceFactory, ModelUtil $modelUtil, EntityImportUtil $util, EventDispatcherInterface $eventDispatcher, DatabaseUtil $databaseUtil)
     {
         $this->activeBundles = System::getContainer()->getParameter('kernel.bundles');
         $this->sourceFactory = $sourceFactory;
-        $this->fileUtil = $fileUtil;
         $this->modelUtil = $modelUtil;
-        $this->dcaUtil = $dcaUtil;
         $this->util = $util;
         $this->eventDispatcher = $eventDispatcher;
         $this->databaseUtil = $databaseUtil;

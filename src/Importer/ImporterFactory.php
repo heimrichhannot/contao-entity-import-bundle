@@ -22,54 +22,17 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class ImporterFactory
 {
-    /**
-     * @var DatabaseUtil
-     */
-    private $databaseUtil;
+    protected DatabaseUtil $databaseUtil;
+    protected EventDispatcherInterface $eventDispatcher;
+    protected ModelUtil $modelUtil;
+    protected SourceFactory $sourceFactory;
+    protected DcaUtil $dcaUtil;
+    protected ContainerInterface $container;
+    protected Request $request;
+    protected FileUtil $fileUtil;
+    protected Utils $utils;
+    protected ContaoFramework $framework;
 
-    /**
-     * @var EventDispatcherInterface
-     */
-    private $eventDispatcher;
-
-    /**
-     * @var ModelUtil
-     */
-    private $modelUtil;
-
-    /**
-     * @var SourceFactory
-     */
-    private $sourceFactory;
-    /**
-     * @var DcaUtil
-     */
-    private $dcaUtil;
-    /**
-     * @var ContainerInterface
-     */
-    private $container;
-    /**
-     * @var Request
-     */
-    private $request;
-    /**
-     * @var FileUtil
-     */
-    private $fileUtil;
-    /**
-     * @var Utils
-     */
-    private $utils;
-
-    /**
-     * @var ContaoFramework
-     */
-    private $framework;
-
-    /**
-     * Importer constructor.
-     */
     public function __construct(
         ContainerInterface $container,
         ContaoFramework $framework,

@@ -157,6 +157,22 @@ and add custom file sources (currently only files of the type CSV are supported)
 
 ![alt quick importer example](./docs/img/quick_importer.png)
 
+### Run the import via cronjob in web context
+
+If you have large datasets the import might take too much memory of the web server. In this case it's often useful to
+
+1. Run the importer as symfony command. This has to be done by a developer.
+2. Run the importer in the web context by cronjob. This can be done by editors or developers.
+
+In most cases, running an importer by command on the shell takes way less memory compared to running it in the web context via website.
+
+For option 2 to work you need to do the following steps:
+
+1. Add the bundle's import command as cronjob using the parameter `--web-cron-mode`:<br>
+   `* * * * * /path/to/vendor/bin/contao-console huh:entity-import:execute <import config ids> --web-cron-mode >/dev/null 2>&1`
+2. Activate `useCron` in the importer config and fill out the needed fields.
+3. Activate `useCronInWebContext` in the importer config.
+
 ## Events
 
 Name | Description

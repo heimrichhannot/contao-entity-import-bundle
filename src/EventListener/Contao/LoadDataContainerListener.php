@@ -15,20 +15,10 @@ use HeimrichHannot\UtilsBundle\Util\Utils;
 
 class LoadDataContainerListener
 {
-    /**
-     * @var Utils
-     */
-    protected $utils;
+    protected Utils $utils;
+    protected ModelUtil $modelUtil;
+    protected ContaoFramework $framework;
 
-    /**
-     * @var ModelUtil
-     */
-    protected $modelUtil;
-
-    /**
-     * @var ContaoFramework
-     */
-    protected $framework;
     private static $run = false;
 
     public function __construct(ContaoFramework $framework, Utils $utils, ModelUtil $modelUtil)

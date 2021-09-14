@@ -74,6 +74,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_quick_config'] = [
                 'label' => &$GLOBALS['TL_LANG']['tl_entity_import_quick_config']['dryRun'],
                 'href' => 'key=dryRun',
                 'icon' => 'important.svg',
+                'button_callback' => [\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportQuickConfigContainer::class, 'getDryRunOperation'],
             ],
             'import' => [
                 'label' => &$GLOBALS['TL_LANG']['tl_entity_import_quick_config']['import'],
@@ -165,6 +166,12 @@ $GLOBALS['TL_DCA']['tl_entity_import_quick_config'] = [
                 'submitOnChange' => true,
             ],
             'sql' => "char(1) NOT NULL default ''",
+        ],
+        'importProgress' => [
+            'inputType' => 'huhProgressBar',
+            'eval' => [
+                'description' => $GLOBALS['TL_LANG']['tl_entity_import_quick_config']['reference']['importProgressDescription'],
+            ],
         ],
     ],
 ];

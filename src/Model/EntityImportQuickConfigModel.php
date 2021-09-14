@@ -8,7 +8,9 @@
 
 namespace HeimrichHannot\EntityImportBundle\Model;
 
-class EntityImportQuickConfigModel extends \Model
+use Contao\Model;
+
+class EntityImportQuickConfigModel extends Model
 {
     protected static $strTable = 'tl_entity_import_quick_config';
 }

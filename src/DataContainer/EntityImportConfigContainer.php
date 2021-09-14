@@ -9,6 +9,7 @@
 namespace HeimrichHannot\EntityImportBundle\DataContainer;
 
 use Contao\Config;
+use Contao\Controller;
 use Contao\CoreBundle\Exception\RedirectResponseException;
 use Contao\Database;
 use Contao\DataContainer;
@@ -38,37 +39,23 @@ class EntityImportConfigContainer
         self::DELETION_MODE_TARGET_FIELDS,
     ];
 
-    /**
-     * @var Request
-     */
-    private $request;
+    const STATES = [
+        self::STATE_READY_FOR_IMPORT,
+        self::STATE_SUCCESS,
+        self::STATE_FAILED,
+    ];
 
-    /**
-     * @var UrlUtil
-     */
-    private $urlUtil;
+    const STATE_READY_FOR_IMPORT = 'ready_for_import';
+    const STATE_SUCCESS = 'success';
+    const STATE_FAILED = 'failed';
 
-    /**
-     * @var ModelUtil
-     */
-    private $modelUtil;
+    protected Request $request;
+    protected UrlUtil $urlUtil;
+    protected ModelUtil $modelUtil;
+    protected ImporterFactory $importerFactory;
+    protected DatabaseUtil $databaseUtil;
+    protected EventDispatcherInterface $eventDispatcher;
 
-    /**
-     * @var ImporterFactory
-     */
-    private $importerFactory;
-    /**
-     * @var DatabaseUtil
-     */
-    private $databaseUtil;
-    /**
-     * @var EventDispatcherInterface
-     */
-    private $eventDispatcher;
-
-    /**
-     * EntityImportConfigContainer constructor.
-     */
     public function __construct(
         Request $request,
         ImporterFactory $importerFactory,
@@ -83,6 +70,15 @@ class EntityImportConfigContainer
         $this->importerFactory = $importerFactory;
         $this->databaseUtil = $databaseUtil;
         $this->eventDispatcher = $eventDispatcher;
+    }
+
+    public function getDryRunOperation($row, $href, $label, $title, $icon, $attributes)
+    {
+        if ($row['useCronInWebContext']) {
+            return '';
+        }
+
+        return '<a href="'.Controller::addToUrl($href.'&amp;id='.$row['id']).'&rt='.\RequestToken::get().'" title="'.\StringUtil::specialchars($title).'"'.$attributes.'>'.\Image::getHtml($icon, $label).'</a> ';
     }
 
     public function setPreset(?DataContainer $dc)
@@ -105,6 +101,12 @@ class EntityImportConfigContainer
 
         if (null === ($configModel = $this->modelUtil->findModelInstanceByPk($dc->table, $dc->id)) || !$configModel->targetTable) {
             $dca['palettes']['default'] = '{general_legend},title,targetTable;';
+
+            return;
+        }
+
+        if ($configModel->state === static::STATE_READY_FOR_IMPORT) {
+            $dca['palettes']['default'] = '{general_legend},importProgress;';
 
             return;
         }
@@ -187,7 +189,7 @@ class EntityImportConfigContainer
 
     public function import()
     {
-        $this->runImport(false);
+        $this->runImport();
     }
 
     public function dryRun()
@@ -212,6 +214,14 @@ class EntityImportConfigContainer
             throw new \Exception(sprintf('Entity source model of ID %s not found', $configModel->pid));
         }
 
+        if ($configModel->useCronInWebContext) {
+            $configModel->importStarted = $configModel->importProgressCurrent = $configModel->importProgressTotal = $configModel->importProgressSkipped = 0;
+            $configModel->state = static::STATE_READY_FOR_IMPORT;
+            $configModel->importProgressResult = '';
+            $configModel->save();
+
+            throw new RedirectResponseException($this->urlUtil->addQueryString('act=edit', $this->urlUtil->removeQueryString(['key'])));
+        }
         $importer = $this->importerFactory->createInstance($configModel->id);
         $importer->setDryRun($dry);
         $result = $importer->run();

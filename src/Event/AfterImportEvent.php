@@ -16,31 +16,12 @@ class AfterImportEvent extends Event
 {
     public const NAME = 'huh.entity_import.after_import_event';
 
-    /**
-     * @var array
-     */
-    private $items;
-    /**
-     * @var Model
-     */
-    private $configModel;
-    /**
-     * @var SourceInterface
-     */
-    private $source;
-    /**
-     * @var bool
-     */
-    private $dryRun;
+    protected array $items;
+    protected Model $configModel;
+    protected SourceInterface $source;
+    protected bool $dryRun;
+    protected array $options;
 
-    /**
-     * @var array
-     */
-    private $options;
-
-    /**
-     * AfterImportEvent constructor.
-     */
     public function __construct(array $items, Model $configModel, SourceInterface $source, bool $dryRun = false, array $options = [])
     {
         $this->items = $items;
