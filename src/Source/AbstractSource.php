@@ -12,17 +12,25 @@ use Contao\Environment;
 use Contao\Model;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
-use Symfony\Component\Cache\Simple\FilesystemCache;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Contracts\Cache\CacheInterface;
 
 abstract class AbstractSource implements SourceInterface
 {
+    protected ContainerInterface $container;
     protected array $fieldMapping;
     protected Model $sourceModel;
-    protected FilesystemCache $filesystemCache;
+    protected CacheInterface $filesystemCache;
     protected string $domain;
 
     public function __construct()
     {
+    }
+
+    public function setContainer(ContainerInterface $container): void
+    {
+        $this->container = $container;
     }
 
     public function getMapping(): array
@@ -45,10 +53,14 @@ abstract class AbstractSource implements SourceInterface
         $this->sourceModel = $sourceModel;
     }
 
-    public function getFilesystemCache(): FilesystemCache
+    public function getFilesystemCache(): CacheInterface
     {
-        if (null === $this->filesystemCache) {
-            $this->filesystemCache = new FilesystemCache('contaoEntityImportBundle', 300);
+        if (!isset($this->filesystemCache)) {
+            $this->filesystemCache = new FilesystemAdapter(
+                'contaoEntityImportBundle',
+                300,
+                $this->container->getParameter('kernel.project_dir').'/var/cache/'.$this->container->getParameter('kernel.environment')
+            );
         }
 
         return $this->filesystemCache;
@@ -108,14 +120,16 @@ abstract class AbstractSource implements SourceInterface
     {
         $filesystemCache = $this->getFilesystemCache();
 
-        return $filesystemCache->get('entity-import-remote.'.$cacheKey, '');
+        return $filesystemCache->get('entity-import-remote.'.$cacheKey, function () {
+            return '';
+        });
     }
 
     protected function deleteValueFromRemoteCache(string $cacheKey): string
     {
         $filesystemCache = $this->getFilesystemCache();
 
-        return $filesystemCache->deleteItem('entity-import-remote.'.$cacheKey);
+        return $filesystemCache->delete('entity-import-remote.'.$cacheKey);
     }
 
     protected function storeValueToRemoteCache(string $url, string $cacheKey, string $method, array $auth = [])
@@ -125,7 +139,9 @@ abstract class AbstractSource implements SourceInterface
         $response = $this->getContentFromUrl($method, $url, $auth);
 
         if (200 === $response['statusCode']) {
-            $filesystemCache->set('entity-import-remote.'.$cacheKey, $response['result']);
+            $filesystemCache->get('entity-import-remote.'.$cacheKey, function () use ($response) {
+                return $response['result'];
+            });
         }
 
         return [
@@ -138,20 +154,24 @@ abstract class AbstractSource implements SourceInterface
     {
         $filesystemCache = $this->getFilesystemCache();
 
-        return $filesystemCache->get('entity-import-data.'.$cacheKey, '');
+        return $filesystemCache->get('entity-import-data.'.$cacheKey, function () {
+            return '';
+        });
     }
 
     protected function deleteValueFromDataCache(string $cacheKey): string
     {
         $filesystemCache = $this->getFilesystemCache();
 
-        return $filesystemCache->deleteItem('entity-import-data.'.$cacheKey);
+        return $filesystemCache->delete('entity-import-data.'.$cacheKey);
     }
 
     protected function storeValueToDataCache(string $cacheKey, string $data)
     {
         $filesystemCache = $this->getFilesystemCache();
 
-        $filesystemCache->set('entity-import-data.'.$cacheKey, $data);
+        $filesystemCache->get('entity-import-data.'.$cacheKey, function () use ($data) {
+            return $data;
+        });
     }
 }

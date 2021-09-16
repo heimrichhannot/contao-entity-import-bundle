@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.21.4] - 2021-09-15
+
+- Fixed: redirect issue
+- Fixed: type hint issues (php 7.4+)
+- Changed: file system cache to new adapter
+- Changed: cache directory to var/cache/{env}
+
 ## [0.21.3] - 2021-09-15
 
 - Fixed: constructor in `DatabaseSource`

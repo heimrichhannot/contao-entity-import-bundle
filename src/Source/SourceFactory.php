@@ -15,21 +15,23 @@ use HeimrichHannot\UtilsBundle\Dca\DcaUtil;
 use HeimrichHannot\UtilsBundle\File\FileUtil;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
 use HeimrichHannot\UtilsBundle\String\StringUtil;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class SourceFactory
 {
-    protected ModelUtil $modelUtil;
-    protected FileUtil $fileUtil;
+    protected ContainerInterface       $container;
+    protected ModelUtil                $modelUtil;
+    protected FileUtil                 $fileUtil;
     protected EventDispatcherInterface $eventDispatcher;
-    protected StringUtil $stringUtil;
-    protected ContainerUtil $containerUtil;
-    protected DcaUtil $dcaUtil;
+    protected StringUtil               $stringUtil;
+    protected ContainerUtil            $containerUtil;
+    protected DcaUtil                  $dcaUtil;
 
     /**
      * SourceFactory constructor.
      */
-    public function __construct(ModelUtil $modelUtil, FileUtil $fileUtil, EventDispatcherInterface $eventDispatcher, StringUtil $stringUtil, ContainerUtil $containerUtil, DcaUtil $dcaUtil)
+    public function __construct(ContainerInterface $container, ModelUtil $modelUtil, FileUtil $fileUtil, EventDispatcherInterface $eventDispatcher, StringUtil $stringUtil, ContainerUtil $containerUtil, DcaUtil $dcaUtil)
     {
         $this->modelUtil = $modelUtil;
         $this->fileUtil = $fileUtil;
@@ -37,6 +39,7 @@ class SourceFactory
         $this->stringUtil = $stringUtil;
         $this->containerUtil = $containerUtil;
         $this->dcaUtil = $dcaUtil;
+        $this->container = $container;
     }
 
     public function createInstance(int $sourceModel): ?SourceInterface
@@ -87,6 +90,7 @@ class SourceFactory
 
         $source->setFieldMapping(\Contao\StringUtil::deserialize($sourceModel->fieldMapping, true));
         $source->setSourceModel($sourceModel);
+        $source->setContainer($this->container);
 
         return $source;
     }

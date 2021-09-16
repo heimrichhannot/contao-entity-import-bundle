@@ -112,7 +112,7 @@ class Importer implements ImporterInterface
 
         $itemCount = \count($items);
 
-        if ($this->io) {
+        if (isset($this->io)) {
             $this->io->progressStart($itemCount);
         }
 
@@ -125,7 +125,7 @@ class Importer implements ImporterInterface
 
         $result = $this->executeImport($event->getItems());
 
-        if ($this->io) {
+        if (isset($this->io)) {
             $this->io->progressFinish();
         }
 
@@ -208,7 +208,7 @@ class Importer implements ImporterInterface
 
         switch ($type) {
             case static::MESSAGE_TYPE_SUCCESS:
-                if ($this->io) {
+                if (isset($this->io)) {
                     $this->io->success($message);
                 } else {
                     Message::addConfirmation($message);
@@ -217,7 +217,7 @@ class Importer implements ImporterInterface
                 break;
 
             case static::MESSAGE_TYPE_ERROR:
-                if ($this->io) {
+                if (isset($this->io)) {
                     $this->io->error($message);
                 } else {
                     Message::addError($message);
@@ -226,7 +226,7 @@ class Importer implements ImporterInterface
                 break;
 
             case static::MESSAGE_TYPE_WARNING:
-                if ($this->io) {
+                if (isset($this->io)) {
                     $this->io->warning($message);
                 } else {
                     Message::addInfo($message);
@@ -263,6 +263,10 @@ class Importer implements ImporterInterface
 
                 $this->outputResultMessage($message, static::MESSAGE_TYPE_WARNING);
             }
+        }
+
+        if ($this->request->getGet('redirect_url')) {
+            throw new RedirectResponseException(html_entity_decode($this->request->getGet('redirect_url')));
         }
     }
 
@@ -565,7 +569,7 @@ class Importer implements ImporterInterface
 
                 $mappedItems[] = $event->getMappedItem();
 
-                if ($this->io) {
+                if (isset($this->io)) {
                     $this->io->progressAdvance(1);
                 }
 
@@ -585,10 +589,6 @@ class Importer implements ImporterInterface
                 'state' => 'error',
                 'error' => $e->getMessage(),
             ];
-        }
-
-        if ($this->request->getGet('redirect_url')) {
-            throw new RedirectResponseException(html_entity_decode($this->request->getGet('redirect_url')));
         }
 
         $event = $this->stopwatch->stop('contao-entity-import-bundle.id'.$this->configModel->id);
