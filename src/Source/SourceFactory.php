@@ -49,7 +49,7 @@ class SourceFactory
 
         switch ($sourceModel->type) {
             case EntityImportSourceContainer::TYPE_DATABASE:
-                $source = new DatabaseSource($this->eventDispatcher, $this->stringUtil, $this->dcaUtil);
+                $source = new DatabaseSource($this->dcaUtil);
 
                 break;
 
