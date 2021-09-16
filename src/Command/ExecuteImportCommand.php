@@ -126,7 +126,7 @@ class ExecuteImportCommand extends AbstractLockedCommand
                 $configModel->save();
             }
 
-            $importer->outputResultMessages($result);
+            $importer->outputFinalResultMessage($result);
 
             if ($configModel->cronLanguage) {
                 $GLOBALS['TL_LANGUAGE'] = $language;

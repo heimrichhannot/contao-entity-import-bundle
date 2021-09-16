@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.21.2] - 2021-09-15
+
+- Changed: Enhanced error/message handling in importer (see README)
+- Added: importer object to the relevant events
+- Fixed: symfony 5 compatbility (event dispatch)
+- Changed: symfony version costraint to `^5.2`
+
 ## [0.21.1] - 2021-09-14
 
 - Fixed: progress bar issue

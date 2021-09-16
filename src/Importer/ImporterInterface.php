@@ -12,8 +12,9 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 interface ImporterInterface
 {
-    const LOCK_KEY = 'contao_entity_import_bundle.%s.id%s';
-    const LOCK_DIRECTORY = '/var';
+    const MESSAGE_TYPE_SUCCESS = 'success';
+    const MESSAGE_TYPE_ERROR = 'error';
+    const MESSAGE_TYPE_WARNING = 'warning';
 
     public function getDataFromSource(): array;
 
@@ -25,5 +26,7 @@ interface ImporterInterface
 
     public function setInputOutput(SymfonyStyle $io): void;
 
-    public function outputResultMessages(array $result): void;
+    public function outputResultMessage(string $message, string $type): void;
+
+    public function outputFinalResultMessage(array $result): void;
 }

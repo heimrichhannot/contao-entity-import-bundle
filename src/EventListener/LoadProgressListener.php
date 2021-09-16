@@ -9,6 +9,7 @@
 namespace HeimrichHannot\EntityImportBundle\EventListener;
 
 use HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer;
+use HeimrichHannot\EntityImportBundle\Importer\ImporterInterface;
 use HeimrichHannot\ProgressBarWidgetBundle\Event\LoadProgressEvent;
 use HeimrichHannot\ProgressBarWidgetBundle\Widget\ProgressBar;
 use HeimrichHannot\RequestBundle\Component\HttpFoundation\Request;
@@ -49,19 +50,16 @@ class LoadProgressListener
         switch ($importConfig->state) {
             case EntityImportConfigContainer::STATE_SUCCESS:
                 $state = ProgressBar::STATE_SUCCESS;
-                $class = 'tl_confirm';
 
                 break;
 
             case EntityImportConfigContainer::STATE_FAILED:
                 $state = ProgressBar::STATE_FAILED;
-                $class = 'tl_error';
 
                 break;
 
             default:
                 $state = ProgressBar::STATE_IN_PROGRESS;
-                $class = '';
         }
 
         $data = [
@@ -72,10 +70,32 @@ class LoadProgressListener
         ];
 
         if ($importConfig->importProgressResult) {
-            $data['messages'] = [[
-                'class' => $class,
-                'text' => str_replace("\n", '<br>', $importConfig->importProgressResult),
-            ]];
+            $progressBarMessages = [];
+            $messages = json_decode($importConfig->importProgressResult, true);
+
+            foreach (array_reverse($messages) as $message) {
+                switch ($message['type']) {
+                    case ImporterInterface::MESSAGE_TYPE_SUCCESS:
+                        $class = 'tl_confirm';
+
+                        break;
+
+                    case ImporterInterface::MESSAGE_TYPE_ERROR:
+                        $class = 'tl_error';
+
+                        break;
+
+                    default:
+                        $class = 'tl_warning';
+                }
+
+                $progressBarMessages[] = [
+                    'class' => $class,
+                    'text' => str_replace("\n", '<br>', $message['message']),
+                ];
+            }
+
+            $data['messages'] = $progressBarMessages;
         }
 
         $event->setData($data);

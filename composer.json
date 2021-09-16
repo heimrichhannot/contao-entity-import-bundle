@@ -23,7 +23,7 @@
     "heimrichhannot/contao-multi-column-editor-bundle": "^2.4",
     "heimrichhannot/contao-progress-bar-widget-bundle": "^0.1",
     "heimrichhannot/contao-utils-bundle": "^2.135",
-    "symfony/stopwatch": "^4.4 || ^5.4",
+    "symfony/stopwatch": "^4.4 || ^5.2",
     "terminal42/service-annotation-bundle": "^1.1"
   },
   "require-dev": {

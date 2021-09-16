@@ -21,7 +21,7 @@ use HeimrichHannot\RequestBundle\Component\HttpFoundation\Request;
 use HeimrichHannot\UtilsBundle\Database\DatabaseUtil;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
 use HeimrichHannot\UtilsBundle\Url\UrlUtil;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class EntityImportConfigContainer
 {
@@ -112,7 +112,7 @@ class EntityImportConfigContainer
         }
 
         // field mapping presets
-        $event = $this->eventDispatcher->dispatch(AddConfigFieldMappingPresetsEvent::NAME, new AddConfigFieldMappingPresetsEvent([], $configModel));
+        $event = $this->eventDispatcher->dispatch(new AddConfigFieldMappingPresetsEvent([], $configModel), AddConfigFieldMappingPresetsEvent::NAME);
 
         $presets = $event->getPresets();
 
@@ -225,7 +225,7 @@ class EntityImportConfigContainer
         $importer = $this->importerFactory->createInstance($configModel->id);
         $importer->setDryRun($dry);
         $result = $importer->run();
-        $importer->outputResultMessages($result);
+        $importer->outputFinalResultMessage($result);
 
         throw new RedirectResponseException($this->urlUtil->addQueryString('id='.$sourceModel->id, $this->urlUtil->removeQueryString(['key', 'id'])));
     }

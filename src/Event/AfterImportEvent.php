@@ -9,26 +9,29 @@
 namespace HeimrichHannot\EntityImportBundle\Event;
 
 use Contao\Model;
+use HeimrichHannot\EntityImportBundle\Importer\ImporterInterface;
 use HeimrichHannot\EntityImportBundle\Source\SourceInterface;
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
 class AfterImportEvent extends Event
 {
     public const NAME = 'huh.entity_import.after_import_event';
 
-    protected array $items;
-    protected Model $configModel;
-    protected SourceInterface $source;
-    protected bool $dryRun;
-    protected array $options;
+    protected array             $items;
+    protected Model             $configModel;
+    protected SourceInterface   $source;
+    protected bool              $dryRun;
+    protected array             $options;
+    protected ImporterInterface $importer;
 
-    public function __construct(array $items, Model $configModel, SourceInterface $source, bool $dryRun = false, array $options = [])
+    public function __construct(array $items, Model $configModel, ImporterInterface $importer, SourceInterface $source, bool $dryRun = false, array $options = [])
     {
         $this->items = $items;
         $this->configModel = $configModel;
         $this->source = $source;
         $this->dryRun = $dryRun;
         $this->options = $options;
+        $this->importer = $importer;
     }
 
     public function getItems(): array
@@ -69,5 +72,10 @@ class AfterImportEvent extends Event
     public function getOptions(): array
     {
         return $this->options;
+    }
+
+    public function getImporter(): ImporterInterface
+    {
+        return $this->importer;
     }
 }

@@ -48,6 +48,19 @@ huh_entity_import:
 
 ## Technical instructions
 
+### Output messages during import process respecting the context
+
+An importer can be run as command, cronjob or in the web context. The context implies how to output messages (or error messages).
+
+For example, when running an importer by clicking the "import" button in the website (i.e. in the browser), the messages should be
+printed out using `\Contao\Message::addError()` (or `addConfirmation()`, ...). If the import is run as command, the same messages
+need to be printed out on command line using a `SymfonyStyle` instance. If the command is also run in web context, the messages even
+need to be stored to the `tl_entity_import_config` entity, because these are retrieved by ajax in the progress bar view.
+
+As you can see, it's not just "printing a message", but taking care of the context, as well.
+
+For this you can use the method `ImporterInterface::outputResultMessage()` which takes care of the correct context itself.
+
 ### Run as symfony command
 
 `huh:entity-import:execute config-ids [--dry-run]`

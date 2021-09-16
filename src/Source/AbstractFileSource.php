@@ -15,7 +15,7 @@ use HeimrichHannot\EntityImportBundle\Event\BeforeAuthenticationEvent;
 use HeimrichHannot\UtilsBundle\Container\ContainerUtil;
 use HeimrichHannot\UtilsBundle\File\FileUtil;
 use HeimrichHannot\UtilsBundle\String\StringUtil;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 abstract class AbstractFileSource extends AbstractSource
 {
@@ -68,7 +68,7 @@ abstract class AbstractFileSource extends AbstractSource
                     $auth = ['auth' => [$httpAuth['username'], $httpAuth['password']]];
                 }
 
-                $event = $this->eventDispatcher->dispatch(BeforeAuthenticationEvent::NAME, new BeforeAuthenticationEvent($auth, $this->sourceModel));
+                $event = $this->eventDispatcher->dispatch(new BeforeAuthenticationEvent($auth, $this->sourceModel), BeforeAuthenticationEvent::NAME);
 
                 if ($cache) {
                     $generator = new SlugGenerator();
@@ -98,7 +98,7 @@ abstract class AbstractFileSource extends AbstractSource
                 break;
         }
 
-        $event = $this->eventDispatcher->dispatch(AfterFileSourceGetContentEvent::NAME, new AfterFileSourceGetContentEvent($content, $this->sourceModel));
+        $event = $this->eventDispatcher->dispatch(new AfterFileSourceGetContentEvent($content, $this->sourceModel), AfterFileSourceGetContentEvent::NAME);
         $content = $event->getContent();
 
         return $content;

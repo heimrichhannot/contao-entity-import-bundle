@@ -9,21 +9,23 @@
 namespace HeimrichHannot\EntityImportBundle\Event;
 
 use Contao\Model;
+use HeimrichHannot\EntityImportBundle\Importer\ImporterInterface;
 use HeimrichHannot\EntityImportBundle\Source\SourceInterface;
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
 class BeforeItemImportEvent extends Event
 {
     public const NAME = 'huh.entity_import.before_item_import_event';
 
-    protected Model $configModel;
-    protected SourceInterface $source;
-    protected array $mappedItem;
-    protected array $item;
-    protected bool $skipped;
-    protected bool $dryRun;
+    protected Model             $configModel;
+    protected SourceInterface   $source;
+    protected array             $mappedItem;
+    protected array             $item;
+    protected bool              $skipped;
+    protected bool              $dryRun;
+    protected ImporterInterface $importer;
 
-    public function __construct(array $mappedItem, array $item, Model $configModel, SourceInterface $source, bool $skipped = false, bool $dryRun = false)
+    public function __construct(array $mappedItem, array $item, Model $configModel, ImporterInterface $importer, SourceInterface $source, bool $skipped = false, bool $dryRun = false)
     {
         $this->configModel = $configModel;
         $this->source = $source;
@@ -31,6 +33,7 @@ class BeforeItemImportEvent extends Event
         $this->item = $item;
         $this->skipped = $skipped;
         $this->dryRun = $dryRun;
+        $this->importer = $importer;
     }
 
     public function getConfigModel(): Model
@@ -86,5 +89,10 @@ class BeforeItemImportEvent extends Event
     public function isDryRun(): bool
     {
         return $this->dryRun;
+    }
+
+    public function getImporter(): ImporterInterface
+    {
+        return $this->importer;
     }
 }

@@ -21,7 +21,7 @@ use HeimrichHannot\EntityImportBundle\Source\SourceFactory;
 use HeimrichHannot\EntityImportBundle\Util\EntityImportUtil;
 use HeimrichHannot\UtilsBundle\Database\DatabaseUtil;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class EntityImportSourceContainer
 {
@@ -168,7 +168,7 @@ class EntityImportSourceContainer
         }
 
         // field mapping presets
-        $event = $this->eventDispatcher->dispatch(AddSourceFieldMappingPresetsEvent::NAME, new AddSourceFieldMappingPresetsEvent([], $sourceModel));
+        $event = $this->eventDispatcher->dispatch(new AddSourceFieldMappingPresetsEvent([], $sourceModel), AddSourceFieldMappingPresetsEvent::NAME);
 
         $presets = $event->getPresets();
 

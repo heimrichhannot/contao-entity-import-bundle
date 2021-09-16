@@ -37,8 +37,8 @@ use Psr\Log\LogLevel;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Stopwatch\Stopwatch;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class Importer implements ImporterInterface
 {
@@ -102,7 +102,7 @@ class Importer implements ImporterInterface
         try {
             $items = $this->getDataFromSource();
         } catch (\Exception $e) {
-            $this->eventDispatcher->dispatch(AfterImportEvent::NAME, new AfterImportEvent([], $this->configModel, $this->source, $this->dryRun));
+            $this->eventDispatcher->dispatch(new AfterImportEvent([], $this->configModel, $this, $this->source, $this->dryRun), AfterImportEvent::NAME);
 
             return [
                 'state' => 'error',
@@ -121,7 +121,7 @@ class Importer implements ImporterInterface
             $this->configModel->save();
         }
 
-        $event = $this->eventDispatcher->dispatch(BeforeImportEvent::NAME, new BeforeImportEvent($items, $this->configModel, $this->source, $this->dryRun));
+        $event = $this->eventDispatcher->dispatch(new BeforeImportEvent($items, $this->configModel, $this, $this->source, $this->dryRun), BeforeImportEvent::NAME);
 
         $result = $this->executeImport($event->getItems());
 
@@ -129,7 +129,7 @@ class Importer implements ImporterInterface
             $this->io->progressFinish();
         }
 
-        $this->eventDispatcher->dispatch(AfterImportEvent::NAME, new AfterImportEvent($items, $this->configModel, $this->source, $this->dryRun));
+        $this->eventDispatcher->dispatch(new AfterImportEvent($items, $this->configModel, $this, $this->source, $this->dryRun), AfterImportEvent::NAME);
 
         return $result;
     }
@@ -180,32 +180,71 @@ class Importer implements ImporterInterface
         $this->webCronMode = $webCronMode;
     }
 
-    public function outputResultMessages(array $result): void
+    public function outputResultMessage(string $message, string $type): void
+    {
+        if ($this->webCronMode) {
+            $this->configModel->refresh();
+
+            if ($this->configModel->importProgressResult) {
+                $messages = json_decode($this->configModel->importProgressResult, true);
+
+                $messages[] = [
+                    'type' => $type,
+                    'message' => $message,
+                ];
+
+                $this->configModel->importProgressResult = json_encode($messages);
+            } else {
+                $this->configModel->importProgressResult = json_encode([
+                    [
+                        'type' => $type,
+                        'message' => $message,
+                    ],
+                ]);
+            }
+
+            $this->configModel->save();
+        }
+
+        switch ($type) {
+            case static::MESSAGE_TYPE_SUCCESS:
+                if ($this->io) {
+                    $this->io->success($message);
+                } else {
+                    Message::addConfirmation($message);
+                }
+
+                break;
+
+            case static::MESSAGE_TYPE_ERROR:
+                if ($this->io) {
+                    $this->io->error($message);
+                } else {
+                    Message::addError($message);
+                }
+
+                break;
+
+            case static::MESSAGE_TYPE_WARNING:
+                if ($this->io) {
+                    $this->io->warning($message);
+                } else {
+                    Message::addInfo($message);
+                }
+
+                break;
+        }
+    }
+
+    public function outputFinalResultMessage(array $result): void
     {
         $this->framework->getAdapter(System::class)->loadLanguageFile('tl_entity_import_config');
 
         if ('error' === $result['state']) {
-            $message = $GLOBALS['TL_LANG']['tl_entity_import_config']['error']['errorImport'];
+            $message = $GLOBALS['TL_LANG']['tl_entity_import_config']['error']['errorImport']
+                ."\n\n".$GLOBALS['TL_LANG']['tl_entity_import_config']['error']['error'].':'."\n\n".($result['error'] ?? '');
 
-            if ($this->utils->container()->isDev()) {
-                if ($this->io) {
-                    $message .= "\n\n".$GLOBALS['TL_LANG']['tl_entity_import_config']['error']['error'].':'."\n\n".($result['error'] ?? '');
-                } else {
-                    $message .= '<br><br>'.$GLOBALS['TL_LANG']['tl_entity_import_config']['error']['error'].':'.'<br><br>'.($result['error'] ?? '');
-                }
-            }
-
-            if ($this->webCronMode) {
-                $this->configModel->refresh();
-                $this->configModel->importProgressResult = $message;
-                $this->configModel->save();
-            }
-
-            if ($this->io) {
-                $this->io->error($message);
-            } else {
-                Message::addError($message);
-            }
+            $this->outputResultMessage($message, static::MESSAGE_TYPE_ERROR);
         } else {
             $count = $result['count'];
             $duration = $result['duration'];
@@ -218,31 +257,11 @@ class Importer implements ImporterInterface
                     System::getReadableSize(memory_get_peak_usage())
                 );
 
-                if ($this->webCronMode) {
-                    $this->configModel->refresh();
-                    $this->configModel->importProgressResult = $message;
-                    $this->configModel->save();
-                }
-
-                if ($this->io) {
-                    $this->io->success($message);
-                } else {
-                    Message::addConfirmation($message);
-                }
+                $this->outputResultMessage($message, static::MESSAGE_TYPE_SUCCESS);
             } else {
                 $message = sprintf($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['emptyFile']);
 
-                if ($this->webCronMode) {
-                    $this->configModel->refresh();
-                    $this->configModel->importProgressResult = $message;
-                    $this->configModel->save();
-                }
-
-                if ($this->io) {
-                    $this->io->warning($message);
-                } else {
-                    Message::addInfo($message);
-                }
+                $this->outputResultMessage($message, static::MESSAGE_TYPE_WARNING);
             }
         }
     }
@@ -425,14 +444,15 @@ class Importer implements ImporterInterface
                 }
 
                 /** @var BeforeItemImportEvent $event */
-                $event = $this->eventDispatcher->dispatch(BeforeItemImportEvent::NAME, new BeforeItemImportEvent(
+                $event = $this->eventDispatcher->dispatch(new BeforeItemImportEvent(
                     $mappedItem,
                     $item,
                     $this->configModel,
+                    $this,
                     $this->source,
                     false,
                     $this->dryRun
-                ));
+                ), BeforeItemImportEvent::NAME);
 
                 $item = $event->getItem();
                 $mappedItem = $event->getMappedItem();
@@ -532,15 +552,16 @@ class Importer implements ImporterInterface
                 $this->importCategoryAssociations($mapping, $item, $importedRecord->id);
 
                 /* @var AfterItemImportEvent $event */
-                $this->eventDispatcher->dispatch(AfterItemImportEvent::NAME, new AfterItemImportEvent(
+                $this->eventDispatcher->dispatch(new AfterItemImportEvent(
                     $importedRecord,
                     $mappedItem,
                     $item,
                     $mapping,
                     $this->configModel,
+                    $this,
                     $this->source,
                     $this->dryRun
-                ));
+                ), AfterItemImportEvent::NAME);
 
                 $mappedItems[] = $event->getMappedItem();
 
@@ -948,15 +969,16 @@ class Importer implements ImporterInterface
                 }
             }
 
-            $event = $this->eventDispatcher->dispatch(BeforeFileImportEvent::NAME, new BeforeFileImportEvent(
+            $event = $this->eventDispatcher->dispatch(new BeforeFileImportEvent(
                 $file->path,
                 $content,
                 (array) $record,
                 $item,
                 $this->configModel,
+                $this,
                 $this->source,
                 $this->dryRun
-            ));
+            ), BeforeFileImportEvent::NAME);
 
             $file = new File($event->getPath());
 

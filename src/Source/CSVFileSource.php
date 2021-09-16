@@ -32,7 +32,7 @@ class CSVFileSource extends AbstractFileSource
         $csv->next();
 
         while ($current = $csv->current()) {
-            $event = $this->eventDispatcher->dispatch(AfterCsvFileSourceGetRowEvent::NAME, new AfterCsvFileSourceGetRowEvent($current, $this->sourceModel));
+            $event = $this->eventDispatcher->dispatch(new AfterCsvFileSourceGetRowEvent($current, $this->sourceModel), AfterCsvFileSourceGetRowEvent::NAME);
             $current = $event->getRow();
 
             if (!$this->sourceModel->csvSkipEmptyLines || [null] !== $current) {

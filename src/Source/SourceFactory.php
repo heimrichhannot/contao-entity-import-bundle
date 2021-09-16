@@ -15,7 +15,7 @@ use HeimrichHannot\UtilsBundle\Dca\DcaUtil;
 use HeimrichHannot\UtilsBundle\File\FileUtil;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
 use HeimrichHannot\UtilsBundle\String\StringUtil;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class SourceFactory
 {
@@ -74,10 +74,10 @@ class SourceFactory
                 break;
         }
 
-        $event = $this->eventDispatcher->dispatch(SourceFactoryCreateSourceEvent::NAME, new SourceFactoryCreateSourceEvent(
+        $event = $this->eventDispatcher->dispatch(new SourceFactoryCreateSourceEvent(
             $source,
             $sourceModel
-        ));
+        ), SourceFactoryCreateSourceEvent::NAME);
 
         $source = $event->getSource();
 

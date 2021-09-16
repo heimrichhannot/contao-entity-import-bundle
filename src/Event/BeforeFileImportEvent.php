@@ -9,22 +9,24 @@
 namespace HeimrichHannot\EntityImportBundle\Event;
 
 use Contao\Model;
+use HeimrichHannot\EntityImportBundle\Importer\ImporterInterface;
 use HeimrichHannot\EntityImportBundle\Source\SourceInterface;
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
 class BeforeFileImportEvent extends Event
 {
     public const NAME = 'huh.entity_import.before_file_import_event';
 
-    protected string $path;
+    protected string            $path;
     protected $content;
-    protected array $mappedItem;
-    protected array $item;
-    protected Model $configModel;
-    protected SourceInterface $source;
-    protected bool $dryRun;
+    protected array             $mappedItem;
+    protected array             $item;
+    protected Model             $configModel;
+    protected SourceInterface   $source;
+    protected bool              $dryRun;
+    protected ImporterInterface $importer;
 
-    public function __construct(?string $path, $content, array $mappedItem, array $item, Model $configModel, SourceInterface $source, bool $dryRun = false)
+    public function __construct(?string $path, $content, array $mappedItem, array $item, Model $configModel, ImporterInterface $importer, SourceInterface $source, bool $dryRun = false)
     {
         $this->path = $path;
         $this->content = $content;
@@ -33,6 +35,7 @@ class BeforeFileImportEvent extends Event
         $this->configModel = $configModel;
         $this->source = $source;
         $this->dryRun = $dryRun;
+        $this->importer = $importer;
     }
 
     public function getConfigModel(): Model
@@ -104,5 +107,10 @@ class BeforeFileImportEvent extends Event
     public function setContent($content): void
     {
         $this->content = $content;
+    }
+
+    public function getImporter(): ImporterInterface
+    {
+        return $this->importer;
     }
 }

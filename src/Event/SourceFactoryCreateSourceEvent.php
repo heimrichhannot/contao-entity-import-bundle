@@ -10,7 +10,7 @@ namespace HeimrichHannot\EntityImportBundle\Event;
 
 use Contao\Model;
 use HeimrichHannot\EntityImportBundle\Source\SourceInterface;
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
 class SourceFactoryCreateSourceEvent extends Event
 {

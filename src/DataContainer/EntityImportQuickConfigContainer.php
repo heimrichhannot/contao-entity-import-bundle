@@ -25,7 +25,7 @@ use HeimrichHannot\UtilsBundle\Database\DatabaseUtil;
 use HeimrichHannot\UtilsBundle\Dca\DcaUtil;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
 use HeimrichHannot\UtilsBundle\Url\UrlUtil;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class EntityImportQuickConfigContainer
 {
@@ -192,7 +192,7 @@ class EntityImportQuickConfigContainer
 
         $items = $importer->getMappedItems();
 
-        $event = $this->eventDispatcher->dispatch(BeforeImportEvent::NAME, new BeforeImportEvent($items, $importerConfig, $source, true));
+        $event = $this->eventDispatcher->dispatch(new BeforeImportEvent($items, $importerConfig, $importer, $source, true), BeforeImportEvent::NAME);
 
         $items = $event->getItems();
 
@@ -205,14 +205,15 @@ class EntityImportQuickConfigContainer
         foreach ($items as $item) {
             // call the event (else db constraints might fail)
             /** @var BeforeItemImportEvent $event */
-            $event = $this->eventDispatcher->dispatch(BeforeItemImportEvent::NAME, new BeforeItemImportEvent(
+            $event = $this->eventDispatcher->dispatch(new BeforeItemImportEvent(
                 $item,
                 $item,
                 $importerConfig,
+                $importer,
                 $source,
                 false,
                 true
-            ));
+            ), BeforeItemImportEvent::NAME);
 
             $itemsToInsert[] = $event->getMappedItem();
         }
@@ -394,7 +395,7 @@ class EntityImportQuickConfigContainer
         }
         $importer->setDryRun($dry);
         $result = $importer->run();
-        $importer->outputResultMessages($result);
+        $importer->outputFinalResultMessage($result);
 
         throw new RedirectResponseException($this->urlUtil->removeQueryString(['key', 'id']));
     }

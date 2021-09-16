@@ -9,7 +9,7 @@
 namespace HeimrichHannot\EntityImportBundle\Event;
 
 use Contao\Model;
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
 class AfterFileSourceGetContentEvent extends Event
 {
