@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.21.5] - 2021-09-24
+
+- Fixed: database issue
+
 ## [0.21.4] - 2021-09-15
 
 - Fixed: redirect issue

@@ -29,7 +29,7 @@ $GLOBALS['TL_MODELS']['tl_entity_import_cache'] = 'HeimrichHannot\EntityImportBu
 /*
  * Hooks
  */
-$GLOBALS['TL_HOOKS']['loadDataContainer'][] = [\HeimrichHannot\EntityImportBundle\EventListener\Contao\LoadDataContainerListener::class, '__invoke'];
+$GLOBALS['TL_HOOKS']['sqlGetFromDca']['huhEntityImportBundle'] = [\HeimrichHannot\EntityImportBundle\EventListener\Contao\SqlGetFromDcaEventListener::class, '__invoke'];
 
 /*
  * Backend widgets

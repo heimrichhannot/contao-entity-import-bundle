@@ -13,13 +13,11 @@ use Contao\Database;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
 use HeimrichHannot\UtilsBundle\Util\Utils;
 
-class LoadDataContainerListener
+class SqlGetFromDcaEventListener
 {
     protected Utils $utils;
     protected ModelUtil $modelUtil;
     protected ContaoFramework $framework;
-
-    private static $run = false;
 
     public function __construct(ContaoFramework $framework, Utils $utils, ModelUtil $modelUtil)
     {
@@ -28,26 +26,17 @@ class LoadDataContainerListener
         $this->modelUtil = $modelUtil;
     }
 
-    public function __invoke($table)
+    public function __invoke(array $sqlDcaData)
     {
-        if ('tl_entity_import_cache' !== $table || !$this->utils->container()->isBackend()) {
-            return;
+        if (!$this->utils->container()->isBackend()) {
+            return $sqlDcaData;
         }
-
-        // only run once
-        if (static::$run) {
-            return;
-        }
-
-        static::$run = true;
 
         /** @var Database $db */
         $db = $this->framework->getAdapter(Database::class)->getInstance();
 
-        $dca = &$GLOBALS['TL_DCA']['tl_entity_import_cache'];
-
         if (!$db->fieldExists('useCacheForQuickImporters', 'tl_entity_import_config')) {
-            return;
+            return $sqlDcaData;
         }
 
         // add cache fields to tl_entity_import_cache
@@ -56,24 +45,28 @@ class LoadDataContainerListener
             ], [
                 true,
             ]))) {
-            return;
+            return $sqlDcaData;
         }
 
-        $cacheFieldsBeforeInsertion = array_keys($dca['fields']);
+        $skipFields = [
+            'id',
+            'cache_ptable',
+            'cache_pid'
+        ];
 
         foreach ($importers->fetchEach('targetTable') as $targetTable) {
             $fields = $db->listFields($targetTable);
 
             foreach ($fields as $field) {
-                if (\in_array($field['name'], $cacheFieldsBeforeInsertion)) {
+                if (\in_array($field['name'], $skipFields) || $field['type'] === 'index') {
                     continue;
                 }
 
-                $dca['fields'][$field['name']] = [
-                    'sql' => $this->transformSqlArrayToString($field),
-                ];
+                $sqlDcaData['tl_entity_import_cache']['TABLE_FIELDS'][$field['name']] = '`'.$field['name']."` " . $this->transformSqlArrayToString($field);
             }
         }
+
+        return $sqlDcaData;
     }
 
     private function transformSqlArrayToString(array $fieldSqlData)
