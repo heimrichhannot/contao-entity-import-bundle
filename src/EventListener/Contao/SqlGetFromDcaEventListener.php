@@ -35,6 +35,10 @@ class SqlGetFromDcaEventListener
         /** @var Database $db */
         $db = $this->framework->getAdapter(Database::class)->getInstance();
 
+        if (!$db->tableExists('tl_entity_import_config')) {
+            return $sqlDcaData;
+        }
+
         if (!$db->fieldExists('useCacheForQuickImporters', 'tl_entity_import_config')) {
             return $sqlDcaData;
         }
@@ -51,18 +55,18 @@ class SqlGetFromDcaEventListener
         $skipFields = [
             'id',
             'cache_ptable',
-            'cache_pid'
+            'cache_pid',
         ];
 
         foreach ($importers->fetchEach('targetTable') as $targetTable) {
             $fields = $db->listFields($targetTable);
 
             foreach ($fields as $field) {
-                if (\in_array($field['name'], $skipFields) || $field['type'] === 'index') {
+                if (\in_array($field['name'], $skipFields) || 'index' === $field['type']) {
                     continue;
                 }
 
-                $sqlDcaData['tl_entity_import_cache']['TABLE_FIELDS'][$field['name']] = '`'.$field['name']."` " . $this->transformSqlArrayToString($field);
+                $sqlDcaData['tl_entity_import_cache']['TABLE_FIELDS'][$field['name']] = '`'.$field['name'].'` '.$this->transformSqlArrayToString($field);
             }
         }
 

@@ -138,9 +138,11 @@ abstract class AbstractSource implements SourceInterface
 
         $response = $this->getContentFromUrl($method, $url, $auth);
 
+        $filesystemCache->delete('entity-import-remote.'.$cacheKey);
+
         if (200 === $response['statusCode']) {
             $filesystemCache->get('entity-import-remote.'.$cacheKey, function () use ($response) {
-                return $response['result'];
+                return trim($response['result']);
             });
         }
 

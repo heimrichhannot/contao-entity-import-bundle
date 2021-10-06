@@ -68,6 +68,10 @@ abstract class AbstractFileSource extends AbstractSource
                     $auth = ['auth' => [$httpAuth['username'], $httpAuth['password']]];
                 }
 
+                if (!$this->sourceModel->httpMethod || !$this->sourceModel->sourceUrl) {
+                    return '';
+                }
+
                 $event = $this->eventDispatcher->dispatch(new BeforeAuthenticationEvent($auth, $this->sourceModel), BeforeAuthenticationEvent::NAME);
 
                 if ($cache) {

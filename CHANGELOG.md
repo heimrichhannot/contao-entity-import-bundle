@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.21.6] - 2021-10-05
+
+- Fixed: http caching issue
+- Fixed: database issue
+
 ## [0.21.5] - 2021-09-24
 
 - Fixed: database issue
