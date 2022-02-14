@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.22.0] - 2022-02-14
+
+- Fixed: config for symfony 5+
+- Added: support for contao 4.13
+
 ## [0.21.6] - 2021-10-05
 
 - Fixed: http caching issue
