@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright (c) 2021 Heimrich & Hannot GmbH
+ * Copyright (c) 2022 Heimrich & Hannot GmbH
  *
  * @license LGPL-3.0-or-later
  */
@@ -67,7 +67,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
                 'label' => &$GLOBALS['TL_LANG']['tl_entity_import_source']['delete'],
                 'href' => 'act=delete',
                 'icon' => 'delete.gif',
-                'attributes' => 'onclick="if (!confirm(\''.$GLOBALS['TL_LANG']['MSC']['deleteConfirm'].'\')) return false; Backend.getScrollOffset();"',
+                'attributes' => 'onclick="if (!confirm(\''.($GLOBALS['TL_LANG']['MSC']['deleteConfirm'] ?? null).'\')) return false; Backend.getScrollOffset();"',
             ],
             'show' => [
                 'label' => &$GLOBALS['TL_LANG']['tl_entity_import_source']['show'],
@@ -361,7 +361,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'inputType' => 'select',
             'reference' => &$GLOBALS['TL_LANG']['tl_entity_import_source']['reference']['fieldMappingPresets'],
             // options can be passed in via event listener
-            'eval' => ['tl_class' => 'w50', 'includeBlankOption' => true, 'submitOnChange' => true, 'onchange' => "if(!confirm('".$GLOBALS['TL_LANG']['MSC']['entityImport']['presetConfirm']."')) {this.selectedIndex = 0; return false;}"],
+            'eval' => ['tl_class' => 'w50', 'includeBlankOption' => true, 'submitOnChange' => true, 'onchange' => "if(!confirm('".($GLOBALS['TL_LANG']['MSC']['entityImport']['presetConfirm'] ?? null)."')) {this.selectedIndex = 0; return false;}"],
             'sql' => "varchar(64) NOT NULL default ''",
         ],
         'fieldMapping' => [
