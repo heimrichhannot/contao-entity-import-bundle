@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.22.1] - 2022-02-14
+
+- Fixed: cache contract deps
+
 ## [0.22.0] - 2022-02-14
 
 - Fixed: config for symfony 5+
