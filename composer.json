@@ -15,7 +15,7 @@
   "require": {
     "php": "^7.4||^8.0",
     "ausi/slug-generator": "^1.1",
-    "codefog/contao-haste": "^4.24",
+    "league/csv": "^9.8.0",
     "contao/core-bundle": "^4.9",
     "heimrichhannot/contao-be_explanation-bundle": "^2.3",
     "heimrichhannot/contao-field-value-copier-bundle": "^1.1",
