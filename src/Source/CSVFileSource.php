@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright (c) 2021 Heimrich & Hannot GmbH
+ * Copyright (c) 2023 Heimrich & Hannot GmbH
  *
  * @license LGPL-3.0-or-later
  */
@@ -9,8 +9,8 @@
 namespace HeimrichHannot\EntityImportBundle\Source;
 
 use Contao\Message;
-use Haste\IO\Reader\CsvReader;
 use HeimrichHannot\EntityImportBundle\Event\AfterCsvFileSourceGetRowEvent;
+use League\Csv\Reader;
 
 class CSVFileSource extends AbstractFileSource
 {
@@ -24,22 +24,19 @@ class CSVFileSource extends AbstractFileSource
             return [];
         }
 
-        $csv = new CsvReader($file->path);
+        $csv = Reader::createFromPath($file->path);
         $csv->setDelimiter($settings['delimiter']);
         $csv->setEnclosure($settings['enclosure']);
         $csv->setEscape($settings['escape']);
-        $csv->rewind();
-        $csv->next();
 
-        while ($current = $csv->current()) {
-            $event = $this->eventDispatcher->dispatch(new AfterCsvFileSourceGetRowEvent($current, $this->sourceModel), AfterCsvFileSourceGetRowEvent::NAME);
-            $current = $event->getRow();
+        $records = $csv->getRecords();
 
-            if (!$this->sourceModel->csvSkipEmptyLines || [null] !== $current) {
-                $data[] = $this->getMappedItemData($current, $this->fieldMapping);
+        foreach ($records as $offset => $record) {
+            $event = $this->eventDispatcher->dispatch(new AfterCsvFileSourceGetRowEvent($record, $this->sourceModel), AfterCsvFileSourceGetRowEvent::NAME);
+
+            if (!$this->sourceModel->csvSkipEmptyLines || [null] !== $record) {
+                $data[] = $this->getMappedItemData($record, $this->fieldMapping);
             }
-
-            $csv->next();
         }
 
         if ($this->sourceModel->csvHeaderRow) {
@@ -74,7 +71,7 @@ class CSVFileSource extends AbstractFileSource
             }
             $settings['escape'] = $this->sourceModel->csvEscape;
         } catch (\Exception $e) {
-            Message::addError(sprintf($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['errorMessage']), $e->getMessage());
+            Message::addError($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['errorMessage'], $e->getMessage());
         }
 
         return $settings;
