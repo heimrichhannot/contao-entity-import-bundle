@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.22.3] - 2023-05-15
+- Fixed: issues with binary uuids in Importer
+
 ## [0.22.2] - 2022-02-14
 
 - Fixed: array index issues in php 8+

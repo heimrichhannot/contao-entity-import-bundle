@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright (c) 2021 Heimrich & Hannot GmbH
+ * Copyright (c) 2023 Heimrich & Hannot GmbH
  *
  * @license LGPL-3.0-or-later
  */
@@ -259,7 +259,7 @@ class Importer implements ImporterInterface
 
                 $this->outputResultMessage($message, static::MESSAGE_TYPE_SUCCESS);
             } else {
-                $message = sprintf($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['emptyFile']);
+                $message = $GLOBALS['TL_LANG']['tl_entity_import_config']['error']['emptyFile'];
 
                 $this->outputResultMessage($message, static::MESSAGE_TYPE_WARNING);
             }
@@ -372,7 +372,7 @@ class Importer implements ImporterInterface
             }
 
             // only trim if string -> else e.g. int or null would be translated to string leading to mysql errors
-            if (isset($mapped[$mappingElement['columnName']]) && \is_string($mapped[$mappingElement['columnName']])) {
+            if (isset($mapped[$mappingElement['columnName']]) && \is_string($mapped[$mappingElement['columnName']]) && !Validator::isBinaryUuid($mapped[$mappingElement['columnName']])) {
                 $mapped[$mappingElement['columnName']] = trim($mapped[$mappingElement['columnName']]);
             }
         }
