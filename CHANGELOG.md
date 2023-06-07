@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.22.4] - 2023-06-07
+- Fixed: php8 warnings
+
 ## [0.22.3] - 2023-05-15
 - Fixed: issues with binary uuids in Importer
 

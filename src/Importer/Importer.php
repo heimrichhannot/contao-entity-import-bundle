@@ -543,9 +543,9 @@ class Importer implements ImporterInterface
 
                 $dbItemMapping[] = [
                     'source' => [
-                        'langPid' => $item['langPid'],
-                        'draftParent' => $item['draftParent'],
-                        'languageMain' => $item['languageMain'],
+                        'langPid' => $item['langPid'] ?? null,
+                        'draftParent' => $item['draftParent'] ?? null,
+                        'languageMain' => $item['languageMain'] ?? null,
                     ],
                     'target' => [
                         'id' => $importedRecord->id,
@@ -764,7 +764,7 @@ class Importer implements ImporterInterface
     {
         $config = $this->container->getParameter('huh_entity_import');
 
-        return $config['debug'];
+        return $config['debug'] ?? [];
     }
 
     protected function deleteBeforeImport()
