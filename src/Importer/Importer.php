@@ -366,7 +366,7 @@ class Importer implements ImporterInterface
             }
 
             if ('source_value' === $mappingElement['valueType']) {
-                $mapped[$mappingElement['columnName']] = $item[$mappingElement['mappingValue']];
+                $mapped[$mappingElement['columnName']] = $item[$mappingElement['mappingValue']] ?? null;
             } elseif ('static_value' === $mappingElement['valueType']) {
                 $mapped[$mappingElement['columnName']] = $this->framework->getAdapter(Controller::class)->replaceInsertTags($mappingElement['staticValue']);
             }
@@ -897,7 +897,7 @@ class Importer implements ImporterInterface
         $fileMapping = \Contao\StringUtil::deserialize($this->configModel->fileFieldMapping, true);
 
         foreach ($fileMapping as $mapping) {
-            if ($record->{$mapping['targetField']} && $mapping['skipIfExisting']) {
+            if (($record->{$mapping['targetField']} ?? NULL) && $mapping['skipIfExisting']) {
                 continue;
             }
 
