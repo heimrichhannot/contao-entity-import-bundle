@@ -9,7 +9,7 @@
 namespace HeimrichHannot\EntityImportBundle\Source;
 
 use Contao\Message;
-use Haste\IO\Reader\CsvReader;
+use HeimrichHannot\EntityImportBundle\Util\CsvReader;
 use HeimrichHannot\EntityImportBundle\Event\AfterCsvFileSourceGetRowEvent;
 
 class CSVFileSource extends AbstractFileSource
