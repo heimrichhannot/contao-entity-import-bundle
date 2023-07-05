@@ -2,8 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.23.1] - 2023-07-05
+- Removed: CsvReader from services.yml
+
 ## [0.23.0] - 2023-07-05
-- Remove: contao-haste dependency because only CsvReader had been used
+- Removed: contao-haste dependency because only CsvReader had been used
 - Added: CsvReader from haste v4
 
 ## [0.22.5] - 2023-06-08

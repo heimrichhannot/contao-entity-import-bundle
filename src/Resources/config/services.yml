@@ -5,7 +5,8 @@ services:
     public: true
 
   HeimrichHannot\EntityImportBundle\:
-    resource: '../../{Command,Controller,DataContainer,EventListener,Util}/*'
+    resource: '../../{Command,Controller,DataContainer,EventListener}/*'
 
   HeimrichHannot\EntityImportBundle\Importer\ImporterFactory: ~
   HeimrichHannot\EntityImportBundle\Source\SourceFactory: ~
+  HeimrichHannot\EntityImportBundle\Util\EntityImportUtil: ~
