@@ -46,11 +46,13 @@ class EntityImportSourceContainer
     const FILETYPE_CSV = 'csv';
     const FILETYPE_JSON = 'json';
     const FILETYPE_RSS = 'rss';
+    const FILETYPE_XML = 'xml';
 
     const FILETYPES = [
         self::FILETYPE_CSV,
         self::FILETYPE_JSON,
         self::FILETYPE_RSS,
+        self::FILETYPE_XML
     ];
 
     protected $activeBundles;
@@ -146,6 +148,11 @@ class EntityImportSourceContainer
 
                         break;
 
+                    case static::FILETYPE_XML:
+                        $dca['fields']['fileContent']['eval']['rte'] = 'ace|xml';
+
+                        break;
+
                     case static::FILETYPE_RSS:
                         /** @var RSSFileSource $source */
                         $source = $this->sourceFactory->createInstance($sourceModel->id);
@@ -212,6 +219,13 @@ class EntityImportSourceContainer
 
             case static::FILETYPE_JSON:
                 $string = json_decode($source->getFileContent(true));
+
+                return substr(json_encode($string, JSON_PRETTY_PRINT), 0, 50000);
+
+            case static::FILETYPE_XML:
+                $xml = simplexml_load_string($source->getFileContent(true));
+                $json = json_encode($xml);
+                $string = json_decode($json, true);
 
                 return substr(json_encode($string, JSON_PRETTY_PRINT), 0, 50000);
 

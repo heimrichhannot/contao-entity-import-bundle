@@ -16,6 +16,7 @@
     "php": "^7.4||^8.0",
     "ausi/slug-generator": "^1.1",
     "contao/core-bundle": "^4.9",
+    "guzzlehttp/guzzle": "^7.0",
     "heimrichhannot/contao-be_explanation-bundle": "^2.3",
     "heimrichhannot/contao-field-value-copier-bundle": "^1.1",
     "heimrichhannot/contao-list_widget": "^2.1",

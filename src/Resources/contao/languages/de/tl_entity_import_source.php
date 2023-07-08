@@ -24,6 +24,7 @@ $lang['fileType'][1] = 'Wählen Sie hier den Typ der Datei aus.';
 $lang['fileType'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::FILETYPE_CSV] = 'CSV';
 $lang['fileType'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::FILETYPE_JSON] = 'JSON';
 $lang['fileType'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::FILETYPE_RSS] = 'RSS';
+$lang['fileType'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::FILETYPE_XML] = 'XML';
 
 $lang['csvHeaderRow'][0] = 'Kopfdatensatz';
 $lang['csvHeaderRow'][1] = 'Der erste Datensatz enthält die Spaltennamen.';

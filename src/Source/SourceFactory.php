@@ -63,6 +63,11 @@ class SourceFactory
 
                         break;
 
+                    case EntityImportSourceContainer::FILETYPE_XML:
+                        $source = new XmlFileSource($this->eventDispatcher, $this->fileUtil, $this->stringUtil, $this->containerUtil);
+
+                        break;
+
                     case EntityImportSourceContainer::FILETYPE_CSV:
                         $source = new CSVFileSource($this->eventDispatcher, $this->fileUtil, $this->stringUtil, $this->containerUtil);
 

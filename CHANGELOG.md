@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.24.0] - 2023-07-08
+- Add: XML source
+
 ## [0.23.1] - 2023-07-05
 - Removed: CsvReader from services.yml
 

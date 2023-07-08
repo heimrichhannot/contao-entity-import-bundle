@@ -93,6 +93,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
         'fileType_csv' => 'fileContent,csvHeaderRow,csvSkipEmptyLines,csvDelimiter,csvEnclosure,csvEscape,fieldMappingCopier,fieldMappingPresets,fieldMapping',
         'fileType_json' => 'fileContent,pathToDataArray,fieldMappingCopier,fieldMappingPresets,fieldMapping',
         'fileType_rss' => 'fileContent,pathToDataArray,fieldMappingCopier,fieldMappingPresets,fieldMapping',
+        'fileType_xml' => 'fileContent,pathToDataArray,fieldMappingCopier,fieldMappingPresets,fieldMapping',
     ],
     // Fields
     'fields' => [
