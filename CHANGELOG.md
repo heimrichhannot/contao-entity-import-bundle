@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.24.2] - 2023-08-01
+- Fix: php 8 alias issue
+
 ## [0.24.1] - 2023-07-08
 - Add: guzzle dependency for 6 or 7
 

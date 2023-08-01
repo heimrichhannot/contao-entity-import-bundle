@@ -877,7 +877,7 @@ class Importer implements ImporterInterface
         );
 
         $alias = $this->dcaUtil->generateAlias(
-            $record->{$field},
+            $record->{$field} ?? '',
             $record->id,
             $table,
             $aliasBase
