@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.24.3] - 2023-08-06
+- Fix: file field mapping issue
+
 ## [0.24.2] - 2023-08-01
 - Fix: php 8 alias issue
 
