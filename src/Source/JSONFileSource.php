@@ -77,7 +77,7 @@ class JSONFileSource extends AbstractFileSource
             return $data;
         }
 
-        $data = $data[array_shift($mapping)];
+        $data = $data[array_shift($mapping)] ?? null;
 
         return $this->getValue($data, $mapping);
     }

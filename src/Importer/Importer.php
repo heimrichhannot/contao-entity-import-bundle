@@ -953,7 +953,7 @@ class Importer implements ImporterInterface
             $file = new File($filenameWithoutExtension.$extension);
 
             if ($file->exists()) {
-                if (!$record->{$mapping['targetField']}) {
+                if (!isset($record->{$mapping['targetField']}) || !$record->{$mapping['targetField']}) {
                     // no reference -> create the file with an incremented suffix
                     $i = 1;
 
