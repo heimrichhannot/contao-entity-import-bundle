@@ -26,6 +26,7 @@ abstract class AbstractSource implements SourceInterface
 
     public function __construct()
     {
+        $this->domain = '';
     }
 
     public function setContainer(ContainerInterface $container): void

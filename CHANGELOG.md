@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.24.5] - 2023-09-18
+- Fix: not initialized property
+
 ## [0.24.4] - 2023-08-12
 - Fix: php8 issues
 
