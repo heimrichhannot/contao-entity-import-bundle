@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.24.6] - 2023-12-16
+- Fixed: delete mirror mode issue
+
 ## [0.24.5] - 2023-09-18
 - Fix: not initialized property
 

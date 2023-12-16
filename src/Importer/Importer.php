@@ -776,7 +776,7 @@ class Importer implements ImporterInterface
         }
     }
 
-    protected function deleteAfterImport(array $mappedSourceItems)
+    protected function deleteAfterImport(array $mappedItems)
     {
         $table = $this->configModel->targetTable;
 
@@ -793,8 +793,8 @@ class Importer implements ImporterInterface
                 foreach ($deletionIdentifiers as $deletionIdentifier) {
                     $identifiers = '';
 
-                    foreach ($mappedSourceItems as $i => $value) {
-                        $identifiers .= '"'.$value[$deletionIdentifier['source']].'",';
+                    foreach ($mappedItems as $value) {
+                        $identifiers .= '"'.$value[$deletionIdentifier['target']].'",';
                     }
 
                     $identifiers = rtrim($identifiers, ',');
