@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.24.7] - 2024-01-19
+- Fixed: null check for file import to avoid guzzle exceptions
+
 ## [0.24.6] - 2023-12-16
 - Fixed: delete mirror mode issue
 

@@ -902,9 +902,15 @@ class Importer implements ImporterInterface
             }
 
             // retrieve the file
-            $content = $this->fileUtil->retrieveFileContent(
-                $item[$mapping['mappingField']], $this->utils->container()->isBackend()
-            );
+            try {
+                $content = $this->fileUtil->retrieveFileContent(
+                    $item[$mapping['mappingField']], $this->utils->container()->isBackend()
+                );
+            } catch (\Exception $e) {
+                $set[$mapping['targetField']] = null;
+
+                continue;
+            }
 
             // sleep after http requests because of a possible rate limiting
             if (Validator::isUrl($item[$mapping['mappingField']]) && $mapping['delayAfter'] > 0) {
