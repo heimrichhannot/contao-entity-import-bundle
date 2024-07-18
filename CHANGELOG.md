@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.24.8] - 2024-07-18
+- Fixed: revert 0.24.3 changes
+
 ## [0.24.7] - 2024-01-19
 - Fixed: null check for file import to avoid guzzle exceptions
 
