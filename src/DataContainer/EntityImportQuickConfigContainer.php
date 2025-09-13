@@ -92,6 +92,10 @@ class EntityImportQuickConfigContainer
 
     public function modifyDca(DataContainer $dc)
     {
+        if (!$dc->id) {
+            return;
+        }
+
         if (null === ($quickImporter = $this->utils->model()->findModelInstanceByPk('tl_entity_import_quick_config', $dc->id)) || !$quickImporter->importerConfig) {
             return;
         }
@@ -255,6 +259,10 @@ class EntityImportQuickConfigContainer
 
     public function getParentEntitiesAsOptions(DataContainer $dc): array
     {
+        if (!$dc->id) {
+            return [];
+        }
+
         if (null === ($quickImporter = $this->utils->model()->findModelInstanceByPk('tl_entity_import_quick_config', $dc->id)) || !$quickImporter->importerConfig) {
             return [];
         }
