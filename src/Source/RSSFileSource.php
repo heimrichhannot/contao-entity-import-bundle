@@ -8,6 +8,9 @@
 
 namespace HeimrichHannot\EntityImportBundle\Source;
 
+use Contao\StringUtil;
+use LitEmoji\LitEmoji;
+
 class RSSFileSource extends AbstractFileSource
 {
     public function getPostFieldsAsOptions()
@@ -73,7 +76,7 @@ class RSSFileSource extends AbstractFileSource
     public function getMappedData(array $options = []): array
     {
         $sourceModel = $this->sourceModel;
-        $mapping = \Contao\StringUtil::deserialize($sourceModel->fieldMapping, true);
+        $mapping = StringUtil::deserialize($sourceModel->fieldMapping, true);
 
         $data = [];
 
@@ -94,7 +97,7 @@ class RSSFileSource extends AbstractFileSource
 
         foreach ($mapping as $mappingElement) {
             if ('static_value' === $mappingElement['valueType']) {
-                $result[$mappingElement['name']] = $this->stringUtil->replaceInsertTags($mappingElement['staticValue']);
+                $result[$mappingElement['name']] = $this->insertTagParser->replace($mappingElement['staticValue']);
             } elseif ('source_value' === $mappingElement['valueType']) {
                 $value = $element[$mappingElement['sourceValue']];
 
@@ -110,7 +113,7 @@ class RSSFileSource extends AbstractFileSource
                         break;
 
                     case 'encoded':
-                        $result[$mappingElement['name']] = $this->stringUtil->replaceUnicodeEmojisByHtml($value);
+                        $result[$mappingElement['name']] = LitEmoji::encodeHtml($value);
 
                         break;
 

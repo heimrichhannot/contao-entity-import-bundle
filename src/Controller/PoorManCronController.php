@@ -10,17 +10,17 @@ namespace HeimrichHannot\EntityImportBundle\Controller;
 
 use HeimrichHannot\EntityImportBundle\Importer\ImporterFactory;
 use HeimrichHannot\EntityImportBundle\Importer\ImporterInterface;
-use HeimrichHannot\UtilsBundle\Model\ModelUtil;
+use HeimrichHannot\UtilsBundle\Util\Utils;
 
 class PoorManCronController
 {
     protected ImporterFactory $importerFactory;
-    protected ModelUtil       $modelUtil;
+    protected Utils           $utils;
 
-    public function __construct(ImporterFactory $importerFactory, ModelUtil $modelUtil)
+    public function __construct(ImporterFactory $importerFactory, Utils $utils)
     {
         $this->importerFactory = $importerFactory;
-        $this->modelUtil = $modelUtil;
+        $this->utils = $utils;
     }
 
     public function runMinutely()
@@ -70,7 +70,7 @@ class PoorManCronController
 
     protected function getConfigIds(string $interval): array
     {
-        $models = $this->modelUtil->findModelInstancesBy('tl_entity_import_config',
+        $models = $this->utils->model()->findModelInstancesBy('tl_entity_import_config',
             ['tl_entity_import_config.useCron=?', 'tl_entity_import_config.cronInterval=?', 'tl_entity_import_config.usePoorMansCron=?'], [true, $interval, true]);
 
         if (null === $models) {
@@ -82,7 +82,7 @@ class PoorManCronController
 
     protected function run(string $id)
     {
-        if (null === ($configModel = $this->modelUtil->findModelInstanceByPk('tl_entity_import_config', $id))) {
+        if (null === ($configModel = $this->utils->model()->findModelInstanceByPk('tl_entity_import_config', $id))) {
             return;
         }
 

@@ -10,59 +10,63 @@ namespace HeimrichHannot\EntityImportBundle\DataContainer;
 
 use Contao\Controller;
 use Contao\CoreBundle\Exception\RedirectResponseException;
+use Contao\CoreBundle\Framework\ContaoFramework;
 use Contao\Database;
 use Contao\DataContainer;
+use Contao\DcaLoader;
+use Contao\Image;
+use Contao\Input;
+use Contao\Model;
 use Contao\StringUtil;
 use Contao\System;
+use Doctrine\DBAL\Connection;
 use HeimrichHannot\EntityImportBundle\Event\BeforeImportEvent;
 use HeimrichHannot\EntityImportBundle\Event\BeforeItemImportEvent;
 use HeimrichHannot\EntityImportBundle\Importer\ImporterFactory;
 use HeimrichHannot\EntityImportBundle\Source\SourceFactory;
 use HeimrichHannot\EntityImportBundle\Source\SourceInterface;
-use HeimrichHannot\ListWidget\ListWidget;
-use HeimrichHannot\RequestBundle\Component\HttpFoundation\Request;
-use HeimrichHannot\UtilsBundle\Database\DatabaseUtil;
-use HeimrichHannot\UtilsBundle\Dca\DcaUtil;
-use HeimrichHannot\UtilsBundle\Model\ModelUtil;
-use HeimrichHannot\UtilsBundle\Url\UrlUtil;
+use HeimrichHannot\EntityImportBundle\Util\EntityImportUtil;
+use HeimrichHannot\ListWidgetBundle\Widget\ListWidget;
+use HeimrichHannot\UtilsBundle\StaticUtil\StaticArrayUtil;
+use HeimrichHannot\UtilsBundle\Util\Utils;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class EntityImportQuickConfigContainer
 {
-    protected DatabaseUtil  $databaseUtil;
-    protected SourceFactory $sourceFactory;
+    const ON_DUPLICATE_KEY_IGNORE = 'IGNORE';
+    const ON_DUPLICATE_KEY_UPDATE = 'UPDATE';
+
+    protected SourceFactory            $sourceFactory;
     protected EventDispatcherInterface $eventDispatcher;
-    protected ModelUtil $modelUtil;
-    protected Request $request;
-    protected ImporterFactory $importerFactory;
-    protected UrlUtil $urlUtil;
-    protected DcaUtil $dcaUtil;
+    protected ImporterFactory          $importerFactory;
+    protected Utils                    $utils;
+    protected ContaoFramework          $framework;
+    protected Connection               $connection;
+    protected EntityImportUtil         $entityImportUtil;
 
     public function __construct(
-        ModelUtil $modelUtil,
         EventDispatcherInterface $eventDispatcher,
-        Request $request,
         ImporterFactory $importerFactory,
-        UrlUtil $urlUtil,
-        DcaUtil $dcaUtil,
-        DatabaseUtil $databaseUtil,
-        SourceFactory $sourceFactory
+        SourceFactory $sourceFactory,
+        ContaoFramework $framework,
+        Connection $connection,
+        EntityImportUtil $entityImportUtil,
+        Utils $utils
     ) {
         $this->eventDispatcher = $eventDispatcher;
-        $this->modelUtil = $modelUtil;
-        $this->request = $request;
         $this->importerFactory = $importerFactory;
-        $this->urlUtil = $urlUtil;
-        $this->dcaUtil = $dcaUtil;
-        $this->databaseUtil = $databaseUtil;
         $this->sourceFactory = $sourceFactory;
+        $this->utils = $utils;
+        $this->framework = $framework;
+        $this->connection = $connection;
+        $this->entityImportUtil = $entityImportUtil;
     }
 
     public function getImporterConfigs()
     {
         $options = [];
 
-        if (null === ($configs = $this->modelUtil->findAllModelInstances('tl_entity_import_config', [
+        if (null === ($configs = $this->utils->model()->findModelInstancesBy('tl_entity_import_config', [], [], [
                 'order' => 'tl_entity_import_config.title ASC',
             ]))) {
             return [];
@@ -77,32 +81,37 @@ class EntityImportQuickConfigContainer
 
     public function getDryRunOperation($row, $href, $label, $title, $icon, $attributes)
     {
-        if (null !== ($config = $this->modelUtil->findModelInstanceByPk('tl_entity_import_config', $row['importerConfig']))) {
+        if (null !== ($config = $this->utils->model()->findModelInstanceByPk('tl_entity_import_config', $row['importerConfig']))) {
             if ($config->useCronInWebContext) {
                 return '';
             }
         }
 
-        return '<a href="'.Controller::addToUrl($href.'&amp;id='.$row['id']).'&rt='.\RequestToken::get().'" title="'.\StringUtil::specialchars($title).'"'.$attributes.'>'.\Image::getHtml($icon, $label).'</a> ';
+        return '<a data-turbo="false" href="'.Controller::addToUrl($href.'&amp;id='.$row['id']).'&rt='.\Contao\System::getContainer()->get('contao.csrf.token_manager')->getDefaultTokenValue().'" title="'.StringUtil::specialchars($title).'"'.$attributes.'>'.Image::getHtml($icon, $label).'</a> ';
     }
 
     public function modifyDca(DataContainer $dc)
     {
-        if (null === ($quickImporter = $this->modelUtil->findModelInstanceByPk('tl_entity_import_quick_config', $dc->id)) || !$quickImporter->importerConfig) {
+        if (!$dc->id) {
             return;
         }
 
-        if (null === ($importer = $this->modelUtil->findModelInstanceByPk('tl_entity_import_config', $quickImporter->importerConfig))) {
+        if (null === ($quickImporter = $this->utils->model()->findModelInstanceByPk('tl_entity_import_quick_config', $dc->id)) || !$quickImporter->importerConfig) {
             return;
         }
 
-        if (null === ($sourceModel = $this->modelUtil->findModelInstanceByPk('tl_entity_import_source', $importer->pid))) {
+        if (null === ($importer = $this->utils->model()->findModelInstanceByPk('tl_entity_import_config', $quickImporter->importerConfig))) {
+            return;
+        }
+
+        if (null === ($sourceModel = $this->utils->model()->findModelInstanceByPk('tl_entity_import_source', $importer->pid))) {
             return;
         }
 
         $dca = &$GLOBALS['TL_DCA']['tl_entity_import_quick_config'];
 
-        $this->dcaUtil->loadDc($importer->targetTable);
+        $loader = new DcaLoader($importer->targetTable);
+        $loader->load();
 
         $targetDca = &$GLOBALS['TL_DCA'][$importer->targetTable];
 
@@ -154,19 +163,19 @@ class EntityImportQuickConfigContainer
     public function cacheCsvRows(DataContainer $dc)
     {
         // cache might be invalid now -> delete tl_md_recipient
-        $this->databaseUtil->delete('tl_entity_import_cache', 'cache_ptable=? AND cache_pid=?', ['tl_entity_import_quick_config', $dc->id]);
+        $this->connection->delete('tl_entity_import_cache', ['cache_ptable' => 'tl_entity_import_quick_config', 'cache_pid' => $dc->id]);
 
         // cache the rows
-        if (null === ($quickImporter = $this->modelUtil->findModelInstanceByPk('tl_entity_import_quick_config', $dc->id)) ||
+        if (null === ($quickImporter = $this->utils->model()->findModelInstanceByPk('tl_entity_import_quick_config', $dc->id)) ||
             !$quickImporter->importerConfig || !$quickImporter->fileSRC) {
             return;
         }
 
-        if (null === ($importerConfig = $this->modelUtil->findModelInstanceByPk('tl_entity_import_config', $quickImporter->importerConfig))) {
+        if (null === ($importerConfig = $this->utils->model()->findModelInstanceByPk('tl_entity_import_config', $quickImporter->importerConfig))) {
             return;
         }
 
-        if (null === ($sourceModel = $this->modelUtil->findModelInstanceByPk('tl_entity_import_source', $importerConfig->pid))) {
+        if (null === ($sourceModel = $this->utils->model()->findModelInstanceByPk('tl_entity_import_source', $importerConfig->pid))) {
             return;
         }
 
@@ -218,7 +227,7 @@ class EntityImportQuickConfigContainer
             $itemsToInsert[] = $event->getMappedItem();
         }
 
-        $this->databaseUtil->doBulkInsert('tl_entity_import_cache', $itemsToInsert, [
+        $this->doBulkInsert('tl_entity_import_cache', $itemsToInsert, [
             'cache_ptable' => 'tl_entity_import_quick_config',
             'cache_pid' => $dc->id,
         ]);
@@ -248,13 +257,17 @@ class EntityImportQuickConfigContainer
         return $itemData;
     }
 
-    public function getParentEntitiesAsOptions(\Contao\DataContainer $dc)
+    public function getParentEntitiesAsOptions(DataContainer $dc): array
     {
-        if (null === ($quickImporter = $this->modelUtil->findModelInstanceByPk('tl_entity_import_quick_config', $dc->id)) || !$quickImporter->importerConfig) {
+        if (!$dc->id) {
             return [];
         }
 
-        if (null === ($importer = $this->modelUtil->findModelInstanceByPk('tl_entity_import_config', $quickImporter->importerConfig))) {
+        if (null === ($quickImporter = $this->utils->model()->findModelInstanceByPk('tl_entity_import_quick_config', $dc->id)) || !$quickImporter->importerConfig) {
+            return [];
+        }
+
+        if (null === ($importer = $this->utils->model()->findModelInstanceByPk('tl_entity_import_config', $quickImporter->importerConfig))) {
             return [];
         }
 
@@ -264,9 +277,17 @@ class EntityImportQuickConfigContainer
             return [];
         }
 
-        return System::getContainer()->get('huh.utils.choice.model_instance')->getCachedChoices([
-            'dataContainer' => $dca['config']['ptable'],
-        ]);
+        $options = [];
+
+        $models = $this->utils->model()->findModelInstancesBy($dca['config']['ptable'], [], []);
+
+        if (null !== $models) {
+            while ($models->next()) {
+                $options[$models->id] = $models->title ?: $models->headline ?: $models->id;
+            }
+        }
+
+        return $options;
     }
 
     public function import()
@@ -279,29 +300,30 @@ class EntityImportQuickConfigContainer
         $this->runImport(true);
     }
 
-    public function getHeaderFieldsForPreview($config, $widget, \DataContainer $dc)
+    public function getHeaderFieldsForPreview($config, $widget, DataContainer $dc)
     {
-        if (null === ($quickImporter = $this->modelUtil->findModelInstanceByPk('tl_entity_import_quick_config', $dc->id)) || !$quickImporter->importerConfig) {
+        if (null === ($quickImporter = $this->utils->model()->findModelInstanceByPk('tl_entity_import_quick_config', $dc->id)) || !$quickImporter->importerConfig) {
             return [];
         }
 
-        if (null === ($importer = $this->modelUtil->findModelInstanceByPk('tl_entity_import_config', $quickImporter->importerConfig))) {
+        if (null === ($importer = $this->utils->model()->findModelInstanceByPk('tl_entity_import_config', $quickImporter->importerConfig))) {
             return [];
         }
 
         $fields = [];
 
         foreach (StringUtil::deserialize($importer->fieldMapping, true) as $mapping) {
-            $fields[$mapping['columnName']] = $this->dcaUtil->getLocalizedFieldName($mapping['columnName'], $importer->targetTable);
+            $fields[$mapping['columnName']] = $this->entityImportUtil->getLocalizedFieldName($mapping['columnName'], $importer->targetTable);
         }
 
         if (Database::getInstance()->fieldExists('pid', $importer->targetTable) && $quickImporter->parentEntity) {
-            $this->dcaUtil->loadDc($importer->targetTable);
+            $loader = new DcaLoader($importer->targetTable);
+            $loader->load();
 
             $dca = &$GLOBALS['TL_DCA'][$importer->targetTable];
 
             if (isset($dca['config']['ptable'])) {
-                $fields = array_merge(['pid' => $this->dcaUtil->getLocalizedFieldName('pid', $importer->targetTable)], $fields);
+                $fields = array_merge(['pid' => $this->entityImportUtil->getLocalizedFieldName('pid', $importer->targetTable)], $fields);
             }
         }
 
@@ -310,15 +332,15 @@ class EntityImportQuickConfigContainer
 
     public function getItemsForPreview($config, $widget, $dc)
     {
-        if (null === ($quickImporter = $this->modelUtil->findModelInstanceByPk('tl_entity_import_quick_config', $dc->id)) || !$quickImporter->importerConfig || !$quickImporter->fileSRC) {
+        if (null === ($quickImporter = $this->utils->model()->findModelInstanceByPk('tl_entity_import_quick_config', $dc->id)) || !$quickImporter->importerConfig || !$quickImporter->fileSRC) {
             return [];
         }
 
-        if (null === ($importer = $this->modelUtil->findModelInstanceByPk('tl_entity_import_config', $quickImporter->importerConfig))) {
+        if (null === ($importer = $this->utils->model()->findModelInstanceByPk('tl_entity_import_config', $quickImporter->importerConfig))) {
             return [];
         }
 
-        if (null === ($sourceModel = $this->modelUtil->findModelInstanceByPk('tl_entity_import_source', $importer->pid))) {
+        if (null === ($sourceModel = $this->utils->model()->findModelInstanceByPk('tl_entity_import_source', $importer->pid))) {
             return [];
         }
 
@@ -344,7 +366,8 @@ class EntityImportQuickConfigContainer
             return;
         }
 
-        $this->dcaUtil->loadDc($importer->targetTable);
+        $loader = new DcaLoader($importer->targetTable);
+        $loader->load();
 
         $dca = &$GLOBALS['TL_DCA'][$importer->targetTable];
 
@@ -363,17 +386,17 @@ class EntityImportQuickConfigContainer
 
     private function runImport(bool $dry = false)
     {
-        $config = $this->request->getGet('id');
+        $config = Input::get('id');
 
-        if (null === ($quickImporter = $this->modelUtil->findModelInstanceByPk('tl_entity_import_quick_config', $config)) || !$quickImporter->importerConfig) {
+        if (null === ($quickImporter = $this->utils->model()->findModelInstanceByPk('tl_entity_import_quick_config', $config)) || !$quickImporter->importerConfig) {
             return;
         }
 
-        if (null === ($importerConfig = $this->modelUtil->findModelInstanceByPk('tl_entity_import_config', $quickImporter->importerConfig))) {
+        if (null === ($importerConfig = $this->utils->model()->findModelInstanceByPk('tl_entity_import_config', $quickImporter->importerConfig))) {
             return;
         }
 
-        if (null === ($sourceModel = $this->modelUtil->findModelInstanceByPk('tl_entity_import_source', $importerConfig->pid))) {
+        if (null === ($sourceModel = $this->utils->model()->findModelInstanceByPk('tl_entity_import_source', $importerConfig->pid))) {
             return;
         }
 
@@ -391,12 +414,177 @@ class EntityImportQuickConfigContainer
             $importerConfig->importProgressResult = '';
             $importerConfig->save();
 
-            throw new RedirectResponseException($this->urlUtil->addQueryString('act=edit', $this->urlUtil->removeQueryString(['key'])));
+            throw new RedirectResponseException($this->utils->url()->addQueryStringParameterToUrl('act=edit', $this->utils->url()->removeQueryStringParameterFromUrl('key')));
         }
         $importer->setDryRun($dry);
         $result = $importer->run();
         $importer->outputFinalResultMessage($result);
 
-        throw new RedirectResponseException($this->urlUtil->removeQueryString(['key', 'id']));
+        $url = $this->utils->url()->removeQueryStringParameterFromUrl('key');
+        $url = $this->utils->url()->removeQueryStringParameterFromUrl('id', $url);
+
+        throw new RedirectResponseException($url);
+    }
+
+    /**
+     * Bulk insert SQL of given data.
+     *
+     * @param string   $table          The database table, where new items should be stored inside
+     * @param array    $data           An array of values associated to its field
+     * @param array    $fixedValues    A array of fixed values associated to its field that should be set for each row as fixed values
+     * @param mixed    $onDuplicateKey null = Throw error on duplicates, self::ON_DUPLICATE_KEY_IGNORE = ignore error duplicates (skip this entries),
+     *                                 self::ON_DUPLICATE_KEY_UPDATE = update existing entries
+     * @param callable $callback       A callback that should be triggered after each cycle, contains $arrValues of current cycle
+     * @param callable $itemCallback   A callback to change the insert values for each items, contains $arrValues as first argument, $arrFields as
+     *                                 second, $arrOriginal as third, expects an array as return value with same order as $arrFields, if no array is
+     *                                 returned, insert of the row will be skipped item insert
+     * @param int      $bulkSize       The bulk size
+     * @param string   $pk             The primary key of the current table (default: id)
+     */
+    public function doBulkInsert(
+        string $table,
+        array $data = [],
+        array $fixedValues = [],
+        $onDuplicateKey = null,
+        $callback = null,
+        $itemCallback = null,
+        int $bulkSize = 100,
+        string $pk = 'id'
+    ) {
+        /** @var Database $database */
+        $database = $this->framework->createInstance(Database::class);
+
+        if (!$database->tableExists($table) || empty($data)) {
+            return null;
+        }
+
+        $fields = $database->getFieldNames($table, true);
+        StaticArrayUtil::removeValue($pk, $fields); // unset id
+        $fields = array_values($fields);
+
+        $bulkSize = (int) $bulkSize;
+
+        $query = '';
+        $duplicateKey = '';
+        $startQuery = sprintf('INSERT %s INTO %s (%s) VALUES ', self::ON_DUPLICATE_KEY_IGNORE === $onDuplicateKey ? 'IGNORE' : '', $table, implode(',', $fields));
+
+        if (self::ON_DUPLICATE_KEY_UPDATE === $onDuplicateKey) {
+            $duplicateKey = ' ON DUPLICATE KEY UPDATE '.implode(
+                    ',',
+                    array_map(
+                        function ($val) {
+                            // escape double quotes
+                            return $val.' = VALUES('.$val.')';
+                        },
+                        $fields
+                    )
+                );
+        }
+
+        $i = 0;
+
+        $columnWildcards = array_map(
+            function ($val) {
+                return '?';
+            },
+            $fields
+        );
+
+        foreach ($data as $key => $varData) {
+            if (0 === $i) {
+                $values = [];
+                $return = [];
+                $query = $startQuery;
+            }
+
+            $columns = $columnWildcards;
+
+            if ($varData instanceof Model) {
+                $varData = $varData->row();
+            }
+
+            foreach ($fields as $n => $strField) {
+                $varValue = isset($varData[$strField]) ? $varData[$strField] : 'DEFAULT';
+
+                if (\in_array($strField, array_keys($fixedValues))) {
+                    $varValue = $fixedValues[$strField];
+                }
+
+                // replace SQL Keyword DEFAULT within wildcards ?
+                if ('DEFAULT' === $varValue) {
+                    $columns[$n] = 'DEFAULT';
+
+                    continue;
+                }
+
+                $return[$i][$strField] = $varValue;
+            }
+
+            // manipulate the item
+            if (\is_callable($itemCallback)) {
+                if (!isset($return[$i])) {
+                    continue;
+                }
+                $varCallback = \call_user_func_array($itemCallback, [$return[$i], $fields, $varData]);
+
+                if (!\is_array($varCallback)) {
+                    continue;
+                }
+
+                foreach ($fields as $n => $strField) {
+                    $varValue = isset($varCallback[$strField]) ? $varCallback[$strField] : 'DEFAULT';
+
+                    // replace SQL Keyword DEFAULT within wildcards ?
+                    if ('DEFAULT' === $varValue) {
+                        $columns[$n] = 'DEFAULT';
+
+                        continue;
+                    }
+
+                    $columns[$n] = '?';
+                    $return[$i][$strField] = $varValue;
+                }
+            }
+
+            // add values to insert array
+            $values = array_merge($values, array_values($return[$i]));
+
+            $query .= '('.implode(',', $columns).'),';
+
+            ++$i;
+
+            if ($bulkSize === $i) {
+                $query = rtrim($query, ',');
+
+                if (self::ON_DUPLICATE_KEY_UPDATE === $onDuplicateKey) {
+                    $query .= $duplicateKey;
+                }
+
+                $database->prepare($query)->execute($values);
+
+                if (\is_callable($callback)) {
+                    \call_user_func_array($callback, [$return]);
+                }
+
+                $query = '';
+
+                $i = 0;
+            }
+        }
+
+        // remaining elements < $intBulkSize
+        if ($query) {
+            $query = rtrim($query, ',');
+
+            if (self::ON_DUPLICATE_KEY_UPDATE === $onDuplicateKey) {
+                $query .= $duplicateKey;
+            }
+
+            $database->prepare($query)->execute($values);
+
+            if (\is_callable($callback)) {
+                \call_user_func_array($callback, [$return]);
+            }
+        }
     }
 }

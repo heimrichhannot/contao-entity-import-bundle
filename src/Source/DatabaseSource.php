@@ -9,21 +9,18 @@
 namespace HeimrichHannot\EntityImportBundle\Source;
 
 use Contao\Database;
-use HeimrichHannot\UtilsBundle\Dca\DcaUtil;
+use Contao\DcaLoader;
+use Contao\StringUtil;
+use Doctrine\DBAL\Connection;
+use HeimrichHannot\EntityImportBundle\Util\EntityImportUtil;
 
 class DatabaseSource extends AbstractSource
 {
-    /**
-     * @var DcaUtil
-     */
-    private $dcaUtil;
+    protected EntityImportUtil $util;
 
-    /**
-     * AbstractFileSource constructor.
-     */
-    public function __construct(DcaUtil $dcaUtil)
+    public function __construct(EntityImportUtil $util)
     {
-        $this->dcaUtil = $dcaUtil;
+        $this->util = $util;
 
         parent::__construct();
     }
@@ -31,21 +28,22 @@ class DatabaseSource extends AbstractSource
     public function getMappedData(array $options = []): array
     {
         $sourceModel = $this->sourceModel;
-        $mapping = \Contao\StringUtil::deserialize($this->sourceModel->fieldMapping, true);
+        $mapping = StringUtil::deserialize($this->sourceModel->fieldMapping, true);
 
         $mapping = $this->adjustMappingForDcMultilingual($mapping);
         $mapping = $this->adjustMappingForChangeLanguage($mapping);
 
         // retrieve the source records
-        $db = Database::getInstance($sourceModel->row());
         $where = $sourceModel->dbSourceTableWhere ?: '1=1';
 
-        $records = $db->prepare("SELECT * FROM $sourceModel->dbSourceTable WHERE $where")->execute();
+        $connection = $this->util->getDbalConnectionBySource($sourceModel->row());
+
+        $records = $connection->prepare("SELECT * FROM $sourceModel->dbSourceTable WHERE $where")->executeQuery()->fetchAllAssociative();
 
         $data = [];
 
-        while ($records->next()) {
-            $data[] = $this->getMappedItemData($records->row(), $mapping);
+        foreach ($records as $record) {
+            $data[] = $this->getMappedItemData($record, $mapping);
         }
 
         return $data;
@@ -68,7 +66,8 @@ class DatabaseSource extends AbstractSource
             'skip' => true,
         ];
 
-        $this->dcaUtil->loadDc($table);
+        $loader = new DcaLoader($table);
+        $loader->load();
 
         $dca = $GLOBALS['TL_DCA'][$table];
 

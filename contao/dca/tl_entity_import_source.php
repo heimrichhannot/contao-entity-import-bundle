@@ -6,19 +6,20 @@
  * @license LGPL-3.0-or-later
  */
 
+\HeimrichHannot\UtilsBundle\Dca\DateAddedField::register('tl_entity_import_source');
+
+$connection = \Contao\System::getContainer()->get('doctrine.dbal.default_connection');
+$connectionParams = $connection->getParams();
+
 $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
     // Config
     'config' => [
-        'dataContainer' => 'Table',
+        'dataContainer' => \Contao\DC_Table::class,
         'ctable' => ['tl_entity_import_config'],
         'enableVersioning' => true,
         'onload_callback' => [[\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::class, 'initPalette']],
         'onsubmit_callback' => [
-            ['huh.utils.dca', 'setDateAdded'],
             [\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::class, 'setPreset'],
-        ],
-        'oncopy_callback' => [
-            ['huh.utils.dca', 'setDateAddedOnCopy'],
         ],
         'sql' => [
             'keys' => [
@@ -103,13 +104,6 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
         'tstamp' => [
             'sql' => "int(10) unsigned NOT NULL default '0'",
         ],
-        'dateAdded' => [
-            'label' => &$GLOBALS['TL_LANG']['MSC']['dateAdded'],
-            'sorting' => true,
-            'flag' => 6,
-            'eval' => ['rgxp' => 'datim', 'doNotCopy' => true],
-            'sql' => "int(10) unsigned NOT NULL default '0'",
-        ],
         'title' => [
             'label' => &$GLOBALS['TL_LANG']['tl_entity_import_source']['title'],
             'search' => true,
@@ -132,8 +126,8 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'exclude' => true,
             'label' => &$GLOBALS['TL_LANG']['tl_entity_import_source']['dbDriver'],
             'inputType' => 'select',
-            'default' => version_compare(VERSION, '4.0', '<') ? \Config::get('dbDriver') : 'pdo_mysql',
-            'options' => version_compare(VERSION, '4.0', '<') ? ['MySQLi', 'MySQL'] : ['pdo_mysql'],
+            'default' => 'pdo_mysql',
+            'options' => ['pdo_mysql'],
             'eval' => ['mandatory' => true, 'tl_class' => 'w50'],
             'sql' => "varchar(12) NOT NULL default ''",
         ],
@@ -141,7 +135,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'exclude' => true,
             'label' => &$GLOBALS['TL_LANG']['tl_entity_import_source']['dbHost'],
             'inputType' => 'text',
-            'default' => \Config::get('dbHost'),
+            'default' => $connectionParams['host'],
             'eval' => ['mandatory' => true, 'maxlength' => 64, 'tl_class' => 'w50'],
             'sql' => "varchar(64) NOT NULL default ''",
         ],
@@ -149,7 +143,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'exclude' => true,
             'label' => &$GLOBALS['TL_LANG']['tl_entity_import_source']['dbUser'],
             'inputType' => 'text',
-            'default' => \Config::get('dbUser') ?: '',
+            'default' => $connectionParams['user'] ?? '',
             'eval' => ['mandatory' => true, 'maxlength' => 64, 'tl_class' => 'w50'],
             'sql' => "varchar(64) NOT NULL default ''",
         ],
@@ -164,7 +158,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'exclude' => true,
             'label' => &$GLOBALS['TL_LANG']['tl_entity_import_source']['dbDatabase'],
             'inputType' => 'text',
-            'default' => \Config::get('dbDatabase') ?: '',
+            'default' => $connectionParams['dbname'] ?? '',
             'eval' => ['mandatory' => true, 'maxlength' => 64, 'tl_class' => 'w50'],
             'sql' => "varchar(64) NOT NULL default ''",
         ],
@@ -181,7 +175,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'exclude' => true,
             'label' => &$GLOBALS['TL_LANG']['tl_entity_import_source']['dbCharset'],
             'inputType' => 'text',
-            'default' => \Config::get('dbCharset'),
+            'default' => $connectionParams['charset'] ?? '',
             'eval' => ['mandatory' => true, 'maxlength' => 32, 'tl_class' => 'w50'],
             'sql' => "varchar(32) NOT NULL default ''",
         ],
@@ -189,7 +183,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'exclude' => true,
             'label' => &$GLOBALS['TL_LANG']['tl_entity_import_source']['dbPort'],
             'inputType' => 'text',
-            'default' => \Config::get('dbPort'),
+            'default' => $connectionParams['port'] ?? 0,
             'eval' => ['maxlength' => 5, 'tl_class' => 'w50', 'rgxp' => 'digit'],
             'sql' => "int(5) unsigned NOT NULL default '0'",
         ],

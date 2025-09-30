@@ -55,7 +55,7 @@ class XmlFileSource extends AbstractFileSource
 
         foreach ($mapping as $mappingElement) {
             if ('static_value' === $mappingElement['valueType']) {
-                $result[$mappingElement['name']] = $this->stringUtil->replaceInsertTags($mappingElement['staticValue']);
+                $result[$mappingElement['name']] = $this->insertTagParser->replace($mappingElement['staticValue']);
             } elseif ('source_value' === $mappingElement['valueType']) {
                 $result[$mappingElement['name']] = $this->getValue($element, $mappingElement);
             }

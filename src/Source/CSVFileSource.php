@@ -8,6 +8,7 @@
 
 namespace HeimrichHannot\EntityImportBundle\Source;
 
+use Contao\File;
 use Contao\Message;
 use HeimrichHannot\EntityImportBundle\Util\CsvReader;
 use HeimrichHannot\EntityImportBundle\Event\AfterCsvFileSourceGetRowEvent;
@@ -18,9 +19,9 @@ class CSVFileSource extends AbstractFileSource
     {
         $data = [];
         $settings = $this->getCsvSettings();
-        $file = $this->fileUtil->getFileFromUuid($this->sourceModel->fileSRC);
+        $file = new File($this->utils->file()->getPathFromUuid($this->sourceModel->fileSRC));
 
-        if (null === $file || !$file->exists()) {
+        if (!$file->exists()) {
             return [];
         }
 

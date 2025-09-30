@@ -8,31 +8,47 @@
 
 namespace HeimrichHannot\EntityImportBundle\Command;
 
-use Contao\CoreBundle\Command\AbstractLockedCommand;
+use Contao\CoreBundle\Framework\ContaoFramework;
 use HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer;
 use HeimrichHannot\EntityImportBundle\Importer\ImporterFactory;
 use HeimrichHannot\EntityImportBundle\Importer\ImporterInterface;
-use HeimrichHannot\UtilsBundle\Model\ModelUtil;
+use HeimrichHannot\UtilsBundle\Util\Utils;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Lock\LockFactory;
+use Symfony\Component\Lock\Store\FlockStore;
+use Symfony\Component\Filesystem\Path;
 
-class ExecuteImportCommand extends AbstractLockedCommand
+class ExecuteImportCommand extends Command
 {
-    protected InputInterface $input;
-    protected SymfonyStyle $io;
-    protected ModelUtil $modelUtil;
+    protected InputInterface  $input;
+    protected SymfonyStyle    $io;
+    protected Utils           $utils;
     protected ImporterFactory $importerFactory;
+    protected ContaoFramework $framework;
+    protected Filesystem      $filesystem;
+    protected string          $projectDir;
 
     /**
      * ExecuteImportCommand constructor.
      */
-    public function __construct(ModelUtil $modelUtil, ImporterFactory $importerFactory)
-    {
-        $this->modelUtil = $modelUtil;
+    public function __construct(
+        Utils $utils,
+        ImporterFactory $importerFactory,
+        ContaoFramework $framework,
+        Filesystem $filesystem,
+        string $projectDir
+    ) {
+        $this->utils           = $utils;
         $this->importerFactory = $importerFactory;
+        $this->framework = $framework;
+        $this->filesystem = $filesystem;
+        $this->projectDir = $projectDir;
 
         parent::__construct();
     }
@@ -52,26 +68,37 @@ class ExecuteImportCommand extends AbstractLockedCommand
     /**
      * {@inheritdoc}
      */
-    protected function executeLocked(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        $store   = new FlockStore($this->getTempDir());
+        $factory = new LockFactory($store);
+        $lock    = $factory->createLock($this->getName());
+
+        if (!$lock->acquire()) {
+            $output->writeln('The command is already running in another process.');
+
+            return 1;
+        }
+
         $this->input = $input;
-        $this->io = new SymfonyStyle($input, $output);
-        $this->framework = $this->getContainer()->get('contao.framework');
+        $this->io    = new SymfonyStyle($input, $output);
         $this->framework->initialize();
 
         $this->import();
+
+        $lock->release();
 
         return 0;
     }
 
     private function import()
     {
-        $configIds = explode(',', $this->input->getArgument('config-ids'));
-        $dryRun = $this->input->getOption('dry-run') ?: false;
+        $configIds   = explode(',', $this->input->getArgument('config-ids'));
+        $dryRun      = $this->input->getOption('dry-run') ?: false;
         $webCronMode = $this->input->getOption('web-cron-mode') ?: false;
 
         foreach ($configIds as $configId) {
-            if (null === ($configModel = $this->modelUtil->findModelInstanceByPk('tl_entity_import_config', $configId))) {
+            if (null === ($configModel = $this->utils->model()->findModelInstanceByPk('tl_entity_import_config', $configId))) {
                 $this->io->error("Importer config with ID $configId not found.");
 
                 continue;
@@ -93,7 +120,7 @@ class ExecuteImportCommand extends AbstractLockedCommand
                     continue;
                 }
 
-                $configModel->importStarted = time();
+                $configModel->importStarted         = time();
                 $configModel->importProgressCurrent = 0;
                 $configModel->save();
             }
@@ -132,5 +159,19 @@ class ExecuteImportCommand extends AbstractLockedCommand
                 $GLOBALS['TL_LANGUAGE'] = $language;
             }
         }
+    }
+
+    /**
+     * Creates an installation specific folder in the temporary directory and returns its path.
+     */
+    private function getTempDir(): string
+    {
+        $tmpDir = Path::join(sys_get_temp_dir(), md5((string)$this->projectDir));
+
+        if (!is_dir($tmpDir)) {
+            $this->filesystem->mkdir($tmpDir);
+        }
+
+        return $tmpDir;
     }
 }

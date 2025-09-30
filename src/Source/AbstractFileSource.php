@@ -9,30 +9,29 @@
 namespace HeimrichHannot\EntityImportBundle\Source;
 
 use Ausi\SlugGenerator\SlugGenerator;
+use Contao\CoreBundle\InsertTag\InsertTagParser;
+use Contao\StringUtil;
+use Contao\System;
 use HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer;
 use HeimrichHannot\EntityImportBundle\Event\AfterFileSourceGetContentEvent;
 use HeimrichHannot\EntityImportBundle\Event\BeforeAuthenticationEvent;
-use HeimrichHannot\UtilsBundle\Container\ContainerUtil;
-use HeimrichHannot\UtilsBundle\File\FileUtil;
-use HeimrichHannot\UtilsBundle\String\StringUtil;
+use HeimrichHannot\UtilsBundle\Util\Utils;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 abstract class AbstractFileSource extends AbstractSource
 {
-    protected FileUtil $fileUtil;
-    protected StringUtil $stringUtil;
     protected EventDispatcherInterface $eventDispatcher;
-    protected ContainerUtil $containerUtil;
+    protected Utils                    $utils;
+    protected InsertTagParser          $insertTagParser;
 
     /**
      * AbstractFileSource constructor.
      */
-    public function __construct(EventDispatcherInterface $eventDispatcher, FileUtil $fileUtil, StringUtil $stringUtil, ContainerUtil $containerUtil)
+    public function __construct(EventDispatcherInterface $eventDispatcher, Utils $utils, InsertTagParser $insertTagParser)
     {
-        $this->fileUtil = $fileUtil;
-        $this->stringUtil = $stringUtil;
-        $this->containerUtil = $containerUtil;
         $this->eventDispatcher = $eventDispatcher;
+        $this->utils = $utils;
+        $this->insertTagParser = $insertTagParser;
 
         parent::__construct();
     }
@@ -48,11 +47,11 @@ abstract class AbstractFileSource extends AbstractSource
     public function getFileContent(bool $cache = false): string
     {
         $content = '';
-        $projectDir = $this->containerUtil->getProjectDir();
+        $projectDir = System::getContainer()->getParameter('kernel.project_dir');
 
         switch ($this->sourceModel->retrievalType) {
             case EntityImportSourceContainer::RETRIEVAL_TYPE_CONTAO_FILE_SYSTEM:
-                $path = $projectDir.'/'.$this->fileUtil->getPathFromUuid($this->sourceModel->fileSRC);
+                $path = $projectDir.'/'.$this->utils->file()->getPathFromUuid($this->sourceModel->fileSRC);
 
                 if (file_exists($path)) {
                     $content = file_get_contents($path);
@@ -64,7 +63,7 @@ abstract class AbstractFileSource extends AbstractSource
                 $auth = [];
 
                 if (null !== $this->sourceModel->httpAuth) {
-                    $httpAuth = \Contao\StringUtil::deserialize($this->sourceModel->httpAuth, true);
+                    $httpAuth = StringUtil::deserialize($this->sourceModel->httpAuth, true);
                     $auth = ['auth' => [$httpAuth['username'], $httpAuth['password']]];
                 }
 

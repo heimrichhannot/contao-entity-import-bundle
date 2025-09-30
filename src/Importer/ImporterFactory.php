@@ -9,63 +9,52 @@
 namespace HeimrichHannot\EntityImportBundle\Importer;
 
 use Contao\CoreBundle\Framework\ContaoFramework;
+use Contao\CoreBundle\InsertTag\InsertTagParser;
+use Doctrine\DBAL\Connection;
 use HeimrichHannot\EntityImportBundle\Source\SourceFactory;
 use HeimrichHannot\EntityImportBundle\Source\SourceInterface;
-use HeimrichHannot\RequestBundle\Component\HttpFoundation\Request;
-use HeimrichHannot\UtilsBundle\Database\DatabaseUtil;
-use HeimrichHannot\UtilsBundle\Dca\DcaUtil;
-use HeimrichHannot\UtilsBundle\File\FileUtil;
-use HeimrichHannot\UtilsBundle\Model\ModelUtil;
+use HeimrichHannot\EntityImportBundle\Util\EntityImportUtil;
 use HeimrichHannot\UtilsBundle\Util\Utils;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class ImporterFactory
 {
-    protected DatabaseUtil $databaseUtil;
     protected EventDispatcherInterface $eventDispatcher;
-    protected ModelUtil $modelUtil;
-    protected SourceFactory $sourceFactory;
-    protected DcaUtil $dcaUtil;
-    protected ContainerInterface $container;
-    protected Request $request;
-    protected FileUtil $fileUtil;
-    protected Utils $utils;
-    protected ContaoFramework $framework;
+    protected SourceFactory            $sourceFactory;
+    protected Utils                    $utils;
+    protected ContaoFramework          $framework;
+    protected Connection               $connection;
+    protected EntityImportUtil         $entityImportUtil;
+    protected InsertTagParser          $insertTagParser;
 
     public function __construct(
-        ContainerInterface $container,
         ContaoFramework $framework,
-        DatabaseUtil $databaseUtil,
         EventDispatcherInterface $eventDispatcher,
-        Request $request,
-        ModelUtil $modelUtil,
-        DcaUtil $dcaUtil,
+        Connection $connection,
+        EntityImportUtil $entityImportUtil,
         SourceFactory $sourceFactory,
-        FileUtil $fileUtil,
-        Utils $utils
+        Utils $utils,
+        InsertTagParser $insertTagParser
     ) {
-        $this->databaseUtil = $databaseUtil;
         $this->eventDispatcher = $eventDispatcher;
-        $this->modelUtil = $modelUtil;
         $this->sourceFactory = $sourceFactory;
-        $this->dcaUtil = $dcaUtil;
-        $this->container = $container;
-        $this->request = $request;
-        $this->fileUtil = $fileUtil;
         $this->utils = $utils;
         $this->framework = $framework;
+        $this->connection = $connection;
+        $this->entityImportUtil = $entityImportUtil;
+        $this->insertTagParser = $insertTagParser;
     }
 
     public function createInstance($configModel, array $options = []): ?ImporterInterface
     {
         $sourceModel = $options['sourceModel'] ?? null;
 
-        if (is_numeric($configModel) && null === ($configModel = $this->modelUtil->findModelInstanceByPk('tl_entity_import_config', $configModel))) {
+        if (is_numeric($configModel) && null === ($configModel = $this->utils->model()->findModelInstanceByPk('tl_entity_import_config', $configModel))) {
             return null;
         }
 
-        if (null === $sourceModel && null === ($sourceModel = $this->modelUtil->findModelInstanceByPk('tl_entity_import_source', $configModel->pid))) {
+        if (null === $sourceModel && null === ($sourceModel = $this->utils->model()->findModelInstanceByPk('tl_entity_import_source', $configModel->pid))) {
             return null;
         }
 
@@ -78,16 +67,14 @@ class ImporterFactory
         $source->setDomain($configModel->cronDomain);
 
         return new Importer(
-            $this->container,
             $this->framework,
             $configModel,
             $source,
             $this->eventDispatcher,
-            $this->request,
-            $this->databaseUtil,
-            $this->dcaUtil,
-            $this->fileUtil,
-            $this->utils
+            $this->connection,
+            $this->entityImportUtil,
+            $this->utils,
+            $this->insertTagParser
         );
     }
 }

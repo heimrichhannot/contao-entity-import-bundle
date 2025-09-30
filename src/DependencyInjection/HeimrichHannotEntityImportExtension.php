@@ -23,7 +23,7 @@ class HeimrichHannotEntityImportExtension extends Extension
         $container->setParameter(Configuration::ROOT_ID, $this->processConfiguration($configuration, $configs));
     }
 
-    public function getAlias()
+    public function getAlias(): string
     {
         return Configuration::ROOT_ID;
     }

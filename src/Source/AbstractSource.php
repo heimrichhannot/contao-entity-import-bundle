@@ -8,8 +8,10 @@
 
 namespace HeimrichHannot\EntityImportBundle\Source;
 
+use Contao\CoreBundle\InsertTag\InsertTagParser;
 use Contao\Environment;
 use Contao\Model;
+use Contao\StringUtil;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
@@ -89,7 +91,7 @@ abstract class AbstractSource implements SourceInterface
 
         foreach ($mapping as $mappingElement) {
             if ('static_value' === $mappingElement['valueType']) {
-                $result[$mappingElement['name']] = $this->stringUtil->replaceInsertTags($mappingElement['staticValue']);
+                $result[$mappingElement['name']] = $this->container->get(InsertTagParser::class)->replaceInsertTags($mappingElement['staticValue']);
             } elseif ('source_value' === $mappingElement['valueType']) {
                 $result[$mappingElement['name']] = $element[$mappingElement['sourceValue']];
             }
@@ -103,7 +105,7 @@ abstract class AbstractSource implements SourceInterface
         $client = new Client();
 
         try {
-            $response = $client->request($method, \Contao\StringUtil::decodeEntities($url), $auth);
+            $response = $client->request($method, StringUtil::decodeEntities($url), $auth);
         } catch (RequestException $e) {
             return [
                 'statusCode' => $e->getResponse()->getStatusCode(),

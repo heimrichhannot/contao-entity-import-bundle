@@ -8,43 +8,36 @@
 
 namespace HeimrichHannot\EntityImportBundle\Source;
 
+use Contao\CoreBundle\InsertTag\InsertTagParser;
+use Contao\StringUtil;
+use Contao\System;
 use HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer;
 use HeimrichHannot\EntityImportBundle\Event\SourceFactoryCreateSourceEvent;
-use HeimrichHannot\UtilsBundle\Container\ContainerUtil;
-use HeimrichHannot\UtilsBundle\Dca\DcaUtil;
-use HeimrichHannot\UtilsBundle\File\FileUtil;
-use HeimrichHannot\UtilsBundle\Model\ModelUtil;
-use HeimrichHannot\UtilsBundle\String\StringUtil;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use HeimrichHannot\EntityImportBundle\Util\EntityImportUtil;
+use HeimrichHannot\UtilsBundle\Util\Utils;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class SourceFactory
 {
-    protected ContainerInterface       $container;
-    protected ModelUtil                $modelUtil;
-    protected FileUtil                 $fileUtil;
     protected EventDispatcherInterface $eventDispatcher;
-    protected StringUtil               $stringUtil;
-    protected ContainerUtil            $containerUtil;
-    protected DcaUtil                  $dcaUtil;
+    protected Utils                    $utils;
+    protected InsertTagParser          $insertTagParser;
+    protected EntityImportUtil         $entityImportUtil;
 
     /**
      * SourceFactory constructor.
      */
-    public function __construct(ContainerInterface $container, ModelUtil $modelUtil, FileUtil $fileUtil, EventDispatcherInterface $eventDispatcher, StringUtil $stringUtil, ContainerUtil $containerUtil, DcaUtil $dcaUtil)
+    public function __construct(EventDispatcherInterface $eventDispatcher, Utils $utils, InsertTagParser $insertTagParser, EntityImportUtil $entityImportUtil)
     {
-        $this->modelUtil = $modelUtil;
-        $this->fileUtil = $fileUtil;
         $this->eventDispatcher = $eventDispatcher;
-        $this->stringUtil = $stringUtil;
-        $this->containerUtil = $containerUtil;
-        $this->dcaUtil = $dcaUtil;
-        $this->container = $container;
+        $this->utils = $utils;
+        $this->insertTagParser = $insertTagParser;
+        $this->entityImportUtil = $entityImportUtil;
     }
 
     public function createInstance(int $sourceModel): ?SourceInterface
     {
-        if (null === ($sourceModel = $this->modelUtil->findModelInstanceByPk('tl_entity_import_source', $sourceModel))) {
+        if (null === ($sourceModel = $this->utils->model()->findModelInstanceByPk('tl_entity_import_source', $sourceModel))) {
             return null;
         }
 
@@ -52,29 +45,29 @@ class SourceFactory
 
         switch ($sourceModel->type) {
             case EntityImportSourceContainer::TYPE_DATABASE:
-                $source = new DatabaseSource($this->dcaUtil);
+                $source = new DatabaseSource($this->entityImportUtil);
 
                 break;
 
             case EntityImportSourceContainer::TYPE_FILE:
                 switch ($sourceModel->fileType) {
                     case EntityImportSourceContainer::FILETYPE_JSON:
-                        $source = new JSONFileSource($this->eventDispatcher, $this->fileUtil, $this->stringUtil, $this->containerUtil);
+                        $source = new JSONFileSource($this->eventDispatcher, $this->utils, $this->insertTagParser);
 
                         break;
 
                     case EntityImportSourceContainer::FILETYPE_XML:
-                        $source = new XmlFileSource($this->eventDispatcher, $this->fileUtil, $this->stringUtil, $this->containerUtil);
+                        $source = new XmlFileSource($this->eventDispatcher, $this->utils, $this->insertTagParser);
 
                         break;
 
                     case EntityImportSourceContainer::FILETYPE_CSV:
-                        $source = new CSVFileSource($this->eventDispatcher, $this->fileUtil, $this->stringUtil, $this->containerUtil);
+                        $source = new CSVFileSource($this->eventDispatcher, $this->utils, $this->insertTagParser);
 
                         break;
 
                     case EntityImportSourceContainer::FILETYPE_RSS:
-                        $source = new RSSFileSource($this->eventDispatcher, $this->fileUtil, $this->stringUtil, $this->containerUtil);
+                        $source = new RSSFileSource($this->eventDispatcher, $this->utils, $this->insertTagParser);
 
                         break;
                 }
@@ -93,9 +86,9 @@ class SourceFactory
             throw new \Exception('No file source class found for file type '.$sourceModel->fileType);
         }
 
-        $source->setFieldMapping(\Contao\StringUtil::deserialize($sourceModel->fieldMapping, true));
+        $source->setFieldMapping(StringUtil::deserialize($sourceModel->fieldMapping, true));
         $source->setSourceModel($sourceModel);
-        $source->setContainer($this->container);
+        $source->setContainer(System::getContainer());
 
         return $source;
     }

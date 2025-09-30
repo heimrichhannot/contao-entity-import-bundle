@@ -12,8 +12,7 @@ use HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer;
 use HeimrichHannot\EntityImportBundle\Importer\ImporterInterface;
 use HeimrichHannot\ProgressBarWidgetBundle\Event\LoadProgressEvent;
 use HeimrichHannot\ProgressBarWidgetBundle\Widget\ProgressBar;
-use HeimrichHannot\RequestBundle\Component\HttpFoundation\Request;
-use HeimrichHannot\UtilsBundle\Model\ModelUtil;
+use HeimrichHannot\UtilsBundle\Util\Utils;
 use Terminal42\ServiceAnnotationBundle\Annotation\ServiceTag;
 
 /**
@@ -21,28 +20,26 @@ use Terminal42\ServiceAnnotationBundle\Annotation\ServiceTag;
  */
 class LoadProgressListener
 {
-    protected Request   $request;
-    protected ModelUtil $modelUtil;
+    protected Utils $utils;
 
-    public function __construct(ModelUtil $modelUtil, Request $request)
+    public function __construct(Utils $utils)
     {
-        $this->request = $request;
-        $this->modelUtil = $modelUtil;
+        $this->utils = $utils;
     }
 
     public function __invoke(LoadProgressEvent $event)
     {
         if ('tl_entity_import_quick_config' === $event->getTable()) {
-            if (null === ($quickImporter = $this->modelUtil->findModelInstanceByPk('tl_entity_import_quick_config', $event->getId())) ||
+            if (null === ($quickImporter = $this->utils->model()->findModelInstanceByPk('tl_entity_import_quick_config', $event->getId())) ||
                 !$quickImporter->importerConfig) {
                 return;
             }
 
-            if (null === ($importConfig = $this->modelUtil->findModelInstanceByPk('tl_entity_import_config', $quickImporter->importerConfig))) {
+            if (null === ($importConfig = $this->utils->model()->findModelInstanceByPk('tl_entity_import_config', $quickImporter->importerConfig))) {
                 return;
             }
         } else {
-            if (null === ($importConfig = $this->modelUtil->findModelInstanceByPk('tl_entity_import_config', $event->getId()))) {
+            if (null === ($importConfig = $this->utils->model()->findModelInstanceByPk('tl_entity_import_config', $event->getId()))) {
                 return;
             }
         }

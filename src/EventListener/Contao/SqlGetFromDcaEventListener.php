@@ -10,20 +10,17 @@ namespace HeimrichHannot\EntityImportBundle\EventListener\Contao;
 
 use Contao\CoreBundle\Framework\ContaoFramework;
 use Contao\Database;
-use HeimrichHannot\UtilsBundle\Model\ModelUtil;
 use HeimrichHannot\UtilsBundle\Util\Utils;
 
 class SqlGetFromDcaEventListener
 {
     protected Utils $utils;
-    protected ModelUtil $modelUtil;
     protected ContaoFramework $framework;
 
-    public function __construct(ContaoFramework $framework, Utils $utils, ModelUtil $modelUtil)
+    public function __construct(ContaoFramework $framework, Utils $utils)
     {
         $this->framework = $framework;
         $this->utils = $utils;
-        $this->modelUtil = $modelUtil;
     }
 
     public function __invoke(array $sqlDcaData)
@@ -44,7 +41,7 @@ class SqlGetFromDcaEventListener
         }
 
         // add cache fields to tl_entity_import_cache
-        if (null === ($importers = $this->modelUtil->findModelInstancesBy('tl_entity_import_config', [
+        if (null === ($importers = $this->utils->model()->findModelInstancesBy('tl_entity_import_config', [
                 'tl_entity_import_config.useCacheForQuickImporters=?',
             ], [
                 true,

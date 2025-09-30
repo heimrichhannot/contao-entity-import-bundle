@@ -6,18 +6,16 @@
  * @license LGPL-3.0-or-later
  */
 
+\HeimrichHannot\UtilsBundle\Dca\DateAddedField::register('tl_entity_import_config');
+
 $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
     'config' => [
-        'dataContainer' => 'Table',
+        'dataContainer' => \Contao\DC_Table::class,
         'enableVersioning' => true,
         'ptable' => 'tl_entity_import_source',
         'onload_callback' => [[\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::class, 'initPalette']],
         'onsubmit_callback' => [
-            ['huh.utils.dca', 'setDateAdded'],
             [\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::class, 'setPreset'],
-        ],
-        'oncopy_callback' => [
-            ['huh.utils.dca', 'setDateAddedOnCopy'],
         ],
         'sql' => [
             'keys' => [
@@ -77,8 +75,8 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'import' => [
                 'label' => &$GLOBALS['TL_LANG']['tl_entity_import_config']['import'],
                 'href' => 'key=import',
-                'icon' => 'store.svg',
-                'attributes' => 'onclick="if (!confirm(\''.($GLOBALS['TL_LANG']['tl_entity_import_config']['importConfirm'] ?? null).'\')) return false; Backend.getScrollOffset();"',
+                'icon' => 'theme_import.svg',
+                'attributes' => 'data-turbo="false" onclick="if (!confirm(\''.($GLOBALS['TL_LANG']['tl_entity_import_config']['importConfirm'] ?? null).'\')) return false; Backend.getScrollOffset();"',
             ],
         ],
     ],
@@ -109,13 +107,6 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'foreignKey' => 'tl_entity_import_source.title',
             'sql' => "int(10) unsigned NOT NULL default '0'",
             'relation' => ['type' => 'belongsTo', 'load' => 'eager'],
-        ],
-        'dateAdded' => [
-            'label' => &$GLOBALS['TL_LANG']['MSC']['dateAdded'],
-            'sorting' => true,
-            'flag' => 6,
-            'eval' => ['rgxp' => 'datim', 'doNotCopy' => true],
-            'sql' => "int(10) unsigned NOT NULL default '0'",
         ],
         'tstamp' => [
             'sql' => "int(10) unsigned NOT NULL default '0'",
@@ -549,7 +540,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'label' => &$GLOBALS['TL_LANG']['tl_entity_import_config']['cronLanguage'],
             'exclude' => true,
             'inputType' => 'select',
-            'options' => \Contao\System::getLanguages(),
+            'options' => \Contao\System::getContainer()->get('contao.intl.locales')->getLanguages(),
             'eval' => ['tl_class' => 'w50', 'mandatory' => true, 'includeBlankOption' => true, 'chosen' => true],
             'sql' => "varchar(64) NOT NULL default ''",
         ],
