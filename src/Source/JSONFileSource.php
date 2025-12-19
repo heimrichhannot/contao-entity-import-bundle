@@ -70,7 +70,7 @@ class JSONFileSource extends AbstractFileSource
     protected function getValue($data, array $mapping)
     {
         if (\array_key_exists('sourceValue', $mapping)) {
-            $mapping = explode('.', $mapping['sourceValue']);
+            $mapping = explode('.', (string) $mapping['sourceValue']);
         }
 
         if (empty($mapping)) {

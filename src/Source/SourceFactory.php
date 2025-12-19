@@ -20,10 +20,8 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class SourceFactory
 {
-    protected ContainerInterface       $container;
     protected ModelUtil                $modelUtil;
     protected FileUtil                 $fileUtil;
-    protected EventDispatcherInterface $eventDispatcher;
     protected StringUtil               $stringUtil;
     protected ContainerUtil            $containerUtil;
     protected DcaUtil                  $dcaUtil;
@@ -31,15 +29,13 @@ class SourceFactory
     /**
      * SourceFactory constructor.
      */
-    public function __construct(ContainerInterface $container, ModelUtil $modelUtil, FileUtil $fileUtil, EventDispatcherInterface $eventDispatcher, StringUtil $stringUtil, ContainerUtil $containerUtil, DcaUtil $dcaUtil)
+    public function __construct(protected ContainerInterface $container, ModelUtil $modelUtil, FileUtil $fileUtil, protected EventDispatcherInterface $eventDispatcher, StringUtil $stringUtil, ContainerUtil $containerUtil, DcaUtil $dcaUtil)
     {
         $this->modelUtil = $modelUtil;
         $this->fileUtil = $fileUtil;
-        $this->eventDispatcher = $eventDispatcher;
         $this->stringUtil = $stringUtil;
         $this->containerUtil = $containerUtil;
         $this->dcaUtil = $dcaUtil;
-        $this->container = $container;
     }
 
     public function createInstance(int $sourceModel): ?SourceInterface

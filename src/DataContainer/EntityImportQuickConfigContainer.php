@@ -8,6 +8,7 @@
 
 namespace HeimrichHannot\EntityImportBundle\DataContainer;
 
+use Contao\Image;
 use Contao\Controller;
 use Contao\CoreBundle\Exception\RedirectResponseException;
 use Contao\Database;
@@ -30,32 +31,26 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 class EntityImportQuickConfigContainer
 {
     protected DatabaseUtil  $databaseUtil;
-    protected SourceFactory $sourceFactory;
-    protected EventDispatcherInterface $eventDispatcher;
     protected ModelUtil $modelUtil;
     protected Request $request;
-    protected ImporterFactory $importerFactory;
     protected UrlUtil $urlUtil;
     protected DcaUtil $dcaUtil;
 
     public function __construct(
         ModelUtil $modelUtil,
-        EventDispatcherInterface $eventDispatcher,
+        protected EventDispatcherInterface $eventDispatcher,
         Request $request,
-        ImporterFactory $importerFactory,
+        protected ImporterFactory $importerFactory,
         UrlUtil $urlUtil,
         DcaUtil $dcaUtil,
         DatabaseUtil $databaseUtil,
-        SourceFactory $sourceFactory
+        protected SourceFactory $sourceFactory
     ) {
-        $this->eventDispatcher = $eventDispatcher;
         $this->modelUtil = $modelUtil;
         $this->request = $request;
-        $this->importerFactory = $importerFactory;
         $this->urlUtil = $urlUtil;
         $this->dcaUtil = $dcaUtil;
         $this->databaseUtil = $databaseUtil;
-        $this->sourceFactory = $sourceFactory;
     }
 
     public function getImporterConfigs()
@@ -83,10 +78,10 @@ class EntityImportQuickConfigContainer
             }
         }
 
-        return '<a href="'.Controller::addToUrl($href.'&amp;id='.$row['id']).'&rt='.\RequestToken::get().'" title="'.\StringUtil::specialchars($title).'"'.$attributes.'>'.\Image::getHtml($icon, $label).'</a> ';
+        return '<a href="'.Controller::addToUrl($href.'&amp;id='.$row['id']).'&rt='.System::getContainer()->get('contao.csrf.token_manager')->getDefaultTokenValue().'" title="'.StringUtil::specialchars($title).'"'.$attributes.'>'.Image::getHtml($icon, $label).'</a> ';
     }
 
-    public function modifyDca(DataContainer $dc)
+    public function modifyDca(DataContainer $dc): void
     {
         if (null === ($quickImporter = $this->modelUtil->findModelInstanceByPk('tl_entity_import_quick_config', $dc->id)) || !$quickImporter->importerConfig) {
             return;
@@ -151,7 +146,7 @@ class EntityImportQuickConfigContainer
         return ListWidget::loadItems($config, $options, $context, $dc);
     }
 
-    public function cacheCsvRows(DataContainer $dc)
+    public function cacheCsvRows(DataContainer $dc): void
     {
         // cache might be invalid now -> delete tl_md_recipient
         $this->databaseUtil->delete('tl_entity_import_cache', 'cache_ptable=? AND cache_pid=?', ['tl_entity_import_quick_config', $dc->id]);
@@ -248,7 +243,7 @@ class EntityImportQuickConfigContainer
         return $itemData;
     }
 
-    public function getParentEntitiesAsOptions(\Contao\DataContainer $dc)
+    public function getParentEntitiesAsOptions(DataContainer $dc)
     {
         if (null === ($quickImporter = $this->modelUtil->findModelInstanceByPk('tl_entity_import_quick_config', $dc->id)) || !$quickImporter->importerConfig) {
             return [];
@@ -269,17 +264,17 @@ class EntityImportQuickConfigContainer
         ]);
     }
 
-    public function import()
+    public function import(): void
     {
         $this->runImport(false);
     }
 
-    public function dryRun()
+    public function dryRun(): void
     {
         $this->runImport(true);
     }
 
-    public function getHeaderFieldsForPreview($config, $widget, \DataContainer $dc)
+    public function getHeaderFieldsForPreview($config, $widget, DataContainer $dc)
     {
         if (null === ($quickImporter = $this->modelUtil->findModelInstanceByPk('tl_entity_import_quick_config', $dc->id)) || !$quickImporter->importerConfig) {
             return [];
@@ -361,7 +356,7 @@ class EntityImportQuickConfigContainer
         $importer->fieldMapping = serialize($mapping);
     }
 
-    private function runImport(bool $dry = false)
+    private function runImport(bool $dry = false): void
     {
         $config = $this->request->getGet('id');
 

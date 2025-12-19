@@ -12,6 +12,8 @@
 
 namespace HeimrichHannot\EntityImportBundle\Util;
 
+use Contao\System;
+
 class CsvReader implements \Iterator
 {
 
@@ -63,18 +65,18 @@ class CsvReader implements \Iterator
      */
     public function __construct($strFile)
     {
-        if (!is_file(TL_ROOT . '/' . $strFile)) {
+        if (!is_file(System::getContainer()->getParameter('kernel.project_dir') . '/' . $strFile)) {
             throw new \InvalidArgumentException('Input file does not exist!');
         }
 
-        $this->strFilePath = TL_ROOT . '/' . $strFile;
+        $this->strFilePath = System::getContainer()->getParameter('kernel.project_dir') . '/' . $strFile;
     }
 
     /**
      * Set the delimiter character
      * @param string
      */
-    public function setDelimiter($strDelimiter)
+    public function setDelimiter($strDelimiter): void
     {
         $this->strDelimiter = $strDelimiter;
     }
@@ -83,7 +85,7 @@ class CsvReader implements \Iterator
      * Set the enclosure character
      * @param string
      */
-    public function setEnclosure($strEnclosure)
+    public function setEnclosure($strEnclosure): void
     {
         $this->strEnclosure = $strEnclosure;
     }
@@ -92,7 +94,7 @@ class CsvReader implements \Iterator
      * Set the escape character
      * @param string
      */
-    public function setEscape($strEscape)
+    public function setEscape($strEscape): void
     {
         $this->strEscape = $strEscape;
     }
@@ -118,7 +120,7 @@ class CsvReader implements \Iterator
     /**
      * Get the next position
      */
-    public function next()
+    public function next(): void
     {
         $this->arrCurrent = $this->readLine();
 
@@ -131,7 +133,7 @@ class CsvReader implements \Iterator
     /**
      * Reset the records
      */
-    public function rewind()
+    public function rewind(): void
     {
         // Lazy load
         if ($this->resFile === null) {

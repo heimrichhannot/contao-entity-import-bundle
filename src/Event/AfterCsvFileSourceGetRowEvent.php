@@ -15,13 +15,8 @@ class AfterCsvFileSourceGetRowEvent extends Event
 {
     public const NAME = 'huh.entity_import.after_csv_file_source_get_row_event';
 
-    protected array $row;
-    protected Model $sourceModel;
-
-    public function __construct(array $row, Model $sourceModel)
+    public function __construct(protected array $row, protected Model $sourceModel)
     {
-        $this->row = $row;
-        $this->sourceModel = $sourceModel;
     }
 
     public function getRow(): array

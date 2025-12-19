@@ -21,18 +21,16 @@ abstract class AbstractFileSource extends AbstractSource
 {
     protected FileUtil $fileUtil;
     protected StringUtil $stringUtil;
-    protected EventDispatcherInterface $eventDispatcher;
     protected ContainerUtil $containerUtil;
 
     /**
      * AbstractFileSource constructor.
      */
-    public function __construct(EventDispatcherInterface $eventDispatcher, FileUtil $fileUtil, StringUtil $stringUtil, ContainerUtil $containerUtil)
+    public function __construct(protected EventDispatcherInterface $eventDispatcher, FileUtil $fileUtil, StringUtil $stringUtil, ContainerUtil $containerUtil)
     {
         $this->fileUtil = $fileUtil;
         $this->stringUtil = $stringUtil;
         $this->containerUtil = $containerUtil;
-        $this->eventDispatcher = $eventDispatcher;
 
         parent::__construct();
     }

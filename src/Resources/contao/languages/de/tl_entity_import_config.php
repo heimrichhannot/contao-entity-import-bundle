@@ -1,5 +1,7 @@
 <?php
 
+use HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer;
+
 /*
  * Copyright (c) 2021 Heimrich & Hannot GmbH
  *
@@ -187,11 +189,11 @@ $lang['reference'] = [
         'merge' => 'Beim Importieren Datensätze zusammenführen (Merge)',
     ],
     'sortingMode' => [
-        \HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::SORTING_MODE_TARGET_FIELDS => 'Nach Zielfeld(ern) sortieren',
+        EntityImportConfigContainer::SORTING_MODE_TARGET_FIELDS => 'Nach Zielfeld(ern) sortieren',
     ],
     'deletionMode' => [
-        \HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::DELETION_MODE_MIRROR => 'In der Quelle nicht mehr vorhandene Datensätze löschen (Spiegelung)',
-        \HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::DELETION_MODE_TARGET_FIELDS => 'Nach Zielfeldbedingungen löschen',
+        EntityImportConfigContainer::DELETION_MODE_MIRROR => 'In der Quelle nicht mehr vorhandene Datensätze löschen (Spiegelung)',
+        EntityImportConfigContainer::DELETION_MODE_TARGET_FIELDS => 'Nach Zielfeldbedingungen löschen',
     ],
     'cronInterval' => [
         'minutely' => 'Minütlich',
@@ -208,9 +210,9 @@ $lang['reference'] = [
         'field_pattern' => 'aus Quellfeld-Werten',
         'random_md5' => 'zufällige MD5-Zeichenfolge',
     ],
-    \HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::STATE_READY_FOR_IMPORT => 'Bereit für den Import',
-    \HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::STATE_SUCCESS => 'Import erfolgreich',
-    \HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::STATE_FAILED => 'Import fehlgeschlagen',
+    EntityImportConfigContainer::STATE_READY_FOR_IMPORT => 'Bereit für den Import',
+    EntityImportConfigContainer::STATE_SUCCESS => 'Import erfolgreich',
+    EntityImportConfigContainer::STATE_FAILED => 'Import fehlgeschlagen',
     'importProgressDescription' => 'Der Importvorgang wurde gestartet. Je nach zu importierender Datenmenge kann der Import einige Minuten in Anspruch nehmen. Bitte haben Sie einen Moment Geduld...',
 ];
 

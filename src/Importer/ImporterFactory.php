@@ -23,38 +23,28 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 class ImporterFactory
 {
     protected DatabaseUtil $databaseUtil;
-    protected EventDispatcherInterface $eventDispatcher;
     protected ModelUtil $modelUtil;
-    protected SourceFactory $sourceFactory;
     protected DcaUtil $dcaUtil;
-    protected ContainerInterface $container;
     protected Request $request;
     protected FileUtil $fileUtil;
-    protected Utils $utils;
-    protected ContaoFramework $framework;
 
     public function __construct(
-        ContainerInterface $container,
-        ContaoFramework $framework,
+        protected ContainerInterface $container,
+        protected ContaoFramework $framework,
         DatabaseUtil $databaseUtil,
-        EventDispatcherInterface $eventDispatcher,
+        protected EventDispatcherInterface $eventDispatcher,
         Request $request,
         ModelUtil $modelUtil,
         DcaUtil $dcaUtil,
-        SourceFactory $sourceFactory,
+        protected SourceFactory $sourceFactory,
         FileUtil $fileUtil,
-        Utils $utils
+        protected Utils $utils
     ) {
         $this->databaseUtil = $databaseUtil;
-        $this->eventDispatcher = $eventDispatcher;
         $this->modelUtil = $modelUtil;
-        $this->sourceFactory = $sourceFactory;
         $this->dcaUtil = $dcaUtil;
-        $this->container = $container;
         $this->request = $request;
         $this->fileUtil = $fileUtil;
-        $this->utils = $utils;
-        $this->framework = $framework;
     }
 
     public function createInstance($configModel, array $options = []): ?ImporterInterface

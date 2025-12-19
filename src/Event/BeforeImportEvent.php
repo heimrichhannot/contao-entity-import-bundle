@@ -17,21 +17,8 @@ class BeforeImportEvent extends Event
 {
     public const NAME = 'huh.entity_import.before_import_event';
 
-    protected array             $items;
-    protected Model             $configModel;
-    protected SourceInterface   $source;
-    protected bool              $dryRun;
-    protected array             $options;
-    protected ImporterInterface $importer;
-
-    public function __construct(array $items, Model $configModel, ImporterInterface $importer, SourceInterface $source, bool $dryRun = false, array $options = [])
+    public function __construct(protected array $items, protected Model $configModel, protected ImporterInterface $importer, protected SourceInterface $source, protected bool $dryRun = false, protected array $options = [])
     {
-        $this->items = $items;
-        $this->configModel = $configModel;
-        $this->source = $source;
-        $this->dryRun = $dryRun;
-        $this->options = $options;
-        $this->importer = $importer;
     }
 
     public function getItems(): array

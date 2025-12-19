@@ -28,7 +28,7 @@ class Plugin implements BundlePluginInterface, ConfigPluginInterface
         ];
     }
 
-    public function registerContainerConfiguration(LoaderInterface $loader, array $managerConfig)
+    public function registerContainerConfiguration(LoaderInterface $loader, array $managerConfig): void
     {
         $loader->load('@HeimrichHannotContaoEntityImportBundle/Resources/config/services.yml');
     }

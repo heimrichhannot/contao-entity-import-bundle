@@ -16,13 +16,8 @@ class SourceFactoryCreateSourceEvent extends Event
 {
     public const NAME = 'huh.entity_import.source_factory_create_source_event';
 
-    private ?SourceInterface $source;
-    private Model $sourceModel;
-
-    public function __construct(?SourceInterface $source, Model $sourceModel)
+    public function __construct(private ?SourceInterface $source, private readonly Model $sourceModel)
     {
-        $this->source = $source;
-        $this->sourceModel = $sourceModel;
     }
 
     public function getSource(): ?SourceInterface
@@ -30,7 +25,7 @@ class SourceFactoryCreateSourceEvent extends Event
         return $this->source;
     }
 
-    public function setSource(SourceInterface $source)
+    public function setSource(SourceInterface $source): void
     {
         $this->source = $source;
     }

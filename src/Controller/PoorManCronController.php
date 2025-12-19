@@ -14,16 +14,14 @@ use HeimrichHannot\UtilsBundle\Model\ModelUtil;
 
 class PoorManCronController
 {
-    protected ImporterFactory $importerFactory;
     protected ModelUtil       $modelUtil;
 
-    public function __construct(ImporterFactory $importerFactory, ModelUtil $modelUtil)
+    public function __construct(protected ImporterFactory $importerFactory, ModelUtil $modelUtil)
     {
-        $this->importerFactory = $importerFactory;
         $this->modelUtil = $modelUtil;
     }
 
-    public function runMinutely()
+    public function runMinutely(): void
     {
         $items = $this->getConfigIds('minutely');
 
@@ -32,7 +30,7 @@ class PoorManCronController
         }
     }
 
-    public function runHourly()
+    public function runHourly(): void
     {
         $items = $this->getConfigIds('hourly');
 
@@ -41,7 +39,7 @@ class PoorManCronController
         }
     }
 
-    public function runDaily()
+    public function runDaily(): void
     {
         $items = $this->getConfigIds('daily');
 
@@ -50,7 +48,7 @@ class PoorManCronController
         }
     }
 
-    public function runWeekly()
+    public function runWeekly(): void
     {
         $items = $this->getConfigIds('weekly');
 
@@ -59,7 +57,7 @@ class PoorManCronController
         }
     }
 
-    public function runMonthly()
+    public function runMonthly(): void
     {
         $items = $this->getConfigIds('monthly');
 

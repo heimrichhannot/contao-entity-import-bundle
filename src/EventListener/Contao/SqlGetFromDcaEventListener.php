@@ -15,14 +15,10 @@ use HeimrichHannot\UtilsBundle\Util\Utils;
 
 class SqlGetFromDcaEventListener
 {
-    protected Utils $utils;
     protected ModelUtil $modelUtil;
-    protected ContaoFramework $framework;
 
-    public function __construct(ContaoFramework $framework, Utils $utils, ModelUtil $modelUtil)
+    public function __construct(protected ContaoFramework $framework, protected Utils $utils, ModelUtil $modelUtil)
     {
-        $this->framework = $framework;
-        $this->utils = $utils;
         $this->modelUtil = $modelUtil;
     }
 
@@ -88,7 +84,7 @@ class SqlGetFromDcaEventListener
             }
 
             // Default values
-            if (null === $fieldSqlData['default'] || false !== stripos($fieldSqlData['extra'], 'auto_increment') || 'null' == strtolower($fieldSqlData['null']) || \in_array(strtolower($fieldSqlData['type']), ['text', 'tinytext', 'mediumtext', 'longtext', 'blob', 'tinyblob', 'mediumblob', 'longblob'])) {
+            if (null === $fieldSqlData['default'] || false !== stripos((string) $fieldSqlData['extra'], 'auto_increment') || 'null' == strtolower((string) $fieldSqlData['null']) || \in_array(strtolower((string) $fieldSqlData['type']), ['text', 'tinytext', 'mediumtext', 'longtext', 'blob', 'tinyblob', 'mediumblob', 'longblob'])) {
                 unset($fieldSqlData['default']);
             } // Date/time constants (see #5089)
             elseif (\in_array(strtolower($fieldSqlData['default']), ['current_date', 'current_time', 'current_timestamp'])) {

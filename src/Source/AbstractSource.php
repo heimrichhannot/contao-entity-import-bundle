@@ -8,6 +8,7 @@
 
 namespace HeimrichHannot\EntityImportBundle\Source;
 
+use Contao\StringUtil;
 use Contao\Environment;
 use Contao\Model;
 use GuzzleHttp\Client;
@@ -39,7 +40,7 @@ abstract class AbstractSource implements SourceInterface
         return $this->fieldMapping;
     }
 
-    public function setFieldMapping(array $mapping)
+    public function setFieldMapping(array $mapping): void
     {
         $this->fieldMapping = $mapping;
     }
@@ -49,7 +50,7 @@ abstract class AbstractSource implements SourceInterface
         return $this->sourceModel;
     }
 
-    public function setSourceModel(Model $sourceModel)
+    public function setSourceModel(Model $sourceModel): void
     {
         $this->sourceModel = $sourceModel;
     }
@@ -103,7 +104,7 @@ abstract class AbstractSource implements SourceInterface
         $client = new Client();
 
         try {
-            $response = $client->request($method, \Contao\StringUtil::decodeEntities($url), $auth);
+            $response = $client->request($method, StringUtil::decodeEntities($url), $auth);
         } catch (RequestException $e) {
             return [
                 'statusCode' => $e->getResponse()->getStatusCode(),
@@ -121,9 +122,7 @@ abstract class AbstractSource implements SourceInterface
     {
         $filesystemCache = $this->getFilesystemCache();
 
-        return $filesystemCache->get('entity-import-remote.'.$cacheKey, function () {
-            return '';
-        });
+        return $filesystemCache->get('entity-import-remote.'.$cacheKey, fn() => '');
     }
 
     protected function deleteValueFromRemoteCache(string $cacheKey): string
@@ -142,9 +141,7 @@ abstract class AbstractSource implements SourceInterface
         $filesystemCache->delete('entity-import-remote.'.$cacheKey);
 
         if (200 === $response['statusCode']) {
-            $filesystemCache->get('entity-import-remote.'.$cacheKey, function () use ($response) {
-                return trim($response['result']);
-            });
+            $filesystemCache->get('entity-import-remote.'.$cacheKey, fn() => trim((string) $response['result']));
         }
 
         return [
@@ -157,9 +154,7 @@ abstract class AbstractSource implements SourceInterface
     {
         $filesystemCache = $this->getFilesystemCache();
 
-        return $filesystemCache->get('entity-import-data.'.$cacheKey, function () {
-            return '';
-        });
+        return $filesystemCache->get('entity-import-data.'.$cacheKey, fn() => '');
     }
 
     protected function deleteValueFromDataCache(string $cacheKey): string
@@ -173,8 +168,6 @@ abstract class AbstractSource implements SourceInterface
     {
         $filesystemCache = $this->getFilesystemCache();
 
-        $filesystemCache->get('entity-import-data.'.$cacheKey, function () use ($data) {
-            return $data;
-        });
+        $filesystemCache->get('entity-import-data.'.$cacheKey, fn() => $data);
     }
 }

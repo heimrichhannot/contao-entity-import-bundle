@@ -60,22 +60,16 @@ class EntityImportSourceContainer
     protected $cache;
 
     protected ModelUtil $modelUtil;
-    protected SourceFactory $sourceFactory;
-    protected EntityImportUtil $util;
-    protected EventDispatcherInterface $eventDispatcher;
     protected DatabaseUtil $databaseUtil;
 
-    public function __construct(SourceFactory $sourceFactory, ModelUtil $modelUtil, EntityImportUtil $util, EventDispatcherInterface $eventDispatcher, DatabaseUtil $databaseUtil)
+    public function __construct(protected SourceFactory $sourceFactory, ModelUtil $modelUtil, protected EntityImportUtil $util, protected EventDispatcherInterface $eventDispatcher, DatabaseUtil $databaseUtil)
     {
         $this->activeBundles = System::getContainer()->getParameter('kernel.bundles');
-        $this->sourceFactory = $sourceFactory;
         $this->modelUtil = $modelUtil;
-        $this->util = $util;
-        $this->eventDispatcher = $eventDispatcher;
         $this->databaseUtil = $databaseUtil;
     }
 
-    public function setPreset(?DataContainer $dc)
+    public function setPreset(?DataContainer $dc): void
     {
         if (!($preset = $dc->activeRecord->fieldMappingPresets)) {
             return;
@@ -89,7 +83,7 @@ class EntityImportSourceContainer
         ], 'tl_entity_import_source.id='.$dc->id);
     }
 
-    public function initPalette(?DataContainer $dc)
+    public function initPalette(?DataContainer $dc): void
     {
         if (null === ($sourceModel = $this->modelUtil->findModelInstanceByPk($dc->table, $dc->id))) {
             return;
@@ -105,12 +99,12 @@ class EntityImportSourceContainer
                     $dca['palettes'][static::TYPE_DATABASE] = str_replace('fieldMapping', '', $dca['palettes'][static::TYPE_DATABASE]);
                 } else {
                     try {
-                        $options = array_values(Database::getInstance($sourceModel->row())->getFieldNames($sourceModel->dbSourceTable, true));
+                        $options = array_values(Database::getInstance()->getFieldNames($sourceModel->dbSourceTable, true));
 
                         $this->util->transformFieldMappingSourceValueToSelect(
                             array_combine($options, $options)
                         );
-                    } catch (\Exception $e) {
+                    } catch (\Exception) {
                     }
                 }
 
@@ -245,7 +239,7 @@ class EntityImportSourceContainer
         }
 
         try {
-            $options = array_values(Database::getInstance($source->row())->listTables(null, true));
+            $options = array_values(Database::getInstance()->listTables(null, true));
         } catch (\Exception $e) {
             Message::addError(sprintf($GLOBALS['TL_LANG']['MSC']['entityImport']['dbConnectionError'], $e->getMessage()));
 

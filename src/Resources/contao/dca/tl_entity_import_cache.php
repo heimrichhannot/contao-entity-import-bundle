@@ -1,14 +1,15 @@
 <?php
 
+use Contao\DC_Table;
+
 /*
  * Copyright (c) 2021 Heimrich & Hannot GmbH
  *
  * @license LGPL-3.0-or-later
  */
-
 $GLOBALS['TL_DCA']['tl_entity_import_cache'] = [
     'config' => [
-        'dataContainer' => 'Table',
+        'dataContainer' => DC_Table::class,
         'sql' => [
             'keys' => [
                 'id' => 'primary',

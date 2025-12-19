@@ -8,6 +8,7 @@
 
 namespace HeimrichHannot\EntityImportBundle\Source;
 
+use Contao\StringUtil;
 use Contao\Database;
 use HeimrichHannot\UtilsBundle\Dca\DcaUtil;
 
@@ -31,13 +32,13 @@ class DatabaseSource extends AbstractSource
     public function getMappedData(array $options = []): array
     {
         $sourceModel = $this->sourceModel;
-        $mapping = \Contao\StringUtil::deserialize($this->sourceModel->fieldMapping, true);
+        $mapping = StringUtil::deserialize($this->sourceModel->fieldMapping, true);
 
         $mapping = $this->adjustMappingForDcMultilingual($mapping);
         $mapping = $this->adjustMappingForChangeLanguage($mapping);
 
         // retrieve the source records
-        $db = Database::getInstance($sourceModel->row());
+        $db = Database::getInstance();
         $where = $sourceModel->dbSourceTableWhere ?: '1=1';
 
         $records = $db->prepare("SELECT * FROM $sourceModel->dbSourceTable WHERE $where")->execute();

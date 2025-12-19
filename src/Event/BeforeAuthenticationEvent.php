@@ -15,13 +15,8 @@ class BeforeAuthenticationEvent extends Event
 {
     public const NAME = 'huh.entity_import.before_authentication_event';
 
-    private array $auth;
-    private Model $sourceModel;
-
-    public function __construct(array $auth, Model $sourceModel)
+    public function __construct(private array $auth, private Model $sourceModel)
     {
-        $this->auth = $auth;
-        $this->sourceModel = $sourceModel;
     }
 
     public function getAuth(): array
@@ -29,7 +24,7 @@ class BeforeAuthenticationEvent extends Event
         return $this->auth;
     }
 
-    public function setAuth(array $auth)
+    public function setAuth(array $auth): void
     {
         $this->auth = $auth;
     }
@@ -39,7 +34,7 @@ class BeforeAuthenticationEvent extends Event
         return $this->sourceModel;
     }
 
-    public function setSourceModel(Model $sourceModel)
+    public function setSourceModel(Model $sourceModel): void
     {
         $this->sourceModel = $sourceModel;
     }

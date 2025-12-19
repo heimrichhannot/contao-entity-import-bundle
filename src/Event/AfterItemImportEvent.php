@@ -17,25 +17,8 @@ class AfterItemImportEvent extends Event
 {
     public const NAME = 'huh.entity_import.after_item_import_event';
 
-    protected Model             $configModel;
-    protected SourceInterface   $source;
-    protected array             $mappedItem;
-    protected array             $item;
-    protected $importedRecord;
-    protected bool              $dryRun;
-    protected array             $mapping;
-    protected ImporterInterface $importer;
-
-    public function __construct($importedRecord, array $mappedItem, array $item, array $mapping, Model $configModel, ImporterInterface $importer, SourceInterface $source, bool $dryRun = false)
+    public function __construct(protected $importedRecord, protected array $mappedItem, protected array $item, protected array $mapping, protected Model $configModel, protected ImporterInterface $importer, protected SourceInterface $source, protected bool $dryRun = false)
     {
-        $this->configModel = $configModel;
-        $this->source = $source;
-        $this->mappedItem = $mappedItem;
-        $this->item = $item;
-        $this->importedRecord = $importedRecord;
-        $this->dryRun = $dryRun;
-        $this->mapping = $mapping;
-        $this->importer = $importer;
     }
 
     public function getConfigModel(): Model

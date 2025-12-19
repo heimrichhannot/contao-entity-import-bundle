@@ -1,5 +1,7 @@
 <?php
 
+use HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer;
+
 $lang = &$GLOBALS['TL_LANG']['tl_entity_import_source'];
 
 /**
@@ -42,11 +44,11 @@ $lang['fileContent'][1] = 'Here you can see the contents of the selected file. T
 $lang['retrievalType'][0] = 'Source';
 $lang['retrievalType'][1] = 'Select the type of file source here.';
 
-$lang['retrievalType'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::RETRIEVAL_TYPE_HTTP]               = 'HTTP';
-$lang['retrievalType'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::RETRIEVAL_TYPE_CONTAO_FILE_SYSTEM] = 'Contao file management';
-$lang['retrievalType'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::RETRIEVAL_TYPE_ABSOLUTE_PATH]      = 'Absolute path';
-$lang['type'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::TYPE_DATABASE]                              = 'Database';
-$lang['type'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::TYPE_FILE]                                  = 'File';
+$lang['retrievalType'][EntityImportSourceContainer::RETRIEVAL_TYPE_HTTP]               = 'HTTP';
+$lang['retrievalType'][EntityImportSourceContainer::RETRIEVAL_TYPE_CONTAO_FILE_SYSTEM] = 'Contao file management';
+$lang['retrievalType'][EntityImportSourceContainer::RETRIEVAL_TYPE_ABSOLUTE_PATH]      = 'Absolute path';
+$lang['type'][EntityImportSourceContainer::TYPE_DATABASE]                              = 'Database';
+$lang['type'][EntityImportSourceContainer::TYPE_FILE]                                  = 'File';
 
 $lang['sourceUrl'][0]            = 'Url';
 $lang['sourceUrl'][1]            = 'Enter the URL to the file here.';

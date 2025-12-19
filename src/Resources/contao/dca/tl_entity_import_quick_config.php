@@ -1,5 +1,10 @@
 <?php
 
+use Contao\DC_Table;
+use Contao\DataContainer;
+use Contao\System;
+use HeimrichHannot\EntityImportBundle\DataContainer\EntityImportQuickConfigContainer;
+
 /*
  * Copyright (c) 2022 Heimrich & Hannot GmbH
  *
@@ -11,14 +16,14 @@ System::getContainer()->get('huh.utils.dca')->loadLanguageFile('tl_entity_import
 
 $GLOBALS['TL_DCA']['tl_entity_import_quick_config'] = [
     'config' => [
-        'dataContainer' => 'Table',
+        'dataContainer' => DC_Table::class,
         'enableVersioning' => true,
         'onload_callback' => [
-            [\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportQuickConfigContainer::class, 'modifyDca'],
+            [EntityImportQuickConfigContainer::class, 'modifyDca'],
         ],
         'onsubmit_callback' => [
             ['huh.utils.dca', 'setDateAdded'],
-            [\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportQuickConfigContainer::class, 'cacheCsvRows'],
+            [EntityImportQuickConfigContainer::class, 'cacheCsvRows'],
         ],
         'oncopy_callback' => [
             ['huh.utils.dca', 'setDateAddedOnCopy'],
@@ -35,7 +40,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_quick_config'] = [
             'format' => '%s',
         ],
         'sorting' => [
-            'mode' => 1,
+            'mode' => DataContainer::MODE_SORTED,
             'fields' => ['title'],
             'headerFields' => ['title'],
             'panelLayout' => 'filter;sort,search,limit',
@@ -74,7 +79,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_quick_config'] = [
                 'label' => &$GLOBALS['TL_LANG']['tl_entity_import_quick_config']['dryRun'],
                 'href' => 'key=dryRun',
                 'icon' => 'important.svg',
-                'button_callback' => [\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportQuickConfigContainer::class, 'getDryRunOperation'],
+                'button_callback' => [EntityImportQuickConfigContainer::class, 'getDryRunOperation'],
             ],
             'import' => [
                 'label' => &$GLOBALS['TL_LANG']['tl_entity_import_quick_config']['import'],
@@ -98,7 +103,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_quick_config'] = [
         'dateAdded' => [
             'label' => &$GLOBALS['TL_LANG']['MSC']['dateAdded'],
             'sorting' => true,
-            'flag' => 6,
+            'flag' => DataContainer::SORT_DAY_DESC,
             'eval' => ['rgxp' => 'datim', 'doNotCopy' => true],
             'sql' => "int(10) unsigned NOT NULL default '0'",
         ],
@@ -107,7 +112,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_quick_config'] = [
             'exclude' => true,
             'search' => true,
             'sorting' => true,
-            'flag' => 1,
+            'flag' => DataContainer::SORT_INITIAL_LETTER_ASC,
             'inputType' => 'text',
             'eval' => ['mandatory' => true, 'tl_class' => 'w50'],
             'sql' => "varchar(255) NOT NULL default ''",
@@ -117,7 +122,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_quick_config'] = [
             'exclude' => true,
             'filter' => true,
             'inputType' => 'select',
-            'options_callback' => [\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportQuickConfigContainer::class, 'getImporterConfigs'],
+            'options_callback' => [EntityImportQuickConfigContainer::class, 'getImporterConfigs'],
             'eval' => ['tl_class' => 'w50', 'mandatory' => true, 'includeBlankOption' => true, 'submitOnChange' => true, 'chosen' => true],
             'sql' => "int(10) unsigned NOT NULL default '0'",
         ],
@@ -133,7 +138,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_quick_config'] = [
             'exclude' => true,
             'filter' => true,
             'inputType' => 'select',
-            'options_callback' => [\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportQuickConfigContainer::class, 'getParentEntitiesAsOptions'],
+            'options_callback' => [EntityImportQuickConfigContainer::class, 'getParentEntitiesAsOptions'],
             'eval' => ['tl_class' => 'w50', 'includeBlankOption' => true, 'chosen' => true, 'submitOnChange' => true],
             'sql' => "int(10) unsigned NOT NULL default '0'",
         ],
@@ -152,8 +157,8 @@ $GLOBALS['TL_DCA']['tl_entity_import_quick_config'] = [
             'eval' => [
                 'tl_class' => 'long clr',
                 'listWidget' => [
-                    'header_fields_callback' => [\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportQuickConfigContainer::class, 'getHeaderFieldsForPreview'],
-                    'items_callback' => [\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportQuickConfigContainer::class, 'getItemsForPreview'],
+                    'header_fields_callback' => [EntityImportQuickConfigContainer::class, 'getHeaderFieldsForPreview'],
+                    'items_callback' => [EntityImportQuickConfigContainer::class, 'getItemsForPreview'],
                 ],
             ],
         ],

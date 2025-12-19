@@ -24,15 +24,13 @@ class ExecuteImportCommand extends AbstractLockedCommand
     protected InputInterface $input;
     protected SymfonyStyle $io;
     protected ModelUtil $modelUtil;
-    protected ImporterFactory $importerFactory;
 
     /**
      * ExecuteImportCommand constructor.
      */
-    public function __construct(ModelUtil $modelUtil, ImporterFactory $importerFactory)
+    public function __construct(ModelUtil $modelUtil, protected ImporterFactory $importerFactory)
     {
         $this->modelUtil = $modelUtil;
-        $this->importerFactory = $importerFactory;
 
         parent::__construct();
     }
@@ -64,9 +62,9 @@ class ExecuteImportCommand extends AbstractLockedCommand
         return 0;
     }
 
-    private function import()
+    private function import(): void
     {
-        $configIds = explode(',', $this->input->getArgument('config-ids'));
+        $configIds = explode(',', (string) $this->input->getArgument('config-ids'));
         $dryRun = $this->input->getOption('dry-run') ?: false;
         $webCronMode = $this->input->getOption('web-cron-mode') ?: false;
 

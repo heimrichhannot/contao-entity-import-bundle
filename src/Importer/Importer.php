@@ -8,6 +8,7 @@
 
 namespace HeimrichHannot\EntityImportBundle\Importer;
 
+use Contao\StringUtil;
 use Ausi\SlugGenerator\SlugGenerator;
 use Contao\Controller;
 use Contao\CoreBundle\Exception\RedirectResponseException;
@@ -17,7 +18,6 @@ use Contao\Email;
 use Contao\File;
 use Contao\Folder;
 use Contao\Message;
-use Contao\Model;
 use Contao\System;
 use Contao\Validator;
 use HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer;
@@ -42,47 +42,35 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class Importer implements ImporterInterface
 {
-    protected SourceInterface $source;
-    protected EntityImportConfigModel $configModel;
     protected bool $dryRun = false;
     protected bool $webCronMode = false;
-    protected EventDispatcherInterface $eventDispatcher;
     protected Stopwatch $stopwatch;
     protected DatabaseUtil $databaseUtil;
     protected DcaUtil $dcaUtil;
-    protected ContainerInterface $container;
     protected $dbMergeCache;
     protected Request $request;
     protected FileUtil $fileUtil;
-    protected Utils $utils;
     protected SymfonyStyle $io;
-    protected ContaoFramework $framework;
 
     /**
      * Importer constructor.
      */
     public function __construct(
-        ContainerInterface $container,
-        ContaoFramework $framework,
-        Model $configModel,
-        SourceInterface $source,
-        EventDispatcherInterface $eventDispatcher,
+        protected ContainerInterface $container,
+        protected ContaoFramework $framework,
+        protected EntityImportConfigModel $configModel,
+        protected SourceInterface $source,
+        protected EventDispatcherInterface $eventDispatcher,
         Request $request,
         DatabaseUtil $databaseUtil,
         DcaUtil $dcaUtil,
         FileUtil $fileUtil,
-        Utils $utils
+        protected Utils $utils
     ) {
-        $this->container = $container;
-        $this->configModel = $configModel;
-        $this->source = $source;
         $this->databaseUtil = $databaseUtil;
-        $this->eventDispatcher = $eventDispatcher;
         $this->dcaUtil = $dcaUtil;
         $this->request = $request;
         $this->fileUtil = $fileUtil;
-        $this->utils = $utils;
-        $this->framework = $framework;
     }
 
     public function setInputOutput(SymfonyStyle $io): void
@@ -147,7 +135,7 @@ class Importer implements ImporterInterface
 
         $mappedItems = [];
 
-        $mapping = \Contao\StringUtil::deserialize($this->configModel->fieldMapping, true);
+        $mapping = StringUtil::deserialize($this->configModel->fieldMapping, true);
         $mapping = $this->adjustMappingForDcMultilingual($mapping);
         $mapping = $this->adjustMappingForChangeLanguage($mapping);
 
@@ -270,7 +258,7 @@ class Importer implements ImporterInterface
         }
     }
 
-    public function sendErrorEmail(string $errorMessage)
+    public function sendErrorEmail(string $errorMessage): void
     {
         $config = $this->getDebugConfig();
 
@@ -292,7 +280,7 @@ class Importer implements ImporterInterface
         $this->databaseUtil->update('tl_entity_import_config', ['errorNotificationLock' => '1'], 'tl_entity_import_config.id=?', [$this->configModel->id]);
     }
 
-    public function postProcess(string $table, array $mappedItems, array $dbIdMapping, array $dbItemMapping)
+    public function postProcess(string $table, array $mappedItems, array $dbIdMapping, array $dbItemMapping): void
     {
         // DC_Multilingual -> fix langPid (can only be done after all items are imported due to order issues otherwise)
         if (class_exists('\Terminal42\DcMultilingualBundle\Terminal42DcMultilingualBundle') &&
@@ -405,7 +393,7 @@ class Importer implements ImporterInterface
 
             $mode = $this->configModel->importMode;
 
-            $mapping = \Contao\StringUtil::deserialize($this->configModel->fieldMapping, true);
+            $mapping = StringUtil::deserialize($this->configModel->fieldMapping, true);
             $mapping = $this->adjustMappingForDcMultilingual($mapping);
             $mapping = $this->adjustMappingForChangeLanguage($mapping);
 
@@ -413,7 +401,7 @@ class Importer implements ImporterInterface
             $dbItemMapping = [];
 
             if ('merge' === $mode) {
-                $mergeIdentifiers = \Contao\StringUtil::deserialize($this->configModel->mergeIdentifierFields, true);
+                $mergeIdentifiers = StringUtil::deserialize($this->configModel->mergeIdentifierFields, true);
 
                 if (empty(array_filter($mergeIdentifiers))) {
                     throw new Exception($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['noIdentifierFields']);
@@ -493,9 +481,7 @@ class Importer implements ImporterInterface
                         $importedRecord = $record;
                     }
                 } elseif ('merge' === $mode) {
-                    $key = implode('||', array_map(function ($field) use ($item) {
-                        return $item[$field];
-                    }, $identifierFields));
+                    $key = implode('||', array_map(fn($field) => $item[$field], $identifierFields));
 
                     if ($key && isset($this->dbMergeCache[$key]) &&
                         ($existingRecord = $this->databaseUtil->findResultByPk($table, $this->dbMergeCache[$key])) && $existingRecord->numRows > 0) {
@@ -634,7 +620,7 @@ class Importer implements ImporterInterface
             return;
         }
 
-        $skipFields = \Contao\StringUtil::deserialize($this->configModel->skipFieldsOnMerge, true);
+        $skipFields = StringUtil::deserialize($this->configModel->skipFieldsOnMerge, true);
 
         foreach ($skipFields as $skipField) {
             if (!\array_key_exists($skipField, $mappingItem)) {
@@ -746,9 +732,7 @@ class Importer implements ImporterInterface
         $cache = [];
 
         while ($records->next()) {
-            $key = implode('||', array_map(function ($field) use ($records) {
-                return $records->{$field};
-            }, $identifierFields));
+            $key = implode('||', array_map(fn($field) => $records->{$field}, $identifierFields));
 
             if (!$key) {
                 continue;
@@ -782,7 +766,7 @@ class Importer implements ImporterInterface
 
         switch ($this->configModel->deletionMode) {
             case EntityImportConfigContainer::DELETION_MODE_MIRROR:
-                $deletionIdentifiers = \Contao\StringUtil::deserialize($this->configModel->deletionIdentifierFields, true);
+                $deletionIdentifiers = StringUtil::deserialize($this->configModel->deletionIdentifierFields, true);
 
                 if (empty($deletionIdentifiers)) {
                     throw new Exception($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['noIdentifierFields']);
@@ -870,9 +854,7 @@ class Importer implements ImporterInterface
 
         $aliasBase = preg_replace_callback(
             '@%([^%]+)%@i',
-            function ($matches) use ($record) {
-                return $record->{$matches[1]};
-            },
+            fn($matches) => $record->{$matches[1]},
             $fieldPattern
         );
 
@@ -894,7 +876,7 @@ class Importer implements ImporterInterface
     {
         $set = [];
         $slugGenerator = new SlugGenerator();
-        $fileMapping = \Contao\StringUtil::deserialize($this->configModel->fileFieldMapping, true);
+        $fileMapping = StringUtil::deserialize($this->configModel->fileFieldMapping, true);
 
         foreach ($fileMapping as $mapping) {
             if (($record->{$mapping['targetField']} ?? NULL) && $mapping['skipIfExisting']) {
@@ -906,7 +888,7 @@ class Importer implements ImporterInterface
                 $content = $this->fileUtil->retrieveFileContent(
                     $item[$mapping['mappingField']], $this->utils->container()->isBackend()
                 );
-            } catch (\Exception $e) {
+            } catch (\Exception) {
                 $set[$mapping['targetField']] = null;
 
                 continue;
@@ -927,17 +909,15 @@ class Importer implements ImporterInterface
             // generate the file name
             switch ($mapping['namingMode']) {
                 case 'random_md5':
-                    $filename = md5(rand(0, 99999999999999));
+                    $filename = md5(random_int(0, 99999999999999));
 
                     break;
 
                 case 'field_pattern':
                     $filename = preg_replace_callback(
                         '@%([^%]+)%@i',
-                        function ($matches) use ($record) {
-                            return $record->{$matches[1]};
-                        },
-                        $mapping['filenamePattern']
+                        fn($matches) => $record->{$matches[1]},
+                        (string) $mapping['filenamePattern']
                     );
 
                     break;

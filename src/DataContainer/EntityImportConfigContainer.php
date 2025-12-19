@@ -8,6 +8,8 @@
 
 namespace HeimrichHannot\EntityImportBundle\DataContainer;
 
+use Contao\System;
+use Contao\Image;
 use Contao\Config;
 use Contao\Controller;
 use Contao\CoreBundle\Exception\RedirectResponseException;
@@ -52,24 +54,20 @@ class EntityImportConfigContainer
     protected Request $request;
     protected UrlUtil $urlUtil;
     protected ModelUtil $modelUtil;
-    protected ImporterFactory $importerFactory;
     protected DatabaseUtil $databaseUtil;
-    protected EventDispatcherInterface $eventDispatcher;
 
     public function __construct(
         Request $request,
-        ImporterFactory $importerFactory,
+        protected ImporterFactory $importerFactory,
         UrlUtil $urlUtil,
         ModelUtil $modelUtil,
         DatabaseUtil $databaseUtil,
-        EventDispatcherInterface $eventDispatcher
+        protected EventDispatcherInterface $eventDispatcher
     ) {
         $this->request = $request;
         $this->urlUtil = $urlUtil;
         $this->modelUtil = $modelUtil;
-        $this->importerFactory = $importerFactory;
         $this->databaseUtil = $databaseUtil;
-        $this->eventDispatcher = $eventDispatcher;
     }
 
     public function getDryRunOperation($row, $href, $label, $title, $icon, $attributes)
@@ -78,10 +76,10 @@ class EntityImportConfigContainer
             return '';
         }
 
-        return '<a href="'.Controller::addToUrl($href.'&amp;id='.$row['id']).'&rt='.\RequestToken::get().'" title="'.\StringUtil::specialchars($title).'"'.$attributes.'>'.\Image::getHtml($icon, $label).'</a> ';
+        return '<a href="'.Controller::addToUrl($href.'&amp;id='.$row['id']).'&rt='.System::getContainer()->get('contao.csrf.token_manager')->getDefaultTokenValue().'" title="'.StringUtil::specialchars($title).'"'.$attributes.'>'.Image::getHtml($icon, $label).'</a> ';
     }
 
-    public function setPreset(?DataContainer $dc)
+    public function setPreset(?DataContainer $dc): void
     {
         if (!($preset = $dc->activeRecord->fieldMappingPresets)) {
             return;
@@ -95,7 +93,7 @@ class EntityImportConfigContainer
         ], 'tl_entity_import_config.id='.$dc->id);
     }
 
-    public function initPalette(?DataContainer $dc)
+    public function initPalette(?DataContainer $dc): void
     {
         $dca = &$GLOBALS['TL_DCA'][$dc->table];
 
@@ -187,12 +185,12 @@ class EntityImportConfigContainer
         return $options;
     }
 
-    public function import()
+    public function import(): void
     {
         $this->runImport();
     }
 
-    public function dryRun()
+    public function dryRun(): void
     {
         $this->runImport(true);
     }
@@ -202,7 +200,7 @@ class EntityImportConfigContainer
         return '<div class="tl_content_left">'.$row['title'].' <span style="color:#999;padding-left:3px">['.Date::parse(Config::get('datimFormat'), $row['dateAdded']).']</span></div>';
     }
 
-    private function runImport(bool $dry = false)
+    private function runImport(bool $dry = false): void
     {
         $config = $this->request->getGet('id');
 

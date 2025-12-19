@@ -30,7 +30,7 @@ class LoadProgressListener
         $this->modelUtil = $modelUtil;
     }
 
-    public function __invoke(LoadProgressEvent $event)
+    public function __invoke(LoadProgressEvent $event): void
     {
         if ('tl_entity_import_quick_config' === $event->getTable()) {
             if (null === ($quickImporter = $this->modelUtil->findModelInstanceByPk('tl_entity_import_quick_config', $event->getId())) ||
@@ -47,20 +47,11 @@ class LoadProgressListener
             }
         }
 
-        switch ($importConfig->state) {
-            case EntityImportConfigContainer::STATE_SUCCESS:
-                $state = ProgressBar::STATE_SUCCESS;
-
-                break;
-
-            case EntityImportConfigContainer::STATE_FAILED:
-                $state = ProgressBar::STATE_FAILED;
-
-                break;
-
-            default:
-                $state = ProgressBar::STATE_IN_PROGRESS;
-        }
+        $state = match ($importConfig->state) {
+            EntityImportConfigContainer::STATE_SUCCESS => ProgressBar::STATE_SUCCESS,
+            EntityImportConfigContainer::STATE_FAILED => ProgressBar::STATE_FAILED,
+            default => ProgressBar::STATE_IN_PROGRESS,
+        };
 
         $data = [
             'state' => $state,
@@ -71,23 +62,14 @@ class LoadProgressListener
 
         if ($importConfig->importProgressResult) {
             $progressBarMessages = [];
-            $messages = json_decode($importConfig->importProgressResult, true);
+            $messages = json_decode((string) $importConfig->importProgressResult, true);
 
             foreach (array_reverse($messages) as $message) {
-                switch ($message['type']) {
-                    case ImporterInterface::MESSAGE_TYPE_SUCCESS:
-                        $class = 'tl_confirm';
-
-                        break;
-
-                    case ImporterInterface::MESSAGE_TYPE_ERROR:
-                        $class = 'tl_error';
-
-                        break;
-
-                    default:
-                        $class = 'tl_warning';
-                }
+                $class = match ($message['type']) {
+                    ImporterInterface::MESSAGE_TYPE_SUCCESS => 'tl_confirm',
+                    ImporterInterface::MESSAGE_TYPE_ERROR => 'tl_error',
+                    default => 'tl_warning',
+                };
 
                 $progressBarMessages[] = [
                     'class' => $class,

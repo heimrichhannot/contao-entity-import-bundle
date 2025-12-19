@@ -1,5 +1,16 @@
 <?php
 
+use HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer;
+use HeimrichHannot\EntityImportBundle\DataContainer\EntityImportQuickConfigContainer;
+use HeimrichHannot\EntityImportBundle\Model\EntityImportSourceModel;
+use HeimrichHannot\EntityImportBundle\Model\EntityImportConfigModel;
+use HeimrichHannot\EntityImportBundle\Model\EntityImportQuickConfigModel;
+use HeimrichHannot\EntityImportBundle\Model\EntityImportCacheModel;
+use HeimrichHannot\EntityImportBundle\EventListener\Contao\SqlGetFromDcaEventListener;
+use HeimrichHannot\EntityImportBundle\Controller\PoorManCronController;
+use Contao\System;
+use Symfony\Component\HttpFoundation\Request;
+
 /*
  * Copyright (c) 2021 Heimrich & Hannot GmbH
  *
@@ -8,28 +19,28 @@
 
 $GLOBALS['BE_MOD']['system']['entityImport'] = [
     'tables' => ['tl_entity_import_source', 'tl_entity_import_config'],
-    'import' => [HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::class, 'import'],
-    'dryRun' => [HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::class, 'dryRun'],
+    'import' => [EntityImportConfigContainer::class, 'import'],
+    'dryRun' => [EntityImportConfigContainer::class, 'dryRun'],
 ];
 
 $GLOBALS['BE_MOD']['system']['entityImportQuick'] = [
     'tables' => ['tl_entity_import_quick_config'],
-    'import' => [HeimrichHannot\EntityImportBundle\DataContainer\EntityImportQuickConfigContainer::class, 'import'],
-    'dryRun' => [HeimrichHannot\EntityImportBundle\DataContainer\EntityImportQuickConfigContainer::class, 'dryRun'],
+    'import' => [EntityImportQuickConfigContainer::class, 'import'],
+    'dryRun' => [EntityImportQuickConfigContainer::class, 'dryRun'],
 ];
 
 /*
  * Models
  */
-$GLOBALS['TL_MODELS']['tl_entity_import_source'] = 'HeimrichHannot\EntityImportBundle\Model\EntityImportSourceModel';
-$GLOBALS['TL_MODELS']['tl_entity_import_config'] = 'HeimrichHannot\EntityImportBundle\Model\EntityImportConfigModel';
-$GLOBALS['TL_MODELS']['tl_entity_import_quick_config'] = 'HeimrichHannot\EntityImportBundle\Model\EntityImportQuickConfigModel';
-$GLOBALS['TL_MODELS']['tl_entity_import_cache'] = 'HeimrichHannot\EntityImportBundle\Model\EntityImportCacheModel';
+$GLOBALS['TL_MODELS']['tl_entity_import_source'] = EntityImportSourceModel::class;
+$GLOBALS['TL_MODELS']['tl_entity_import_config'] = EntityImportConfigModel::class;
+$GLOBALS['TL_MODELS']['tl_entity_import_quick_config'] = EntityImportQuickConfigModel::class;
+$GLOBALS['TL_MODELS']['tl_entity_import_cache'] = EntityImportCacheModel::class;
 
 /*
  * Hooks
  */
-$GLOBALS['TL_HOOKS']['sqlGetFromDca']['huhEntityImportBundle'] = [\HeimrichHannot\EntityImportBundle\EventListener\Contao\SqlGetFromDcaEventListener::class, '__invoke'];
+$GLOBALS['TL_HOOKS']['sqlGetFromDca']['huhEntityImportBundle'] = [SqlGetFromDcaEventListener::class, '__invoke'];
 
 /*
  * Backend widgets
@@ -39,13 +50,13 @@ $GLOBALS['BE_FFL']['entityImportProgress'] = 'HeimrichHannot\EntityImportBundle\
 /*
  * Crons
  */
-$GLOBALS['TL_CRON']['minutely'][] = [HeimrichHannot\EntityImportBundle\Controller\PoorManCronController::class, 'runMinutely'];
-$GLOBALS['TL_CRON']['hourly'][] = [HeimrichHannot\EntityImportBundle\Controller\PoorManCronController::class, 'runHourly'];
-$GLOBALS['TL_CRON']['daily'][] = [HeimrichHannot\EntityImportBundle\Controller\PoorManCronController::class, 'runDaily'];
-$GLOBALS['TL_CRON']['weekly'][] = [HeimrichHannot\EntityImportBundle\Controller\PoorManCronController::class, 'runWeekly'];
-$GLOBALS['TL_CRON']['monthly'][] = [HeimrichHannot\EntityImportBundle\Controller\PoorManCronController::class, 'runMonthly'];
+$GLOBALS['TL_CRON']['minutely'][] = [PoorManCronController::class, 'runMinutely'];
+$GLOBALS['TL_CRON']['hourly'][] = [PoorManCronController::class, 'runHourly'];
+$GLOBALS['TL_CRON']['daily'][] = [PoorManCronController::class, 'runDaily'];
+$GLOBALS['TL_CRON']['weekly'][] = [PoorManCronController::class, 'runWeekly'];
+$GLOBALS['TL_CRON']['monthly'][] = [PoorManCronController::class, 'runMonthly'];
 
-if ('BE' === TL_MODE) {
+if (System::getContainer()->get('contao.routing.scope_matcher')->isBackendRequest(System::getContainer()->get('request_stack')->getCurrentRequest() ?? Request::create(''))) {
     $GLOBALS['TL_CSS']['be_entityimportbundle'] = 'bundles/heimrichhannotcontaoentityimport/assets/contao-entity-import-bundle-be.css|static';
     $GLOBALS['TL_JAVASCRIPT']['be_entityimportbundle'] = 'bundles/heimrichhannotcontaoentityimport/assets/contao-entity-import-bundle-be.js|static';
 }

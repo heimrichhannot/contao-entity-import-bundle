@@ -1,5 +1,7 @@
 <?php
 
+use HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer;
+
 /*
  * Copyright (c) 2021 Heimrich & Hannot GmbH
  *
@@ -16,15 +18,15 @@ $lang['title'][1] = 'Geben Sie hier den Titel der Quelle ein.';
 
 $lang['type'][0] = 'Typ';
 $lang['type'][1] = 'Wählen Sie hier den Typ des Imports aus.';
-$lang['type'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::TYPE_DATABASE] = 'Datenbank';
-$lang['type'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::TYPE_FILE] = 'Datei';
+$lang['type'][EntityImportSourceContainer::TYPE_DATABASE] = 'Datenbank';
+$lang['type'][EntityImportSourceContainer::TYPE_FILE] = 'Datei';
 
 $lang['fileType'][0] = 'Dateityp';
 $lang['fileType'][1] = 'Wählen Sie hier den Typ der Datei aus.';
-$lang['fileType'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::FILETYPE_CSV] = 'CSV';
-$lang['fileType'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::FILETYPE_JSON] = 'JSON';
-$lang['fileType'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::FILETYPE_RSS] = 'RSS';
-$lang['fileType'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::FILETYPE_XML] = 'XML';
+$lang['fileType'][EntityImportSourceContainer::FILETYPE_CSV] = 'CSV';
+$lang['fileType'][EntityImportSourceContainer::FILETYPE_JSON] = 'JSON';
+$lang['fileType'][EntityImportSourceContainer::FILETYPE_RSS] = 'RSS';
+$lang['fileType'][EntityImportSourceContainer::FILETYPE_XML] = 'XML';
 
 $lang['csvHeaderRow'][0] = 'Kopfdatensatz';
 $lang['csvHeaderRow'][1] = 'Der erste Datensatz enthält die Spaltennamen.';
@@ -58,9 +60,9 @@ $lang['fileContent'][1] = 'Hier können Sie den Inhalt der ausgewählten Datei s
 $lang['retrievalType'][0] = 'Dateiquelle';
 $lang['retrievalType'][1] = 'Wählen Sie hier die Art der Dateiquelle aus.';
 
-$lang['retrievalType'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::RETRIEVAL_TYPE_HTTP] = 'HTTP';
-$lang['retrievalType'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::RETRIEVAL_TYPE_CONTAO_FILE_SYSTEM] = 'Contao Dateiverwaltung';
-$lang['retrievalType'][\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::RETRIEVAL_TYPE_ABSOLUTE_PATH] = 'Absoluter Pfad';
+$lang['retrievalType'][EntityImportSourceContainer::RETRIEVAL_TYPE_HTTP] = 'HTTP';
+$lang['retrievalType'][EntityImportSourceContainer::RETRIEVAL_TYPE_CONTAO_FILE_SYSTEM] = 'Contao Dateiverwaltung';
+$lang['retrievalType'][EntityImportSourceContainer::RETRIEVAL_TYPE_ABSOLUTE_PATH] = 'Absoluter Pfad';
 
 $lang['sourceUrl'][0] = 'URL';
 $lang['sourceUrl'][1] = 'Geben Sie hier die URL zur Datei ein.';

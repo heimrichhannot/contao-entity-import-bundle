@@ -1,5 +1,10 @@
 <?php
 
+use Contao\DC_Table;
+use Contao\DataContainer;
+use HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer;
+use Contao\Config;
+
 /*
  * Copyright (c) 2022 Heimrich & Hannot GmbH
  *
@@ -9,13 +14,13 @@
 $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
     // Config
     'config' => [
-        'dataContainer' => 'Table',
+        'dataContainer' => DC_Table::class,
         'ctable' => ['tl_entity_import_config'],
         'enableVersioning' => true,
-        'onload_callback' => [[\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::class, 'initPalette']],
+        'onload_callback' => [[EntityImportSourceContainer::class, 'initPalette']],
         'onsubmit_callback' => [
             ['huh.utils.dca', 'setDateAdded'],
-            [\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::class, 'setPreset'],
+            [EntityImportSourceContainer::class, 'setPreset'],
         ],
         'oncopy_callback' => [
             ['huh.utils.dca', 'setDateAddedOnCopy'],
@@ -30,9 +35,9 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
     // List
     'list' => [
         'sorting' => [
-            'mode' => 2,
+            'mode' => DataContainer::MODE_SORTABLE,
             'fields' => ['title'],
-            'flag' => 1,
+            'flag' => DataContainer::SORT_INITIAL_LETTER_ASC,
             'panelLayout' => 'search,limit',
         ],
         'label' => [
@@ -81,8 +86,8 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
     'palettes' => [
         '__selector__' => ['type', 'retrievalType', 'fileType'],
         'default' => '{title_legend},title,type;',
-        HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::TYPE_DATABASE => '{title_legend},title,type;{db_legend},dbDriver,dbHost,dbUser,dbPass,dbDatabase,dbPconnect,dbCharset,dbPort,dbSocket,dbSourceTableExplanation,dbSourceTable,dbSourceTableWhere,addDcMultilingualSupport,addChangeLanguageSupport,fieldMappingCopier,fieldMappingPresets,fieldMapping;',
-        HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::TYPE_FILE => '{title_legend},title,type;{file_legend},retrievalType;',
+        EntityImportSourceContainer::TYPE_DATABASE => '{title_legend},title,type;{db_legend},dbDriver,dbHost,dbUser,dbPass,dbDatabase,dbPconnect,dbCharset,dbPort,dbSocket,dbSourceTableExplanation,dbSourceTable,dbSourceTableWhere,addDcMultilingualSupport,addChangeLanguageSupport,fieldMappingCopier,fieldMappingPresets,fieldMapping;',
+        EntityImportSourceContainer::TYPE_FILE => '{title_legend},title,type;{file_legend},retrievalType;',
     ],
 
     // Subpalettes
@@ -106,7 +111,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
         'dateAdded' => [
             'label' => &$GLOBALS['TL_LANG']['MSC']['dateAdded'],
             'sorting' => true,
-            'flag' => 6,
+            'flag' => DataContainer::SORT_DAY_DESC,
             'eval' => ['rgxp' => 'datim', 'doNotCopy' => true],
             'sql' => "int(10) unsigned NOT NULL default '0'",
         ],
@@ -123,7 +128,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'exclude' => true,
             'filter' => true,
             'inputType' => 'select',
-            'options' => \HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::TYPES,
+            'options' => EntityImportSourceContainer::TYPES,
             'reference' => &$GLOBALS['TL_LANG']['tl_entity_import_source']['type'],
             'eval' => ['submitOnChange' => true, 'includeBlankOption' => true, 'tl_class' => 'w50', 'mandatory' => true],
             'sql' => "varchar(32) NOT NULL default ''",
@@ -132,8 +137,8 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'exclude' => true,
             'label' => &$GLOBALS['TL_LANG']['tl_entity_import_source']['dbDriver'],
             'inputType' => 'select',
-            'default' => version_compare(VERSION, '4.0', '<') ? \Config::get('dbDriver') : 'pdo_mysql',
-            'options' => version_compare(VERSION, '4.0', '<') ? ['MySQLi', 'MySQL'] : ['pdo_mysql'],
+            'default' => version_compare(VERSION, '4.0', '<') ? Config::get('dbDriver') : 'pdo_mysql',
+            'options' => \version_compare(\VERSION, '4.0', '<') ? ['MySQLi', 'MySQL'] : ['pdo_mysql'],
             'eval' => ['mandatory' => true, 'tl_class' => 'w50'],
             'sql' => "varchar(12) NOT NULL default ''",
         ],
@@ -141,7 +146,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'exclude' => true,
             'label' => &$GLOBALS['TL_LANG']['tl_entity_import_source']['dbHost'],
             'inputType' => 'text',
-            'default' => \Config::get('dbHost'),
+            'default' => Config::get('dbHost'),
             'eval' => ['mandatory' => true, 'maxlength' => 64, 'tl_class' => 'w50'],
             'sql' => "varchar(64) NOT NULL default ''",
         ],
@@ -149,7 +154,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'exclude' => true,
             'label' => &$GLOBALS['TL_LANG']['tl_entity_import_source']['dbUser'],
             'inputType' => 'text',
-            'default' => \Config::get('dbUser') ?: '',
+            'default' => Config::get('dbUser') ?: '',
             'eval' => ['mandatory' => true, 'maxlength' => 64, 'tl_class' => 'w50'],
             'sql' => "varchar(64) NOT NULL default ''",
         ],
@@ -164,7 +169,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'exclude' => true,
             'label' => &$GLOBALS['TL_LANG']['tl_entity_import_source']['dbDatabase'],
             'inputType' => 'text',
-            'default' => \Config::get('dbDatabase') ?: '',
+            'default' => Config::get('dbDatabase') ?: '',
             'eval' => ['mandatory' => true, 'maxlength' => 64, 'tl_class' => 'w50'],
             'sql' => "varchar(64) NOT NULL default ''",
         ],
@@ -181,7 +186,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'exclude' => true,
             'label' => &$GLOBALS['TL_LANG']['tl_entity_import_source']['dbCharset'],
             'inputType' => 'text',
-            'default' => \Config::get('dbCharset'),
+            'default' => Config::get('dbCharset'),
             'eval' => ['mandatory' => true, 'maxlength' => 32, 'tl_class' => 'w50'],
             'sql' => "varchar(32) NOT NULL default ''",
         ],
@@ -189,7 +194,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'exclude' => true,
             'label' => &$GLOBALS['TL_LANG']['tl_entity_import_source']['dbPort'],
             'inputType' => 'text',
-            'default' => \Config::get('dbPort'),
+            'default' => Config::get('dbPort'),
             'eval' => ['maxlength' => 5, 'tl_class' => 'w50', 'rgxp' => 'digit'],
             'sql' => "int(5) unsigned NOT NULL default '0'",
         ],
@@ -214,7 +219,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'exclude' => true,
             'inputType' => 'select',
             'eval' => ['tl_class' => 'w50', 'chosen' => true, 'includeBlankOption' => true, 'submitOnChange' => true],
-            'options_callback' => [\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::class, 'getAllTargetTables'],
+            'options_callback' => [EntityImportSourceContainer::class, 'getAllTargetTables'],
             'sql' => "varchar(64) NOT NULL default ''",
         ],
         'dbSourceTableWhere' => [
@@ -237,7 +242,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'exclude' => true,
             'filter' => true,
             'inputType' => 'select',
-            'options' => \HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::RETRIEVAL_TYPES,
+            'options' => EntityImportSourceContainer::RETRIEVAL_TYPES,
             'reference' => &$GLOBALS['TL_LANG']['tl_entity_import_source']['retrievalType'],
             'eval' => ['submitOnChange' => true, 'includeBlankOption' => true, 'tl_class' => 'w50', 'mandatory' => true],
             'sql' => "varchar(32) NOT NULL default ''",
@@ -247,7 +252,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'exclude' => true,
             'filter' => true,
             'inputType' => 'select',
-            'options' => \HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::FILETYPES,
+            'options' => EntityImportSourceContainer::FILETYPES,
             'reference' => &$GLOBALS['TL_LANG']['tl_entity_import_source']['fileType'],
             'eval' => ['submitOnChange' => true, 'includeBlankOption' => true, 'tl_class' => 'w50', 'mandatory' => true],
             'sql' => "varchar(16) NOT NULL default ''",
@@ -331,7 +336,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
                 'helpwizard' => false,
                 'tl_class' => 'long clr',
             ],
-            'load_callback' => [[\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer::class, 'onLoadFileContent']],
+            'load_callback' => [[EntityImportSourceContainer::class, 'onLoadFileContent']],
         ],
         'pathToDataArray' => [
             'label' => &$GLOBALS['TL_LANG']['tl_entity_import_source']['pathToDataArray'],

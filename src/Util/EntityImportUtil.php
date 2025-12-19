@@ -10,7 +10,7 @@ namespace HeimrichHannot\EntityImportBundle\Util;
 
 class EntityImportUtil
 {
-    public function transformFieldMappingSourceValueToSelect($options)
+    public function transformFieldMappingSourceValueToSelect($options): void
     {
         $dca = &$GLOBALS['TL_DCA']['tl_entity_import_source']['fields']['fieldMapping']['eval']['multiColumnEditor']['fields']['sourceValue'];
 

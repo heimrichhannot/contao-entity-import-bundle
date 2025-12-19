@@ -1,5 +1,10 @@
 <?php
 
+use Contao\DC_Table;
+use Contao\DataContainer;
+use HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer;
+use Contao\System;
+
 /*
  * Copyright (c) 2022 Heimrich & Hannot GmbH
  *
@@ -8,13 +13,13 @@
 
 $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
     'config' => [
-        'dataContainer' => 'Table',
+        'dataContainer' => DC_Table::class,
         'enableVersioning' => true,
         'ptable' => 'tl_entity_import_source',
-        'onload_callback' => [[\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::class, 'initPalette']],
+        'onload_callback' => [[EntityImportConfigContainer::class, 'initPalette']],
         'onsubmit_callback' => [
             ['huh.utils.dca', 'setDateAdded'],
-            [\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::class, 'setPreset'],
+            [EntityImportConfigContainer::class, 'setPreset'],
         ],
         'oncopy_callback' => [
             ['huh.utils.dca', 'setDateAddedOnCopy'],
@@ -28,11 +33,11 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
     ],
     'list' => [
         'sorting' => [
-            'mode' => 4,
+            'mode' => DataContainer::MODE_PARENT,
             'fields' => ['title DESC'],
             'headerFields' => ['title'],
             'panelLayout' => 'filter;sort,search,limit',
-            'child_record_callback' => [\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::class, 'listItems'],
+            'child_record_callback' => [EntityImportConfigContainer::class, 'listItems'],
             'disableGrouping' => true,
         ],
         'label' => [
@@ -72,7 +77,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
                 'label' => &$GLOBALS['TL_LANG']['tl_entity_import_config']['dryRun'],
                 'href' => 'key=dryRun',
                 'icon' => 'important.svg',
-                'button_callback' => [\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::class, 'getDryRunOperation'],
+                'button_callback' => [EntityImportConfigContainer::class, 'getDryRunOperation'],
             ],
             'import' => [
                 'label' => &$GLOBALS['TL_LANG']['tl_entity_import_config']['import'],
@@ -88,9 +93,9 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
     ],
     'subpalettes' => [
         'importMode_merge' => 'mergeIdentifierFields,mergeIdentifierAdditionalWhere,addSkipFieldsOnMerge',
-        'sortingMode_'.\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::SORTING_MODE_TARGET_FIELDS => 'targetSortingField,targetSortingOrder,targetSortingContextWhere',
-        'deletionMode_'.\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::DELETION_MODE_MIRROR => 'deletionIdentifierFields,targetDeletionAdditionalWhere',
-        'deletionMode_'.\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::DELETION_MODE_TARGET_FIELDS => 'targetDeletionWhere',
+        'sortingMode_'.EntityImportConfigContainer::SORTING_MODE_TARGET_FIELDS => 'targetSortingField,targetSortingOrder,targetSortingContextWhere',
+        'deletionMode_'.EntityImportConfigContainer::DELETION_MODE_MIRROR => 'deletionIdentifierFields,targetDeletionAdditionalWhere',
+        'deletionMode_'.EntityImportConfigContainer::DELETION_MODE_TARGET_FIELDS => 'targetDeletionWhere',
         'setDateAdded' => 'targetDateAddedField',
         'setTstamp' => 'targetTstampField',
         'generateAlias' => 'targetAliasField,aliasFieldPattern',
@@ -113,7 +118,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
         'dateAdded' => [
             'label' => &$GLOBALS['TL_LANG']['MSC']['dateAdded'],
             'sorting' => true,
-            'flag' => 6,
+            'flag' => DataContainer::SORT_DAY_DESC,
             'eval' => ['rgxp' => 'datim', 'doNotCopy' => true],
             'sql' => "int(10) unsigned NOT NULL default '0'",
         ],
@@ -134,7 +139,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'exclude' => true,
             'inputType' => 'select',
             'eval' => ['mandatory' => true, 'submitOnChange' => true, 'tl_class' => 'w50', 'chosen' => true, 'includeBlankOption' => true],
-            'options_callback' => [\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::class, 'getAllTargetTables'],
+            'options_callback' => [EntityImportConfigContainer::class, 'getAllTargetTables'],
             'sql' => "varchar(64) NOT NULL default ''",
         ],
         'fieldMappingCopier' => [
@@ -185,7 +190,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
                             'exclude' => true,
                             'inputType' => 'select',
                             'options' => [],
-                            'options_callback' => [\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::class, 'getTargetFields'],
+                            'options_callback' => [EntityImportConfigContainer::class, 'getTargetFields'],
                             'eval' => ['mandatory' => true, 'submitOnChange' => true, 'groupStyle' => 'width: 38%', 'chosen' => true, 'includeBlankOption' => true],
                         ],
                         'valueType' => [
@@ -207,7 +212,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
                         'mappingValue' => [
                             'label' => &$GLOBALS['TL_LANG']['tl_entity_import_config']['fieldMapping']['mappingValue'],
                             'inputType' => 'select',
-                            'options_callback' => [\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::class, 'getSourceFields'],
+                            'options_callback' => [EntityImportConfigContainer::class, 'getSourceFields'],
                             'eval' => [
                                 'groupStyle' => 'width: 38%',
                                 'mandatory' => true,
@@ -262,7 +267,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
                         'mappingField' => [
                             'label' => &$GLOBALS['TL_LANG']['tl_entity_import_config']['fileFieldMapping']['mappingField'],
                             'inputType' => 'select',
-                            'options_callback' => [\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::class, 'getSourceFields'],
+                            'options_callback' => [EntityImportConfigContainer::class, 'getSourceFields'],
                             'eval' => [
                                 'groupStyle' => 'width: 28%',
                                 'mandatory' => true,
@@ -276,7 +281,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
                             'exclude' => true,
                             'inputType' => 'select',
                             'options' => [],
-                            'options_callback' => [\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::class, 'getTargetFields'],
+                            'options_callback' => [EntityImportConfigContainer::class, 'getTargetFields'],
                             'eval' => [
                                 'mandatory' => true,
                                 'submitOnChange' => true,
@@ -392,7 +397,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
                         'source' => [
                             'label' => &$GLOBALS['TL_LANG']['tl_entity_import_config']['mergeIdentifierFields']['source'],
                             'inputType' => 'select',
-                            'options_callback' => [\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::class, 'getSourceFields'],
+                            'options_callback' => [EntityImportConfigContainer::class, 'getSourceFields'],
                             'eval' => [
                                 'groupStyle' => 'width: 49%',
                                 'includeBlankOption' => true,
@@ -403,7 +408,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
                         'target' => [
                             'label' => &$GLOBALS['TL_LANG']['tl_entity_import_config']['mergeIdentifierFields']['target'],
                             'inputType' => 'select',
-                            'options_callback' => [\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::class, 'getTargetFields'],
+                            'options_callback' => [EntityImportConfigContainer::class, 'getTargetFields'],
                             'eval' => [
                                 'groupStyle' => 'width: 49%',
                                 'includeBlankOption' => true,
@@ -429,7 +434,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'exclude' => true,
             'filter' => true,
             'inputType' => 'select',
-            'options' => \HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::SORTING_MODES,
+            'options' => EntityImportConfigContainer::SORTING_MODES,
             'reference' => &$GLOBALS['TL_LANG']['tl_entity_import_config']['reference']['sortingMode'],
             'eval' => ['tl_class' => 'w50', 'includeBlankOption' => true, 'submitOnChange' => true],
             'sql' => "varchar(16) NOT NULL default ''",
@@ -439,7 +444,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'exclude' => true,
             'filter' => true,
             'inputType' => 'select',
-            'options_callback' => [\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::class, 'getTargetFields'],
+            'options_callback' => [EntityImportConfigContainer::class, 'getTargetFields'],
             'eval' => ['tl_class' => 'w50', 'mandatory' => true, 'includeBlankOption' => true, 'chosen' => true],
             'sql' => "varchar(64) NOT NULL default ''",
         ],
@@ -472,7 +477,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'filter' => true,
             'default' => 'dateAdded',
             'inputType' => 'select',
-            'options_callback' => [\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::class, 'getTargetFields'],
+            'options_callback' => [EntityImportConfigContainer::class, 'getTargetFields'],
             'eval' => ['tl_class' => 'w50', 'includeBlankOption' => true, 'chosen' => true],
             'sql' => "varchar(64) NOT NULL default ''",
         ],
@@ -489,7 +494,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'filter' => true,
             'default' => 'tstamp',
             'inputType' => 'select',
-            'options_callback' => [\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::class, 'getTargetFields'],
+            'options_callback' => [EntityImportConfigContainer::class, 'getTargetFields'],
             'eval' => ['tl_class' => 'w50', 'includeBlankOption' => true, 'chosen' => true],
             'sql' => "varchar(64) NOT NULL default ''",
         ],
@@ -506,7 +511,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'filter' => true,
             'default' => 'alias',
             'inputType' => 'select',
-            'options_callback' => [\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::class, 'getTargetFields'],
+            'options_callback' => [EntityImportConfigContainer::class, 'getTargetFields'],
             'eval' => ['tl_class' => 'w50', 'includeBlankOption' => true, 'chosen' => true, 'mandatory' => true],
             'sql' => "varchar(64) NOT NULL default ''",
         ],
@@ -549,7 +554,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'label' => &$GLOBALS['TL_LANG']['tl_entity_import_config']['cronLanguage'],
             'exclude' => true,
             'inputType' => 'select',
-            'options' => \Contao\System::getLanguages(),
+            'options' => System::getLanguages(),
             'eval' => ['tl_class' => 'w50', 'mandatory' => true, 'includeBlankOption' => true, 'chosen' => true],
             'sql' => "varchar(64) NOT NULL default ''",
         ],
@@ -565,7 +570,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'exclude' => true,
             'filter' => true,
             'inputType' => 'select',
-            'options' => \HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::DELETION_MODES,
+            'options' => EntityImportConfigContainer::DELETION_MODES,
             'reference' => &$GLOBALS['TL_LANG']['tl_entity_import_config']['reference']['deletionMode'],
             'eval' => ['tl_class' => 'w50', 'includeBlankOption' => true, 'submitOnChange' => true],
             'sql' => "varchar(16) NOT NULL default ''",
@@ -580,7 +585,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
                         'source' => [
                             'label' => &$GLOBALS['TL_LANG']['tl_entity_import_config']['mergeIdentifierFields']['source'],
                             'inputType' => 'select',
-                            'options_callback' => [\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::class, 'getSourceFields'],
+                            'options_callback' => [EntityImportConfigContainer::class, 'getSourceFields'],
                             'eval' => [
                                 'groupStyle' => 'width: 49%',
                                 'includeBlankOption' => true,
@@ -591,7 +596,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
                         'target' => [
                             'label' => &$GLOBALS['TL_LANG']['tl_entity_import_config']['mergeIdentifierFields']['target'],
                             'inputType' => 'select',
-                            'options_callback' => [\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::class, 'getTargetFields'],
+                            'options_callback' => [EntityImportConfigContainer::class, 'getTargetFields'],
                             'eval' => [
                                 'groupStyle' => 'width: 49%',
                                 'includeBlankOption' => true,
@@ -637,7 +642,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'label' => &$GLOBALS['TL_LANG']['tl_entity_import_config']['skipFieldsOnMerge'],
             'inputType' => 'checkbox',
             'exclude' => true,
-            'options_callback' => [\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::class, 'getTargetFields'],
+            'options_callback' => [EntityImportConfigContainer::class, 'getTargetFields'],
             'eval' => [
                 'multiple' => true,
                 'tl_class' => 'clr',
@@ -682,7 +687,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'exclude' => true,
             'filter' => true,
             'inputType' => 'select',
-            'options' => \HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::STATES,
+            'options' => EntityImportConfigContainer::STATES,
             'reference' => &$GLOBALS['TL_LANG']['tl_entity_import_config']['reference'],
             'eval' => ['tl_class' => 'w50', 'includeBlankOption' => true, 'submitOnChange' => true, 'readonly' => true],
             'sql' => "varchar(16) NOT NULL default ''",
@@ -773,7 +778,7 @@ if (class_exists('\Terminal42\ChangeLanguage\Language')) {
     $dca['fields']['changeLanguageTargetExternalIdField'] = [
         'label' => &$GLOBALS['TL_LANG']['tl_entity_import_config']['changeLanguageTargetExternalIdField'],
         'inputType' => 'select',
-        'options_callback' => [\HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer::class, 'getTargetFields'],
+        'options_callback' => [EntityImportConfigContainer::class, 'getTargetFields'],
         'eval' => [
             'tl_class' => 'w50',
             'includeBlankOption' => true,
