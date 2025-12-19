@@ -1,8 +1,8 @@
 var Encore = require('@symfony/webpack-encore');
 
 Encore
-.setOutputPath('src/Resources/public/assets')
-.addEntry('contao-entity-import-bundle-be', './src/Resources/assets/js/contao-entity-import-bundle-be.js')
+.setOutputPath('public/assets')
+.addEntry('contao-entity-import-bundle-be', './assets/js/contao-entity-import-bundle-be.js')
 .setPublicPath('/bundles/heimrichhannotcontaoentityimportbundle/assets')
 .setManifestKeyPrefix('bundles/heimrichhannotcontaoentityimportbundle/assets')
 .disableSingleRuntimeChunk()

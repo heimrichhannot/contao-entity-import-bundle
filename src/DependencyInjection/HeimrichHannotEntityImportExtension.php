@@ -8,8 +8,10 @@
 
 namespace HeimrichHannot\EntityImportBundle\DependencyInjection;
 
+use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
+use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 
 class HeimrichHannotEntityImportExtension extends Extension
 {
@@ -21,6 +23,9 @@ class HeimrichHannotEntityImportExtension extends Extension
         $configuration = new Configuration();
 
         $container->setParameter(Configuration::ROOT_ID, $this->processConfiguration($configuration, $configs));
+
+        $loader = new YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
+        $loader->load('services.yaml');
     }
 
     public function getAlias(): string

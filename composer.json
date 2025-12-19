@@ -34,38 +34,19 @@
   },
   "require-dev": {
     "contao/test-case": "^5.3",
-    "contao/manager-plugin": "^2.0",
     "rector/rector": "^2.2",
     "contao/contao-rector": "dev-main"
-  },
-  "conflict": {
-    "heimrichhannot/contao-entity_import": "*"
   },
   "autoload": {
     "psr-4": {
       "HeimrichHannot\\EntityImportBundle\\": "src/"
-    },
-    "classmap": [
-      "src/"
-    ],
-    "exclude-from-classmap": [
-      "src/Resources/contao/config/",
-      "src/Resources/contao/dca/",
-      "src/Resources/contao/languages/",
-      "src/Resources/contao/templates/"
-    ]
-  },
-  "autoload-dev": {
-    "psr-4": {
-      "HeimrichHannot\\EntityImportBundle\\Test\\": "tests/"
     }
   },
   "config": {
     "preferred-install": "dist",
     "allow-plugins": {
       "contao-components/installer": false,
-      "php-http/discovery": false,
-      "contao/manager-plugin": false
+      "php-http/discovery": false
     }
   },
   "extra": {
