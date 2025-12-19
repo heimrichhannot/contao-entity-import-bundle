@@ -8,22 +8,9 @@
 
 namespace HeimrichHannot\EntityImportBundle\ContaoManager;
 
-use Contao\CoreBundle\ContaoCoreBundle;
-use Contao\ManagerPlugin\Bundle\BundlePluginInterface;
-use Contao\ManagerPlugin\Bundle\Config\BundleConfig;
-use Contao\ManagerPlugin\Bundle\Parser\ParserInterface;
-use HeimrichHannot\EntityImportBundle\HeimrichHannotContaoEntityImportBundle;
+use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
 
-class Plugin implements BundlePluginInterface
+class Plugin extends AbstractBundle
 {
-    public function getBundles(ParserInterface $parser)
-    {
-        return [
-            BundleConfig::create(HeimrichHannotContaoEntityImportBundle::class)
-                ->setLoadAfter([
-                    ContaoCoreBundle::class,
-                ]),
-        ];
-    }
 
 }
