@@ -9,7 +9,7 @@
 namespace HeimrichHannot\EntityImportBundle\Source;
 
 use Ausi\SlugGenerator\SlugGenerator;
-use HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer;
+use HeimrichHannot\EntityImportBundle\EventListener\DataContainer\EntityImportSourceContainer;
 use HeimrichHannot\EntityImportBundle\Event\AfterFileSourceGetContentEvent;
 use HeimrichHannot\EntityImportBundle\Event\BeforeAuthenticationEvent;
 use HeimrichHannot\UtilsBundle\Container\ContainerUtil;

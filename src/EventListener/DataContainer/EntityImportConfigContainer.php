@@ -6,8 +6,9 @@
  * @license LGPL-3.0-or-later
  */
 
-namespace HeimrichHannot\EntityImportBundle\DataContainer;
+namespace HeimrichHannot\EntityImportBundle\EventListener\DataContainer;
 
+use Contao\CoreBundle\DependencyInjection\Attribute\AsCallback;
 use Contao\System;
 use Contao\Image;
 use Contao\Config;
@@ -70,6 +71,7 @@ class EntityImportConfigContainer
         $this->databaseUtil = $databaseUtil;
     }
 
+    #[AsCallback('tl_entity_import_config','list.operations.dryRun.button')]
     public function getDryRunOperation($row, $href, $label, $title, $icon, $attributes)
     {
         if ($row['useCronInWebContext']) {
@@ -79,6 +81,7 @@ class EntityImportConfigContainer
         return '<a href="'.Controller::addToUrl($href.'&amp;id='.$row['id']).'&rt='.System::getContainer()->get('contao.csrf.token_manager')->getDefaultTokenValue().'" title="'.StringUtil::specialchars($title).'"'.$attributes.'>'.Image::getHtml($icon, $label).'</a> ';
     }
 
+    #[AsCallback('tl_entity_import_config','config.onsubmit')]
     public function setPreset(?DataContainer $dc): void
     {
         if (!($preset = $dc->activeRecord->fieldMappingPresets)) {
@@ -93,6 +96,7 @@ class EntityImportConfigContainer
         ], 'tl_entity_import_config.id='.$dc->id);
     }
 
+    #[AsCallback('tl_entity_import_config','config.load')]
     public function initPalette(?DataContainer $dc): void
     {
         $dca = &$GLOBALS['TL_DCA'][$dc->table];
@@ -125,6 +129,8 @@ class EntityImportConfigContainer
             $dca['fields']['fieldMappingPresets']['eval']['presets'] = $presets;
         }
     }
+
+    #[AsCallback('tl_entity_import_config','fields.targetTable.options')]
 
     public function getAllTargetTables(?DataContainer $dc): array
     {
@@ -160,6 +166,11 @@ class EntityImportConfigContainer
         return $options;
     }
 
+    #[AsCallback('tl_entity_import_config','fields.targetSortingField.options')]
+    #[AsCallback('tl_entity_import_config','fields.targetDateAddedField.options')]
+    #[AsCallback('tl_entity_import_config','fields.targetTstampField.options')]
+    #[AsCallback('tl_entity_import_config','fields.targetAliasField.options')]
+    #[AsCallback('tl_entity_import_config','fields.skipFieldsOnMerge.options')]
     public function getTargetFields(?DataContainer $dc): array
     {
         $options = [];
@@ -195,6 +206,7 @@ class EntityImportConfigContainer
         $this->runImport(true);
     }
 
+    #[AsCallback('tl_entity_import_config','list.sorting.child_record')]
     public function listItems(array $row): string
     {
         return '<div class="tl_content_left">'.$row['title'].' <span style="color:#999;padding-left:3px">['.Date::parse(Config::get('datimFormat'), $row['dateAdded']).']</span></div>';

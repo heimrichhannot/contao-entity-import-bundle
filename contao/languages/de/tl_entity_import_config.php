@@ -1,6 +1,6 @@
 <?php
 
-use HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer;
+use HeimrichHannot\EntityImportBundle\EventListener\DataContainer\EntityImportConfigContainer;
 
 /*
  * Copyright (c) 2021 Heimrich & Hannot GmbH

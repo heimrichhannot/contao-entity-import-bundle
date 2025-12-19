@@ -6,7 +6,7 @@
  * @license LGPL-3.0-or-later
  */
 
-namespace HeimrichHannot\EntityImportBundle\DataContainer;
+namespace HeimrichHannot\EntityImportBundle\EventListener\DataContainer;
 
 use Contao\CoreBundle\DependencyInjection\Attribute\AsCallback;
 use Contao\Database;
@@ -70,6 +70,7 @@ class EntityImportSourceContainer
         $this->databaseUtil = $databaseUtil;
     }
 
+    #[AsCallback('tl_entity_import_source','config.onsubmit')]
     public function setPreset(?DataContainer $dc): void
     {
         if (!($preset = $dc->activeRecord->fieldMappingPresets)) {
@@ -187,6 +188,7 @@ class EntityImportSourceContainer
         }
     }
 
+    #[AsCallback('tl_entity_import_source','fields.fileContent.load')]
     public function onLoadFileContent(?string $value, ?DataContainer $dc)
     {
         if (null === ($sourceModel = $this->modelUtil->findModelInstanceByPk('tl_entity_import_source', $dc->id))) {
@@ -234,6 +236,7 @@ class EntityImportSourceContainer
         return $source->getFileContent(true);
     }
 
+    #[AsCallback('tl_entity_import_source','fields.dbSourceTable.options')]
     public function getAllTargetTables(?DataContainer $dc): array
     {
         if (null === ($source = $this->modelUtil->findModelInstanceByPk('tl_entity_import_source', $dc->id))) {

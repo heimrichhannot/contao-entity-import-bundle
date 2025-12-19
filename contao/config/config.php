@@ -1,7 +1,7 @@
 <?php
 
-use HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer;
-use HeimrichHannot\EntityImportBundle\DataContainer\EntityImportQuickConfigContainer;
+use HeimrichHannot\EntityImportBundle\EventListener\DataContainer\EntityImportConfigContainer;
+use HeimrichHannot\EntityImportBundle\EventListener\DataContainer\EntityImportQuickConfigContainer;
 use HeimrichHannot\EntityImportBundle\Model\EntityImportSourceModel;
 use HeimrichHannot\EntityImportBundle\Model\EntityImportConfigModel;
 use HeimrichHannot\EntityImportBundle\Model\EntityImportQuickConfigModel;

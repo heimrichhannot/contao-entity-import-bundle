@@ -2,7 +2,7 @@
 
 use Contao\DC_Table;
 use Contao\DataContainer;
-use HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer;
+use HeimrichHannot\EntityImportBundle\EventListener\DataContainer\EntityImportConfigContainer;
 use Contao\System;
 
 /*
@@ -16,14 +16,6 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
         'dataContainer' => DC_Table::class,
         'enableVersioning' => true,
         'ptable' => 'tl_entity_import_source',
-        'onload_callback' => [[EntityImportConfigContainer::class, 'initPalette']],
-        'onsubmit_callback' => [
-            ['huh.utils.dca', 'setDateAdded'],
-            [EntityImportConfigContainer::class, 'setPreset'],
-        ],
-        'oncopy_callback' => [
-            ['huh.utils.dca', 'setDateAddedOnCopy'],
-        ],
         'sql' => [
             'keys' => [
                 'id' => 'primary',
@@ -37,7 +29,6 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'fields' => ['title DESC'],
             'headerFields' => ['title'],
             'panelLayout' => 'filter;sort,search,limit',
-            'child_record_callback' => [EntityImportConfigContainer::class, 'listItems'],
             'disableGrouping' => true,
         ],
         'label' => [
@@ -77,7 +68,6 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
                 'label' => &$GLOBALS['TL_LANG']['tl_entity_import_config']['dryRun'],
                 'href' => 'key=dryRun',
                 'icon' => 'important.svg',
-                'button_callback' => [EntityImportConfigContainer::class, 'getDryRunOperation'],
             ],
             'import' => [
                 'label' => &$GLOBALS['TL_LANG']['tl_entity_import_config']['import'],
@@ -139,7 +129,6 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'exclude' => true,
             'inputType' => 'select',
             'eval' => ['mandatory' => true, 'submitOnChange' => true, 'tl_class' => 'w50', 'chosen' => true, 'includeBlankOption' => true],
-            'options_callback' => [EntityImportConfigContainer::class, 'getAllTargetTables'],
             'sql' => "varchar(64) NOT NULL default ''",
         ],
         'fieldMappingCopier' => [
@@ -444,7 +433,6 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'exclude' => true,
             'filter' => true,
             'inputType' => 'select',
-            'options_callback' => [EntityImportConfigContainer::class, 'getTargetFields'],
             'eval' => ['tl_class' => 'w50', 'mandatory' => true, 'includeBlankOption' => true, 'chosen' => true],
             'sql' => "varchar(64) NOT NULL default ''",
         ],
@@ -477,7 +465,6 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'filter' => true,
             'default' => 'dateAdded',
             'inputType' => 'select',
-            'options_callback' => [EntityImportConfigContainer::class, 'getTargetFields'],
             'eval' => ['tl_class' => 'w50', 'includeBlankOption' => true, 'chosen' => true],
             'sql' => "varchar(64) NOT NULL default ''",
         ],
@@ -494,7 +481,6 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'filter' => true,
             'default' => 'tstamp',
             'inputType' => 'select',
-            'options_callback' => [EntityImportConfigContainer::class, 'getTargetFields'],
             'eval' => ['tl_class' => 'w50', 'includeBlankOption' => true, 'chosen' => true],
             'sql' => "varchar(64) NOT NULL default ''",
         ],
@@ -511,7 +497,6 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'filter' => true,
             'default' => 'alias',
             'inputType' => 'select',
-            'options_callback' => [EntityImportConfigContainer::class, 'getTargetFields'],
             'eval' => ['tl_class' => 'w50', 'includeBlankOption' => true, 'chosen' => true, 'mandatory' => true],
             'sql' => "varchar(64) NOT NULL default ''",
         ],
@@ -642,7 +627,6 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'label' => &$GLOBALS['TL_LANG']['tl_entity_import_config']['skipFieldsOnMerge'],
             'inputType' => 'checkbox',
             'exclude' => true,
-            'options_callback' => [EntityImportConfigContainer::class, 'getTargetFields'],
             'eval' => [
                 'multiple' => true,
                 'tl_class' => 'clr',

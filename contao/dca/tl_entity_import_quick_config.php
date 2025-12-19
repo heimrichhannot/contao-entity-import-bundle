@@ -3,7 +3,7 @@
 use Contao\DC_Table;
 use Contao\DataContainer;
 use Contao\System;
-use HeimrichHannot\EntityImportBundle\DataContainer\EntityImportQuickConfigContainer;
+use HeimrichHannot\EntityImportBundle\EventListener\DataContainer\EntityImportQuickConfigContainer;
 
 /*
  * Copyright (c) 2022 Heimrich & Hannot GmbH

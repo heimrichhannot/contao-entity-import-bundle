@@ -2,7 +2,7 @@
 
 use Contao\DC_Table;
 use Contao\DataContainer;
-use HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer;
+use HeimrichHannot\EntityImportBundle\EventListener\DataContainer\EntityImportSourceContainer;
 use Contao\Config;
 
 /*
@@ -17,10 +17,6 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
         'dataContainer' => DC_Table::class,
         'ctable' => ['tl_entity_import_config'],
         'enableVersioning' => true,
-        'onsubmit_callback' => [
-            ['huh.utils.dca', 'setDateAdded'],
-            [EntityImportSourceContainer::class, 'setPreset'],
-        ],
         'oncopy_callback' => [
             ['huh.utils.dca', 'setDateAddedOnCopy'],
         ],
@@ -44,40 +40,14 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'format' => '%s <span style="color:#b3b3b3; padding-left:3px;">[%s]</span>',
         ],
         'global_operations' => [
-            'all' => [
-                'label' => &$GLOBALS['TL_LANG']['MSC']['all'],
-                'href' => 'act=select',
-                'class' => 'header_edit_all',
-                'attributes' => 'onclick="Backend.getScrollOffset();" accesskey="e"',
-            ],
+            'all',
         ],
         'operations' => [
-            'edit' => [
-                'label' => &$GLOBALS['TL_LANG']['tl_entity_import_source']['edit'],
-                'href' => 'table=tl_entity_import_config',
-                'icon' => 'edit.gif',
-            ],
-            'editheader' => [
-                'label' => &$GLOBALS['TL_LANG']['tl_entity_import_source']['editheader'],
-                'href' => 'act=edit',
-                'icon' => 'header.gif',
-            ],
-            'copy' => [
-                'label' => &$GLOBALS['TL_LANG']['tl_entity_import_source']['copy'],
-                'href' => 'act=copy',
-                'icon' => 'copy.gif',
-            ],
-            'delete' => [
-                'label' => &$GLOBALS['TL_LANG']['tl_entity_import_source']['delete'],
-                'href' => 'act=delete',
-                'icon' => 'delete.gif',
-                'attributes' => 'onclick="if (!confirm(\''.($GLOBALS['TL_LANG']['MSC']['deleteConfirm'] ?? null).'\')) return false; Backend.getScrollOffset();"',
-            ],
-            'show' => [
-                'label' => &$GLOBALS['TL_LANG']['tl_entity_import_source']['show'],
-                'href' => 'act=show',
-                'icon' => 'show.gif',
-            ],
+            'edit',
+            'children',
+            'copy',
+            'delete' ,
+            'show'
         ],
     ],
 
@@ -218,7 +188,6 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'exclude' => true,
             'inputType' => 'select',
             'eval' => ['tl_class' => 'w50', 'chosen' => true, 'includeBlankOption' => true, 'submitOnChange' => true],
-            'options_callback' => [EntityImportSourceContainer::class, 'getAllTargetTables'],
             'sql' => "varchar(64) NOT NULL default ''",
         ],
         'dbSourceTableWhere' => [
@@ -335,7 +304,6 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
                 'helpwizard' => false,
                 'tl_class' => 'long clr',
             ],
-            'load_callback' => [[EntityImportSourceContainer::class, 'onLoadFileContent']],
         ],
         'pathToDataArray' => [
             'label' => &$GLOBALS['TL_LANG']['tl_entity_import_source']['pathToDataArray'],

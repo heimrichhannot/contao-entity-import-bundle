@@ -1,6 +1,6 @@
 <?php
 
-use HeimrichHannot\EntityImportBundle\DataContainer\EntityImportSourceContainer;
+use HeimrichHannot\EntityImportBundle\EventListener\DataContainer\EntityImportSourceContainer;
 
 $lang = &$GLOBALS['TL_LANG']['tl_entity_import_source'];
 

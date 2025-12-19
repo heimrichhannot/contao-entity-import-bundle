@@ -20,7 +20,7 @@ use Contao\Folder;
 use Contao\Message;
 use Contao\System;
 use Contao\Validator;
-use HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer;
+use HeimrichHannot\EntityImportBundle\EventListener\DataContainer\EntityImportConfigContainer;
 use HeimrichHannot\EntityImportBundle\Event\AfterImportEvent;
 use HeimrichHannot\EntityImportBundle\Event\AfterItemImportEvent;
 use HeimrichHannot\EntityImportBundle\Event\BeforeFileImportEvent;

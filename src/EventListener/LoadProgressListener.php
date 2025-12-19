@@ -8,7 +8,7 @@
 
 namespace HeimrichHannot\EntityImportBundle\EventListener;
 
-use HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer;
+use HeimrichHannot\EntityImportBundle\EventListener\DataContainer\EntityImportConfigContainer;
 use HeimrichHannot\EntityImportBundle\Importer\ImporterInterface;
 use HeimrichHannot\ProgressBarWidgetBundle\Event\LoadProgressEvent;
 use HeimrichHannot\ProgressBarWidgetBundle\Widget\ProgressBar;

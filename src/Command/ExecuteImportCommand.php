@@ -9,7 +9,7 @@
 namespace HeimrichHannot\EntityImportBundle\Command;
 
 use Contao\CoreBundle\Command\AbstractLockedCommand;
-use HeimrichHannot\EntityImportBundle\DataContainer\EntityImportConfigContainer;
+use HeimrichHannot\EntityImportBundle\EventListener\DataContainer\EntityImportConfigContainer;
 use HeimrichHannot\EntityImportBundle\Importer\ImporterFactory;
 use HeimrichHannot\EntityImportBundle\Importer\ImporterInterface;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;

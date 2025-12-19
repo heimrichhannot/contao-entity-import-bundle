@@ -6,7 +6,7 @@
  * @license LGPL-3.0-or-later
  */
 
-namespace HeimrichHannot\EntityImportBundle\DataContainer;
+namespace HeimrichHannot\EntityImportBundle\EventListener\DataContainer;
 
 use Contao\Image;
 use Contao\Controller;
@@ -20,7 +20,7 @@ use HeimrichHannot\EntityImportBundle\Event\BeforeItemImportEvent;
 use HeimrichHannot\EntityImportBundle\Importer\ImporterFactory;
 use HeimrichHannot\EntityImportBundle\Source\SourceFactory;
 use HeimrichHannot\EntityImportBundle\Source\SourceInterface;
-use HeimrichHannot\ListWidget\ListWidget;
+use HeimrichHannot\ListWidgetBundle\Widget\ListWidget;
 use HeimrichHannot\RequestBundle\Component\HttpFoundation\Request;
 use HeimrichHannot\UtilsBundle\Database\DatabaseUtil;
 use HeimrichHannot\UtilsBundle\Dca\DcaUtil;
