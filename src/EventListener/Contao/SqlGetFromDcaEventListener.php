@@ -12,7 +12,9 @@ use Contao\CoreBundle\Framework\ContaoFramework;
 use Contao\Database;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
 use HeimrichHannot\UtilsBundle\Util\Utils;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
+#[AsEventListener]
 class SqlGetFromDcaEventListener
 {
     protected ModelUtil $modelUtil;

@@ -17,7 +17,6 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
         'dataContainer' => DC_Table::class,
         'ctable' => ['tl_entity_import_config'],
         'enableVersioning' => true,
-        'onload_callback' => [[EntityImportSourceContainer::class, 'initPalette']],
         'onsubmit_callback' => [
             ['huh.utils.dca', 'setDateAdded'],
             [EntityImportSourceContainer::class, 'setPreset'],
@@ -137,8 +136,8 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'exclude' => true,
             'label' => &$GLOBALS['TL_LANG']['tl_entity_import_source']['dbDriver'],
             'inputType' => 'select',
-            'default' => version_compare(VERSION, '4.0', '<') ? Config::get('dbDriver') : 'pdo_mysql',
-            'options' => \version_compare(\VERSION, '4.0', '<') ? ['MySQLi', 'MySQL'] : ['pdo_mysql'],
+            'default' => 'pdo_mysql',
+            'options' => ['pdo_mysql'],
             'eval' => ['mandatory' => true, 'tl_class' => 'w50'],
             'sql' => "varchar(12) NOT NULL default ''",
         ],

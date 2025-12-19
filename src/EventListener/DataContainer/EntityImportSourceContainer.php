@@ -8,6 +8,7 @@
 
 namespace HeimrichHannot\EntityImportBundle\DataContainer;
 
+use Contao\CoreBundle\DependencyInjection\Attribute\AsCallback;
 use Contao\Database;
 use Contao\DataContainer;
 use Contao\Message;
@@ -83,6 +84,7 @@ class EntityImportSourceContainer
         ], 'tl_entity_import_source.id='.$dc->id);
     }
 
+    #[AsCallback('tl_entity_import_source','config.load')]
     public function initPalette(?DataContainer $dc): void
     {
         if (null === ($sourceModel = $this->modelUtil->findModelInstanceByPk($dc->table, $dc->id))) {

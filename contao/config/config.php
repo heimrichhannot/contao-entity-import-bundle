@@ -38,11 +38,6 @@ $GLOBALS['TL_MODELS']['tl_entity_import_quick_config'] = EntityImportQuickConfig
 $GLOBALS['TL_MODELS']['tl_entity_import_cache'] = EntityImportCacheModel::class;
 
 /*
- * Hooks
- */
-$GLOBALS['TL_HOOKS']['sqlGetFromDca']['huhEntityImportBundle'] = [SqlGetFromDcaEventListener::class, '__invoke'];
-
-/*
  * Backend widgets
  */
 $GLOBALS['BE_FFL']['entityImportProgress'] = 'HeimrichHannot\EntityImportBundle\Widget\ImportProgress';

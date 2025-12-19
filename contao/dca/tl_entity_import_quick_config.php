@@ -10,9 +10,8 @@ use HeimrichHannot\EntityImportBundle\DataContainer\EntityImportQuickConfigConta
  *
  * @license LGPL-3.0-or-later
  */
-
-System::getContainer()->get('huh.utils.dca')->loadLanguageFile('tl_entity_import_source');
-System::getContainer()->get('huh.utils.dca')->loadLanguageFile('tl_entity_import_config');
+System::loadLanguageFile('tl_entity_import_source');
+System::loadLanguageFile('tl_entity_import_config');
 
 $GLOBALS['TL_DCA']['tl_entity_import_quick_config'] = [
     'config' => [

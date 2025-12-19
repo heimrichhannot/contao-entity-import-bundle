@@ -554,7 +554,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'label' => &$GLOBALS['TL_LANG']['tl_entity_import_config']['cronLanguage'],
             'exclude' => true,
             'inputType' => 'select',
-            'options' => System::getLanguages(),
+            'options' => System::getContainer()->get('contao.intl.locales')->getEnabledLocales(),
             'eval' => ['tl_class' => 'w50', 'mandatory' => true, 'includeBlankOption' => true, 'chosen' => true],
             'sql' => "varchar(64) NOT NULL default ''",
         ],
