@@ -5,8 +5,5 @@ services:
     public: true
 
   HeimrichHannot\EntityImportBundle\:
-    resource: '../src/{Command,Controller,EventListener}/*'
-
-  HeimrichHannot\EntityImportBundle\Importer\ImporterFactory: ~
-  HeimrichHannot\EntityImportBundle\Source\SourceFactory: ~
-  HeimrichHannot\EntityImportBundle\Util\EntityImportUtil: ~
+    resource: ../src
+    exclude: ../src/{ContaoManager,DependencyInjection,HeimrichHannotContaoEntityImportBundle.php}
