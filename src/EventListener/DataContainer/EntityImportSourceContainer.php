@@ -1,11 +1,5 @@
 <?php
 
-/*
- * Copyright (c) 2021 Heimrich & Hannot GmbH
- *
- * @license LGPL-3.0-or-later
- */
-
 namespace HeimrichHannot\EntityImportBundle\EventListener\DataContainer;
 
 use Contao\CoreBundle\DependencyInjection\Attribute\AsCallback;
@@ -14,14 +8,14 @@ use Contao\DataContainer;
 use Contao\Message;
 use Contao\Model;
 use Contao\System;
+use Doctrine\DBAL\Connection;
 use HeimrichHannot\EntityImportBundle\Event\AddSourceFieldMappingPresetsEvent;
 use HeimrichHannot\EntityImportBundle\Source\AbstractFileSource;
 use HeimrichHannot\EntityImportBundle\Source\CSVFileSource;
 use HeimrichHannot\EntityImportBundle\Source\RSSFileSource;
 use HeimrichHannot\EntityImportBundle\Source\SourceFactory;
 use HeimrichHannot\EntityImportBundle\Util\EntityImportUtil;
-use HeimrichHannot\UtilsBundle\Database\DatabaseUtil;
-use HeimrichHannot\UtilsBundle\Model\ModelUtil;
+use HeimrichHannot\UtilsBundle\Util\Utils;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class EntityImportSourceContainer
@@ -57,20 +51,18 @@ class EntityImportSourceContainer
     ];
 
     protected $activeBundles;
-    protected $database;
-    protected $cache;
 
-    protected ModelUtil $modelUtil;
-    protected DatabaseUtil $databaseUtil;
-
-    public function __construct(protected SourceFactory $sourceFactory, ModelUtil $modelUtil, protected EntityImportUtil $util, protected EventDispatcherInterface $eventDispatcher, DatabaseUtil $databaseUtil)
-    {
+    public function __construct(
+        private readonly SourceFactory $sourceFactory,
+        private readonly Utils $utils,
+        private readonly Connection $conn,
+        private readonly EntityImportUtil $util,
+        private readonly EventDispatcherInterface $eventDispatcher
+    ) {
         $this->activeBundles = System::getContainer()->getParameter('kernel.bundles');
-        $this->modelUtil = $modelUtil;
-        $this->databaseUtil = $databaseUtil;
     }
 
-    #[AsCallback('tl_entity_import_source','config.onsubmit')]
+    #[AsCallback('tl_entity_import_source', 'config.onsubmit')]
     public function setPreset(?DataContainer $dc): void
     {
         if (!($preset = $dc->activeRecord->fieldMappingPresets)) {
@@ -79,16 +71,16 @@ class EntityImportSourceContainer
 
         $dca = &$GLOBALS['TL_DCA']['tl_entity_import_source'];
 
-        $this->databaseUtil->update('tl_entity_import_source', [
+        $this->conn->update('tl_entity_import_source', [
             'fieldMappingPresets' => '',
             'fieldMapping' => serialize($dca['fields']['fieldMappingPresets']['eval']['presets'][$preset]),
-        ], 'tl_entity_import_source.id='.$dc->id);
+        ], ['id' => $dc->id]);
     }
 
-    #[AsCallback('tl_entity_import_source','config.load')]
+    #[AsCallback('tl_entity_import_source', 'config.load')]
     public function initPalette(?DataContainer $dc): void
     {
-        if (null === ($sourceModel = $this->modelUtil->findModelInstanceByPk($dc->table, $dc->id))) {
+        if (null === ($sourceModel = $this->utils->model()->findModelInstanceByPk($dc->table, $dc->id))) {
             return;
         }
 
@@ -172,7 +164,10 @@ class EntityImportSourceContainer
         }
 
         // field mapping presets
-        $event = $this->eventDispatcher->dispatch(new AddSourceFieldMappingPresetsEvent([], $sourceModel), AddSourceFieldMappingPresetsEvent::NAME);
+        $event = $this->eventDispatcher->dispatch(
+            new AddSourceFieldMappingPresetsEvent([], $sourceModel),
+            AddSourceFieldMappingPresetsEvent::NAME
+        );
 
         $presets = $event->getPresets();
 
@@ -188,10 +183,10 @@ class EntityImportSourceContainer
         }
     }
 
-    #[AsCallback('tl_entity_import_source','fields.fileContent.load')]
+    #[AsCallback('tl_entity_import_source', 'fields.fileContent.load')]
     public function onLoadFileContent(?string $value, ?DataContainer $dc)
     {
-        if (null === ($sourceModel = $this->modelUtil->findModelInstanceByPk('tl_entity_import_source', $dc->id))) {
+        if (null === ($sourceModel = $this->utils->model()->findModelInstanceByPk('tl_entity_import_source', $dc->id))) {
             return '';
         }
 
@@ -229,17 +224,15 @@ class EntityImportSourceContainer
 
             case static::FILETYPE_RSS:
                 return substr($source->getFileContent(true), 0, 50000);
-
-                break;
         }
 
         return $source->getFileContent(true);
     }
 
-    #[AsCallback('tl_entity_import_source','fields.dbSourceTable.options')]
+    #[AsCallback('tl_entity_import_source', 'fields.dbSourceTable.options')]
     public function getAllTargetTables(?DataContainer $dc): array
     {
-        if (null === ($source = $this->modelUtil->findModelInstanceByPk('tl_entity_import_source', $dc->id))) {
+        if (null === ($source = $this->utils->model()->findModelInstanceByPk('tl_entity_import_source', $dc->id))) {
             return [];
         }
 

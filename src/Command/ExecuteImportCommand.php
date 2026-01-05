@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * Copyright (c) 2021 Heimrich & Hannot GmbH
  *
@@ -8,76 +10,83 @@
 
 namespace HeimrichHannot\EntityImportBundle\Command;
 
-use Contao\CoreBundle\Command\AbstractLockedCommand;
+use Contao\CoreBundle\Framework\ContaoFramework;
 use HeimrichHannot\EntityImportBundle\EventListener\DataContainer\EntityImportConfigContainer;
 use HeimrichHannot\EntityImportBundle\Importer\ImporterFactory;
 use HeimrichHannot\EntityImportBundle\Importer\ImporterInterface;
-use HeimrichHannot\UtilsBundle\Model\ModelUtil;
+use HeimrichHannot\UtilsBundle\Util\Utils;
+use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\Lock\LockFactory;
 
-class ExecuteImportCommand extends AbstractLockedCommand
+#[AsCommand(
+    name: 'huh:entity-import:execute',
+    description: 'Runs a given importer config on the command line.'
+)]
+class ExecuteImportCommand extends Command
 {
     protected InputInterface $input;
     protected SymfonyStyle $io;
-    protected ModelUtil $modelUtil;
 
-    /**
-     * ExecuteImportCommand constructor.
-     */
-    public function __construct(ModelUtil $modelUtil, protected ImporterFactory $importerFactory)
-    {
-        $this->modelUtil = $modelUtil;
-
+    public function __construct(
+        private readonly Utils $utils,
+        private readonly ImporterFactory $importerFactory,
+        private readonly ContaoFramework $framework,
+        private readonly LockFactory $lockFactory
+    ) {
         parent::__construct();
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function configure()
+    protected function configure(): void
     {
-        $this->setName('huh:entity-import:execute');
-        $this->setDescription('Runs a given importer config on the command line.');
         $this->addArgument('config-ids', InputArgument::REQUIRED, 'The importer config ids as a comma separated list');
         $this->addOption('dry-run', null, InputOption::VALUE_NONE, 'Run importer without making changes to the database.');
         $this->addOption('web-cron-mode', null, InputOption::VALUE_NONE, 'Companion cron for the website import function. See README for details.');
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function executeLocked(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $this->input = $input;
-        $this->io = new SymfonyStyle($input, $output);
-        $this->framework = $this->getContainer()->get('contao.framework');
-        $this->framework->initialize();
+        $lock = $this->lockFactory->createLock('huh-entity-import-execute');
 
-        $this->import();
+        if (!$lock->acquire()) {
+            $output->writeln('The command is already running in another process.');
+            return Command::FAILURE;
+        }
 
-        return 0;
+        try {
+            $this->input = $input;
+            $this->io = new SymfonyStyle($input, $output);
+            $this->framework->initialize();
+
+            $this->import();
+
+            return Command::SUCCESS;
+        } finally {
+            $lock->release();
+        }
     }
 
     private function import(): void
     {
         $configIds = explode(',', (string) $this->input->getArgument('config-ids'));
-        $dryRun = $this->input->getOption('dry-run') ?: false;
-        $webCronMode = $this->input->getOption('web-cron-mode') ?: false;
+        $dryRun = (bool) $this->input->getOption('dry-run');
+        $webCronMode = (bool) $this->input->getOption('web-cron-mode');
 
         foreach ($configIds as $configId) {
-            if (null === ($configModel = $this->modelUtil->findModelInstanceByPk('tl_entity_import_config', $configId))) {
-                $this->io->error("Importer config with ID $configId not found.");
+            $configModel = $this->utils->model()->findModelInstanceByPk('tl_entity_import_config', $configId);
 
+            if (null === $configModel) {
+                $this->io->error("Importer config with ID $configId not found.");
                 continue;
             }
 
             if (!$configModel->useCron) {
                 $this->io->warning("Importer with config ID $configId hasn't set useCron=1. Skipped.");
-
                 continue;
             }
 
@@ -86,7 +95,6 @@ class ExecuteImportCommand extends AbstractLockedCommand
                     continue;
                 }
 
-                // no support for continuing an already started import
                 if ($configModel->importStarted) {
                     continue;
                 }
@@ -96,9 +104,9 @@ class ExecuteImportCommand extends AbstractLockedCommand
                 $configModel->save();
             }
 
+            $language = null;
             if ($configModel->cronLanguage) {
                 $language = $GLOBALS['TL_LANGUAGE'];
-
                 $GLOBALS['TL_LANGUAGE'] = $configModel->cronLanguage;
             }
 
@@ -110,23 +118,17 @@ class ExecuteImportCommand extends AbstractLockedCommand
             $result = $importer->run();
 
             if ($webCronMode && $configModel->useCronInWebContext && EntityImportConfigContainer::STATE_READY_FOR_IMPORT === $configModel->state) {
-                // might have been changed
                 $configModel->refresh();
-
                 $configModel->importFinished = time();
-
-                if ('success' === $result['state']) {
-                    $configModel->state = EntityImportConfigContainer::STATE_SUCCESS;
-                } else {
-                    $configModel->state = EntityImportConfigContainer::STATE_FAILED;
-                }
-
+                $configModel->state = 'success' === $result['state']
+                    ? EntityImportConfigContainer::STATE_SUCCESS
+                    : EntityImportConfigContainer::STATE_FAILED;
                 $configModel->save();
             }
 
             $importer->outputFinalResultMessage($result);
 
-            if ($configModel->cronLanguage) {
+            if (null !== $language) {
                 $GLOBALS['TL_LANGUAGE'] = $language;
             }
         }

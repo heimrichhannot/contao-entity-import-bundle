@@ -1,63 +1,44 @@
 <?php
 
-/*
- * Copyright (c) 2021 Heimrich & Hannot GmbH
- *
- * @license LGPL-3.0-or-later
- */
-
 namespace HeimrichHannot\EntityImportBundle\EventListener\DataContainer;
 
 use Contao\Image;
 use Contao\Controller;
+use Contao\CoreBundle\DependencyInjection\Attribute\AsCallback;
 use Contao\CoreBundle\Exception\RedirectResponseException;
 use Contao\Database;
 use Contao\DataContainer;
 use Contao\StringUtil;
 use Contao\System;
+use Doctrine\DBAL\Connection;
 use HeimrichHannot\EntityImportBundle\Event\BeforeImportEvent;
 use HeimrichHannot\EntityImportBundle\Event\BeforeItemImportEvent;
 use HeimrichHannot\EntityImportBundle\Importer\ImporterFactory;
 use HeimrichHannot\EntityImportBundle\Source\SourceFactory;
 use HeimrichHannot\EntityImportBundle\Source\SourceInterface;
 use HeimrichHannot\ListWidgetBundle\Widget\ListWidget;
-use HeimrichHannot\RequestBundle\Component\HttpFoundation\Request;
-use HeimrichHannot\UtilsBundle\Database\DatabaseUtil;
-use HeimrichHannot\UtilsBundle\Dca\DcaUtil;
-use HeimrichHannot\UtilsBundle\Model\ModelUtil;
-use HeimrichHannot\UtilsBundle\Url\UrlUtil;
+use HeimrichHannot\UtilsBundle\Util\Utils;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class EntityImportQuickConfigContainer
 {
-    protected DatabaseUtil  $databaseUtil;
-    protected ModelUtil $modelUtil;
-    protected Request $request;
-    protected UrlUtil $urlUtil;
-    protected DcaUtil $dcaUtil;
-
     public function __construct(
-        ModelUtil $modelUtil,
-        protected EventDispatcherInterface $eventDispatcher,
-        Request $request,
-        protected ImporterFactory $importerFactory,
-        UrlUtil $urlUtil,
-        DcaUtil $dcaUtil,
-        DatabaseUtil $databaseUtil,
-        protected SourceFactory $sourceFactory
+        private readonly RequestStack $requestStack,
+        private readonly Utils $utils,
+        private readonly Connection $conn,
+        private readonly EventDispatcherInterface $eventDispatcher,
+        private readonly ImporterFactory $importerFactory,
+        private readonly SourceFactory $sourceFactory
     ) {
-        $this->modelUtil = $modelUtil;
-        $this->request = $request;
-        $this->urlUtil = $urlUtil;
-        $this->dcaUtil = $dcaUtil;
-        $this->databaseUtil = $databaseUtil;
     }
 
-    public function getImporterConfigs()
+    #[AsCallback('tl_entity_import_quick_config', 'fields.importerConfig.options')]
+    public function getImporterConfigs(): array
     {
         $options = [];
 
-        if (null === ($configs = $this->modelUtil->findAllModelInstances('tl_entity_import_config', [
+        if (null === ($configs = $this->utils->model()->findAllModelInstances('tl_entity_import_config', [
                 'order' => 'tl_entity_import_config.title ASC',
             ]))) {
             return [];
@@ -70,9 +51,10 @@ class EntityImportQuickConfigContainer
         return $options;
     }
 
-    public function getDryRunOperation($row, $href, $label, $title, $icon, $attributes)
+    #[AsCallback('tl_entity_import_quick_config', 'list.operations.dryRun.button')]
+    public function getDryRunOperation($row, $href, $label, $title, $icon, $attributes): string
     {
-        if (null !== ($config = $this->modelUtil->findModelInstanceByPk('tl_entity_import_config', $row['importerConfig']))) {
+        if (null !== ($config = $this->utils->model()->findModelInstanceByPk('tl_entity_import_config', $row['importerConfig']))) {
             if ($config->useCronInWebContext) {
                 return '';
             }
@@ -81,23 +63,24 @@ class EntityImportQuickConfigContainer
         return '<a href="'.Controller::addToUrl($href.'&amp;id='.$row['id']).'&rt='.System::getContainer()->get('contao.csrf.token_manager')->getDefaultTokenValue().'" title="'.StringUtil::specialchars($title).'"'.$attributes.'>'.Image::getHtml($icon, $label).'</a> ';
     }
 
+    #[AsCallback('tl_entity_import_quick_config', 'config.onload')]
     public function modifyDca(DataContainer $dc): void
     {
-        if (null === ($quickImporter = $this->modelUtil->findModelInstanceByPk('tl_entity_import_quick_config', $dc->id)) || !$quickImporter->importerConfig) {
+        if (null === ($quickImporter = $this->utils->model()->findModelInstanceByPk('tl_entity_import_quick_config', $dc->id)) || !$quickImporter->importerConfig) {
             return;
         }
 
-        if (null === ($importer = $this->modelUtil->findModelInstanceByPk('tl_entity_import_config', $quickImporter->importerConfig))) {
+        if (null === ($importer = $this->utils->model()->findModelInstanceByPk('tl_entity_import_config', $quickImporter->importerConfig))) {
             return;
         }
 
-        if (null === ($sourceModel = $this->modelUtil->findModelInstanceByPk('tl_entity_import_source', $importer->pid))) {
+        if (null === ($sourceModel = $this->utils->model()->findModelInstanceByPk('tl_entity_import_source', $importer->pid))) {
             return;
         }
 
         $dca = &$GLOBALS['TL_DCA']['tl_entity_import_quick_config'];
 
-        $this->dcaUtil->loadDc($importer->targetTable);
+        $this->utils->dca()->loadDc($importer->targetTable);
 
         $targetDca = &$GLOBALS['TL_DCA'][$importer->targetTable];
 
@@ -116,7 +99,6 @@ class EntityImportQuickConfigContainer
                         $dca['palettes']['default'] = str_replace('fileSRC', 'fileSRC,parentEntity', $dca['palettes']['default']);
                     }
 
-                    // large dataset? -> ajax list
                     if ($importer->useCacheForQuickImporters) {
                         unset($dca['fields']['csvPreviewList']['eval']['listWidget']['items_callback']);
 
@@ -138,7 +120,6 @@ class EntityImportQuickConfigContainer
         $options = [
             'table' => $config['table'],
             'columns' => $config['columns'],
-            // filtering
             'column' => [$config['table'].'.cache_ptable = ?', $config['table'].'.cache_pid = ?'],
             'value' => ['tl_entity_import_quick_config', $dc->id],
         ];
@@ -146,22 +127,24 @@ class EntityImportQuickConfigContainer
         return ListWidget::loadItems($config, $options, $context, $dc);
     }
 
+    #[AsCallback('tl_entity_import_quick_config', 'config.onsubmit')]
     public function cacheCsvRows(DataContainer $dc): void
     {
-        // cache might be invalid now -> delete tl_md_recipient
-        $this->databaseUtil->delete('tl_entity_import_cache', 'cache_ptable=? AND cache_pid=?', ['tl_entity_import_quick_config', $dc->id]);
+        $this->conn->executeStatement(
+            'DELETE FROM tl_entity_import_cache WHERE cache_ptable = ? AND cache_pid = ?',
+            ['tl_entity_import_quick_config', $dc->id]
+        );
 
-        // cache the rows
-        if (null === ($quickImporter = $this->modelUtil->findModelInstanceByPk('tl_entity_import_quick_config', $dc->id)) ||
+        if (null === ($quickImporter = $this->utils->model()->findModelInstanceByPk('tl_entity_import_quick_config', $dc->id)) ||
             !$quickImporter->importerConfig || !$quickImporter->fileSRC) {
             return;
         }
 
-        if (null === ($importerConfig = $this->modelUtil->findModelInstanceByPk('tl_entity_import_config', $quickImporter->importerConfig))) {
+        if (null === ($importerConfig = $this->utils->model()->findModelInstanceByPk('tl_entity_import_config', $quickImporter->importerConfig))) {
             return;
         }
 
-        if (null === ($sourceModel = $this->modelUtil->findModelInstanceByPk('tl_entity_import_source', $importerConfig->pid))) {
+        if (null === ($sourceModel = $this->utils->model()->findModelInstanceByPk('tl_entity_import_source', $importerConfig->pid))) {
             return;
         }
 
@@ -177,18 +160,12 @@ class EntityImportQuickConfigContainer
             'sourceModel' => $sourceModel,
         ]);
 
-        /**
-         * @var SourceInterface
-         */
         $source = $this->sourceFactory->createInstance($sourceModel->id);
-
-        // set domain
         $source->setDomain($importerConfig->cronDomain);
 
         $items = $importer->getMappedItems();
 
         $event = $this->eventDispatcher->dispatch(new BeforeImportEvent($items, $importerConfig, $importer, $source, true), BeforeImportEvent::NAME);
-
         $items = $event->getItems();
 
         if ($quickImporter->csvHeaderRow) {
@@ -198,8 +175,6 @@ class EntityImportQuickConfigContainer
         $itemsToInsert = [];
 
         foreach ($items as $item) {
-            // call the event (else db constraints might fail)
-            /** @var BeforeItemImportEvent $event */
             $event = $this->eventDispatcher->dispatch(new BeforeItemImportEvent(
                 $item,
                 $item,
@@ -213,7 +188,7 @@ class EntityImportQuickConfigContainer
             $itemsToInsert[] = $event->getMappedItem();
         }
 
-        $this->databaseUtil->doBulkInsert('tl_entity_import_cache', $itemsToInsert, [
+        $this->utils->database()->doBulkInsert('tl_entity_import_cache', $itemsToInsert, [
             'cache_ptable' => 'tl_entity_import_quick_config',
             'cache_pid' => $dc->id,
         ]);
@@ -243,13 +218,14 @@ class EntityImportQuickConfigContainer
         return $itemData;
     }
 
-    public function getParentEntitiesAsOptions(DataContainer $dc)
+    #[AsCallback('tl_entity_import_quick_config', 'fields.parentEntity.options')]
+    public function getParentEntitiesAsOptions(DataContainer $dc): array
     {
-        if (null === ($quickImporter = $this->modelUtil->findModelInstanceByPk('tl_entity_import_quick_config', $dc->id)) || !$quickImporter->importerConfig) {
+        if (null === ($quickImporter = $this->utils->model()->findModelInstanceByPk('tl_entity_import_quick_config', $dc->id)) || !$quickImporter->importerConfig) {
             return [];
         }
 
-        if (null === ($importer = $this->modelUtil->findModelInstanceByPk('tl_entity_import_config', $quickImporter->importerConfig))) {
+        if (null === ($importer = $this->utils->model()->findModelInstanceByPk('tl_entity_import_config', $quickImporter->importerConfig))) {
             return [];
         }
 
@@ -274,46 +250,46 @@ class EntityImportQuickConfigContainer
         $this->runImport(true);
     }
 
-    public function getHeaderFieldsForPreview($config, $widget, DataContainer $dc)
+    public function getHeaderFieldsForPreview($config, $widget, DataContainer $dc): array
     {
-        if (null === ($quickImporter = $this->modelUtil->findModelInstanceByPk('tl_entity_import_quick_config', $dc->id)) || !$quickImporter->importerConfig) {
+        if (null === ($quickImporter = $this->utils->model()->findModelInstanceByPk('tl_entity_import_quick_config', $dc->id)) || !$quickImporter->importerConfig) {
             return [];
         }
 
-        if (null === ($importer = $this->modelUtil->findModelInstanceByPk('tl_entity_import_config', $quickImporter->importerConfig))) {
+        if (null === ($importer = $this->utils->model()->findModelInstanceByPk('tl_entity_import_config', $quickImporter->importerConfig))) {
             return [];
         }
 
         $fields = [];
 
         foreach (StringUtil::deserialize($importer->fieldMapping, true) as $mapping) {
-            $fields[$mapping['columnName']] = $this->dcaUtil->getLocalizedFieldName($mapping['columnName'], $importer->targetTable);
+            $fields[$mapping['columnName']] = $this->utils->dca()->getLocalizedFieldName($mapping['columnName'], $importer->targetTable);
         }
 
         if (Database::getInstance()->fieldExists('pid', $importer->targetTable) && $quickImporter->parentEntity) {
-            $this->dcaUtil->loadDc($importer->targetTable);
+            $this->utils->dca()->loadDc($importer->targetTable);
 
             $dca = &$GLOBALS['TL_DCA'][$importer->targetTable];
 
             if (isset($dca['config']['ptable'])) {
-                $fields = array_merge(['pid' => $this->dcaUtil->getLocalizedFieldName('pid', $importer->targetTable)], $fields);
+                $fields = array_merge(['pid' => $this->utils->dca()->getLocalizedFieldName('pid', $importer->targetTable)], $fields);
             }
         }
 
         return $fields;
     }
 
-    public function getItemsForPreview($config, $widget, $dc)
+    public function getItemsForPreview($config, $widget, $dc): array
     {
-        if (null === ($quickImporter = $this->modelUtil->findModelInstanceByPk('tl_entity_import_quick_config', $dc->id)) || !$quickImporter->importerConfig || !$quickImporter->fileSRC) {
+        if (null === ($quickImporter = $this->utils->model()->findModelInstanceByPk('tl_entity_import_quick_config', $dc->id)) || !$quickImporter->importerConfig || !$quickImporter->fileSRC) {
             return [];
         }
 
-        if (null === ($importer = $this->modelUtil->findModelInstanceByPk('tl_entity_import_config', $quickImporter->importerConfig))) {
+        if (null === ($importer = $this->utils->model()->findModelInstanceByPk('tl_entity_import_config', $quickImporter->importerConfig))) {
             return [];
         }
 
-        if (null === ($sourceModel = $this->modelUtil->findModelInstanceByPk('tl_entity_import_source', $importer->pid))) {
+        if (null === ($sourceModel = $this->utils->model()->findModelInstanceByPk('tl_entity_import_source', $importer->pid))) {
             return [];
         }
 
@@ -333,13 +309,13 @@ class EntityImportQuickConfigContainer
         return $result;
     }
 
-    protected function addParentEntityToFieldMapping($quickImporter, $importer)
+    protected function addParentEntityToFieldMapping($quickImporter, $importer): void
     {
         if (!Database::getInstance()->fieldExists('pid', $importer->targetTable) || !$quickImporter->parentEntity) {
             return;
         }
 
-        $this->dcaUtil->loadDc($importer->targetTable);
+        $this->utils->dca()->loadDc($importer->targetTable);
 
         $dca = &$GLOBALS['TL_DCA'][$importer->targetTable];
 
@@ -358,17 +334,18 @@ class EntityImportQuickConfigContainer
 
     private function runImport(bool $dry = false): void
     {
-        $config = $this->request->getGet('id');
+        $request = $this->requestStack->getCurrentRequest();
+        $config = $request?->query->get('id');
 
-        if (null === ($quickImporter = $this->modelUtil->findModelInstanceByPk('tl_entity_import_quick_config', $config)) || !$quickImporter->importerConfig) {
+        if (null === ($quickImporter = $this->utils->model()->findModelInstanceByPk('tl_entity_import_quick_config', $config)) || !$quickImporter->importerConfig) {
             return;
         }
 
-        if (null === ($importerConfig = $this->modelUtil->findModelInstanceByPk('tl_entity_import_config', $quickImporter->importerConfig))) {
+        if (null === ($importerConfig = $this->utils->model()->findModelInstanceByPk('tl_entity_import_config', $quickImporter->importerConfig))) {
             return;
         }
 
-        if (null === ($sourceModel = $this->modelUtil->findModelInstanceByPk('tl_entity_import_source', $importerConfig->pid))) {
+        if (null === ($sourceModel = $this->utils->model()->findModelInstanceByPk('tl_entity_import_source', $importerConfig->pid))) {
             return;
         }
 
@@ -386,12 +363,13 @@ class EntityImportQuickConfigContainer
             $importerConfig->importProgressResult = '';
             $importerConfig->save();
 
-            throw new RedirectResponseException($this->urlUtil->addQueryString('act=edit', $this->urlUtil->removeQueryString(['key'])));
+            throw new RedirectResponseException($this->utils->url()->addQueryStringParameterToUrl('act=edit', $this->utils->url()->removeQueryStringParameterFromUrl(['key'])));
         }
+
         $importer->setDryRun($dry);
         $result = $importer->run();
         $importer->outputFinalResultMessage($result);
 
-        throw new RedirectResponseException($this->urlUtil->removeQueryString(['key', 'id']));
+        throw new RedirectResponseException($this->utils->url()->removeQueryStringParameterFromUrl(['key', 'id']));
     }
 }

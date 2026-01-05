@@ -693,7 +693,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_config'] = [
             'sql' => "varchar(10) NOT NULL default ''",
         ],
         'importProgress' => [
-            'inputType' => 'huhProgressBar',
+            'inputType' => 'importProgress',
             'eval' => [
                 'description' => $GLOBALS['TL_LANG']['tl_entity_import_config']['reference']['importProgressDescription'] ?? null,
             ],

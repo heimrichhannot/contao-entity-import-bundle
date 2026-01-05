@@ -18,12 +18,12 @@ use Contao\Database;
 use Contao\DataContainer;
 use Contao\Date;
 use Contao\StringUtil;
+use Doctrine\DBAL\Connection;
 use HeimrichHannot\EntityImportBundle\Event\AddConfigFieldMappingPresetsEvent;
 use HeimrichHannot\EntityImportBundle\Importer\ImporterFactory;
 use HeimrichHannot\RequestBundle\Component\HttpFoundation\Request;
-use HeimrichHannot\UtilsBundle\Database\DatabaseUtil;
-use HeimrichHannot\UtilsBundle\Model\ModelUtil;
-use HeimrichHannot\UtilsBundle\Url\UrlUtil;
+use HeimrichHannot\UtilsBundle\Util\Utils;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class EntityImportConfigContainer
@@ -52,23 +52,14 @@ class EntityImportConfigContainer
     const STATE_SUCCESS = 'success';
     const STATE_FAILED = 'failed';
 
-    protected Request $request;
-    protected UrlUtil $urlUtil;
-    protected ModelUtil $modelUtil;
-    protected DatabaseUtil $databaseUtil;
 
     public function __construct(
-        Request $request,
+        private readonly RequestStack $requestStack,
         protected ImporterFactory $importerFactory,
-        UrlUtil $urlUtil,
-        ModelUtil $modelUtil,
-        DatabaseUtil $databaseUtil,
+        protected Utils $utils,
+        protected Connection $conn,
         protected EventDispatcherInterface $eventDispatcher
     ) {
-        $this->request = $request;
-        $this->urlUtil = $urlUtil;
-        $this->modelUtil = $modelUtil;
-        $this->databaseUtil = $databaseUtil;
     }
 
     #[AsCallback('tl_entity_import_config','list.operations.dryRun.button')]
@@ -90,10 +81,10 @@ class EntityImportConfigContainer
 
         $dca = &$GLOBALS['TL_DCA']['tl_entity_import_config'];
 
-        $this->databaseUtil->update('tl_entity_import_config', [
+        $this->conn->update('tl_entity_import_config', [
             'fieldMappingPresets' => '',
             'fieldMapping' => serialize($dca['fields']['fieldMappingPresets']['eval']['presets'][$preset]),
-        ], 'tl_entity_import_config.id='.$dc->id);
+        ], ['tl_entity_import_config.id='.$dc->id]);
     }
 
     #[AsCallback('tl_entity_import_config','config.load')]
@@ -101,7 +92,7 @@ class EntityImportConfigContainer
     {
         $dca = &$GLOBALS['TL_DCA'][$dc->table];
 
-        if (null === ($configModel = $this->modelUtil->findModelInstanceByPk($dc->table, $dc->id)) || !$configModel->targetTable) {
+        if (null === ($configModel = $this->utils->model()->findModelInstanceByPk($dc->table, $dc->id)) || !$configModel->targetTable) {
             $dca['palettes']['default'] = '{general_legend},title,targetTable;';
 
             return;
@@ -141,11 +132,11 @@ class EntityImportConfigContainer
     {
         $options = [];
 
-        if (null === ($configModel = $this->modelUtil->findModelInstanceByPk('tl_entity_import_config', $dc->id))) {
+        if (null === ($configModel = $this->utils->model()->findModelInstanceByPk('tl_entity_import_config', $dc->id))) {
             return $options;
         }
 
-        if (null === ($sourceModel = $this->modelUtil->findModelInstanceByPk('tl_entity_import_source', $configModel->pid))) {
+        if (null === ($sourceModel = $this->utils->model()->findModelInstanceByPk('tl_entity_import_source', $configModel->pid))) {
             return $options;
         }
 
@@ -175,7 +166,7 @@ class EntityImportConfigContainer
     {
         $options = [];
 
-        if (null === ($configModel = $this->modelUtil->findModelInstanceByPk('tl_entity_import_config', $dc->id)) || !$configModel->targetTable) {
+        if (null === ($configModel = $this->utils->model()->findModelInstanceByPk('tl_entity_import_config', $dc->id)) || !$configModel->targetTable) {
             return $options;
         }
 
@@ -214,13 +205,14 @@ class EntityImportConfigContainer
 
     private function runImport(bool $dry = false): void
     {
-        $config = $this->request->getGet('id');
+        $request = $this->requestStack->getCurrentRequest();
+        $config = $request?->query->get('id');
 
-        if (null === ($configModel = $this->modelUtil->findModelInstanceByPk('tl_entity_import_config', $config))) {
+        if (null === ($configModel = $this->utils->model()->findModelInstanceByPk('tl_entity_import_config', $config))) {
             throw new \Exception(sprintf('Entity config model of ID %s not found', $config));
         }
 
-        if (null === ($sourceModel = $this->modelUtil->findModelInstanceByPk('tl_entity_import_source', $configModel->pid))) {
+        if (null === ($sourceModel = $this->utils->model()->findModelInstanceByPk('tl_entity_import_source', $configModel->pid))) {
             throw new \Exception(sprintf('Entity source model of ID %s not found', $configModel->pid));
         }
 
@@ -230,13 +222,13 @@ class EntityImportConfigContainer
             $configModel->importProgressResult = '';
             $configModel->save();
 
-            throw new RedirectResponseException($this->urlUtil->addQueryString('act=edit', $this->urlUtil->removeQueryString(['key'])));
+            throw new RedirectResponseException($this->utils->url()->addQueryStringParameterToUrl('act=edit', $this->utils->url()->removeQueryStringParameterFromUrl(['key'])));
         }
         $importer = $this->importerFactory->createInstance($configModel->id);
         $importer->setDryRun($dry);
         $result = $importer->run();
         $importer->outputFinalResultMessage($result);
 
-        throw new RedirectResponseException($this->urlUtil->addQueryString('id='.$sourceModel->id, $this->urlUtil->removeQueryString(['key', 'id'])));
+        throw new RedirectResponseException($this->utils->url()->addQueryStringParameterToUrl('id='.$sourceModel->id, $this->utils->url()->removeQueryStringParameterFromUrl(['key', 'id'])));
     }
 }

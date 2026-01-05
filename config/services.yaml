@@ -6,4 +6,4 @@ services:
 
   HeimrichHannot\EntityImportBundle\:
     resource: ../src
-    exclude: ../src/{ContaoManager,DependencyInjection,HeimrichHannotContaoEntityImportBundle.php}
+    exclude: ../src/{ContaoManager,DependencyInjection,Event,HeimrichHannotContaoEntityImportBundle.php}
