@@ -7,7 +7,6 @@ use HeimrichHannot\EntityImportBundle\Model\EntityImportConfigModel;
 use HeimrichHannot\EntityImportBundle\Model\EntityImportQuickConfigModel;
 use HeimrichHannot\EntityImportBundle\Model\EntityImportCacheModel;
 use HeimrichHannot\EntityImportBundle\EventListener\Contao\SqlGetFromDcaEventListener;
-use HeimrichHannot\EntityImportBundle\Controller\PoorManCronController;
 use Contao\System;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -41,15 +40,6 @@ $GLOBALS['TL_MODELS']['tl_entity_import_cache'] = EntityImportCacheModel::class;
  * Backend widgets
  */
 $GLOBALS['BE_FFL']['entityImportProgress'] = 'HeimrichHannot\EntityImportBundle\Widget\ImportProgress';
-
-/*
- * Crons
- */
-$GLOBALS['TL_CRON']['minutely'][] = [PoorManCronController::class, 'runMinutely'];
-$GLOBALS['TL_CRON']['hourly'][] = [PoorManCronController::class, 'runHourly'];
-$GLOBALS['TL_CRON']['daily'][] = [PoorManCronController::class, 'runDaily'];
-$GLOBALS['TL_CRON']['weekly'][] = [PoorManCronController::class, 'runWeekly'];
-$GLOBALS['TL_CRON']['monthly'][] = [PoorManCronController::class, 'runMonthly'];
 
 if (System::getContainer()->get('contao.routing.scope_matcher')->isBackendRequest(System::getContainer()->get('request_stack')->getCurrentRequest() ?? Request::create(''))) {
     $GLOBALS['TL_CSS']['be_entityimportbundle'] = 'bundles/heimrichhannotcontaoentityimport/assets/contao-entity-import-bundle-be.css|static';

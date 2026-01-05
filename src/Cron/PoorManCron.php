@@ -6,19 +6,21 @@
  * @license LGPL-3.0-or-later
  */
 
-namespace HeimrichHannot\EntityImportBundle\Controller;
+namespace HeimrichHannot\EntityImportBundle\Cron;
 
+use Contao\CoreBundle\DependencyInjection\Attribute\AsCronJob;
 use HeimrichHannot\EntityImportBundle\Importer\ImporterFactory;
 use HeimrichHannot\EntityImportBundle\Importer\ImporterInterface;
 use HeimrichHannot\UtilsBundle\Util\Utils;
 
-class PoorManCronController
+class PoorManCron
 {
 
     public function __construct(protected ImporterFactory $importerFactory, protected readonly Utils $utils)
     {
     }
 
+    #[AsCronJob('minutely')]
     public function runMinutely(): void
     {
         $items = $this->getConfigIds('minutely');
@@ -28,6 +30,7 @@ class PoorManCronController
         }
     }
 
+    #[AsCronJob('hourly')]
     public function runHourly(): void
     {
         $items = $this->getConfigIds('hourly');
@@ -37,6 +40,7 @@ class PoorManCronController
         }
     }
 
+    #[AsCronJob('daily')]
     public function runDaily(): void
     {
         $items = $this->getConfigIds('daily');
@@ -46,6 +50,7 @@ class PoorManCronController
         }
     }
 
+    #[AsCronJob('weekly')]
     public function runWeekly(): void
     {
         $items = $this->getConfigIds('weekly');
@@ -55,6 +60,7 @@ class PoorManCronController
         }
     }
 
+    #[AsCronJob('monthly')]
     public function runMonthly(): void
     {
         $items = $this->getConfigIds('monthly');
