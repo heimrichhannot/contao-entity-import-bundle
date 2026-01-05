@@ -13,26 +13,28 @@ use Contao\Environment;
 use Contao\Model;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
+use HeimrichHannot\UtilsBundle\Util\Utils;
+use Contao\CoreBundle\InsertTag\InsertTagParser;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Contracts\Cache\CacheInterface;
 
 abstract class AbstractSource implements SourceInterface
 {
-    protected ContainerInterface $container;
     protected array $fieldMapping;
     protected Model $sourceModel;
     protected CacheInterface $filesystemCache;
     protected string $domain;
+    protected Utils $utils;
+    protected ParameterBagInterface $parameterBag;
+    protected InsertTagParser $insertTagParser;
 
-    public function __construct()
+    public function __construct(Utils $utils, ParameterBagInterface $parameterBag, InsertTagParser $insertTagParser)
     {
         $this->domain = '';
-    }
-
-    public function setContainer(ContainerInterface $container): void
-    {
-        $this->container = $container;
+        $this->utils = $utils;
+        $this->parameterBag = $parameterBag;
+        $this->insertTagParser = $insertTagParser;
     }
 
     public function getMapping(): array
@@ -61,7 +63,7 @@ abstract class AbstractSource implements SourceInterface
             $this->filesystemCache = new FilesystemAdapter(
                 'contaoEntityImportBundle',
                 300,
-                $this->container->getParameter('kernel.project_dir').'/var/cache/'.$this->container->getParameter('kernel.environment')
+                $this->parameterBag->get('kernel.project_dir').'/var/cache/'.$this->parameterBag->get('kernel.environment')
             );
         }
 
@@ -90,7 +92,7 @@ abstract class AbstractSource implements SourceInterface
 
         foreach ($mapping as $mappingElement) {
             if ('static_value' === $mappingElement['valueType']) {
-                $result[$mappingElement['name']] = $this->stringUtil->replaceInsertTags($mappingElement['staticValue']);
+                $result[$mappingElement['name']] = $this->replaceInsertTags($mappingElement['staticValue']);
             } elseif ('source_value' === $mappingElement['valueType']) {
                 $result[$mappingElement['name']] = $element[$mappingElement['sourceValue']];
             }
@@ -169,5 +171,10 @@ abstract class AbstractSource implements SourceInterface
         $filesystemCache = $this->getFilesystemCache();
 
         $filesystemCache->get('entity-import-data.'.$cacheKey, fn() => $data);
+    }
+
+    protected function replaceInsertTags(?string $value): string
+    {
+        return $this->insertTagParser->replace((string) $value);
     }
 }

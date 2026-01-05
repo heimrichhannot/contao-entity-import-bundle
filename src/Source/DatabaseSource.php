@@ -10,23 +10,25 @@ namespace HeimrichHannot\EntityImportBundle\Source;
 
 use Contao\StringUtil;
 use Contao\Database;
-use HeimrichHannot\UtilsBundle\Dca\DcaUtil;
+use Contao\Controller;
+use Contao\CoreBundle\Framework\ContaoFramework;
+use HeimrichHannot\UtilsBundle\Util\Utils;
+use Contao\CoreBundle\InsertTag\InsertTagParser;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class DatabaseSource extends AbstractSource
 {
     /**
-     * @var DcaUtil
-     */
-    private $dcaUtil;
-
-    /**
      * AbstractFileSource constructor.
      */
-    public function __construct(DcaUtil $dcaUtil)
+    public function __construct(
+        Utils $utils,
+        ParameterBagInterface $parameterBag,
+        InsertTagParser $insertTagParser,
+        protected ContaoFramework $framework
+    )
     {
-        $this->dcaUtil = $dcaUtil;
-
-        parent::__construct();
+        parent::__construct($utils, $parameterBag, $insertTagParser);
     }
 
     public function getMappedData(array $options = []): array
@@ -69,7 +71,7 @@ class DatabaseSource extends AbstractSource
             'skip' => true,
         ];
 
-        $this->dcaUtil->loadDc($table);
+        $this->framework->getAdapter(Controller::class)->loadDataContainer($table);
 
         $dca = $GLOBALS['TL_DCA'][$table];
 

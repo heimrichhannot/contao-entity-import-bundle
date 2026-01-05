@@ -12,27 +12,25 @@ use Ausi\SlugGenerator\SlugGenerator;
 use HeimrichHannot\EntityImportBundle\EventListener\DataContainer\EntityImportSourceContainer;
 use HeimrichHannot\EntityImportBundle\Event\AfterFileSourceGetContentEvent;
 use HeimrichHannot\EntityImportBundle\Event\BeforeAuthenticationEvent;
-use HeimrichHannot\UtilsBundle\Container\ContainerUtil;
-use HeimrichHannot\UtilsBundle\File\FileUtil;
-use HeimrichHannot\UtilsBundle\String\StringUtil;
+use Contao\FilesModel;
+use HeimrichHannot\UtilsBundle\Util\Utils;
+use Contao\CoreBundle\InsertTag\InsertTagParser;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 abstract class AbstractFileSource extends AbstractSource
 {
-    protected FileUtil $fileUtil;
-    protected StringUtil $stringUtil;
-    protected ContainerUtil $containerUtil;
-
     /**
      * AbstractFileSource constructor.
      */
-    public function __construct(protected EventDispatcherInterface $eventDispatcher, FileUtil $fileUtil, StringUtil $stringUtil, ContainerUtil $containerUtil)
+    public function __construct(
+        protected EventDispatcherInterface $eventDispatcher,
+        Utils $utils,
+        ParameterBagInterface $parameterBag,
+        InsertTagParser $insertTagParser
+    )
     {
-        $this->fileUtil = $fileUtil;
-        $this->stringUtil = $stringUtil;
-        $this->containerUtil = $containerUtil;
-
-        parent::__construct();
+        parent::__construct($utils, $parameterBag, $insertTagParser);
     }
 
     public function getLinesFromFile(int $limit, bool $cache = false): string
@@ -46,11 +44,17 @@ abstract class AbstractFileSource extends AbstractSource
     public function getFileContent(bool $cache = false): string
     {
         $content = '';
-        $projectDir = $this->containerUtil->getProjectDir();
+        $projectDir = $this->parameterBag->get('kernel.project_dir');
 
         switch ($this->sourceModel->retrievalType) {
             case EntityImportSourceContainer::RETRIEVAL_TYPE_CONTAO_FILE_SYSTEM:
-                $path = $projectDir.'/'.$this->fileUtil->getPathFromUuid($this->sourceModel->fileSRC);
+                $fileModel = FilesModel::findByUuid($this->sourceModel->fileSRC);
+
+                if (null === $fileModel) {
+                    break;
+                }
+
+                $path = $projectDir.'/'.$fileModel->path;
 
                 if (file_exists($path)) {
                     $content = file_get_contents($path);

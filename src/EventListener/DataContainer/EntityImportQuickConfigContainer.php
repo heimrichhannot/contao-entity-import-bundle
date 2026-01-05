@@ -6,6 +6,7 @@ use Contao\Image;
 use Contao\Controller;
 use Contao\CoreBundle\DependencyInjection\Attribute\AsCallback;
 use Contao\CoreBundle\Exception\RedirectResponseException;
+use Contao\CoreBundle\Framework\ContaoFramework;
 use Contao\Database;
 use Contao\DataContainer;
 use Contao\StringUtil;
@@ -29,7 +30,8 @@ class EntityImportQuickConfigContainer
         private readonly Connection $conn,
         private readonly EventDispatcherInterface $eventDispatcher,
         private readonly ImporterFactory $importerFactory,
-        private readonly SourceFactory $sourceFactory
+        private readonly SourceFactory $sourceFactory,
+        private readonly ContaoFramework $framework
     ) {
     }
 
@@ -80,7 +82,7 @@ class EntityImportQuickConfigContainer
 
         $dca = &$GLOBALS['TL_DCA']['tl_entity_import_quick_config'];
 
-        $this->utils->dca()->loadDc($importer->targetTable);
+        $this->framework->getAdapter(Controller::class)->loadDataContainer($importer->targetTable);
 
         $targetDca = &$GLOBALS['TL_DCA'][$importer->targetTable];
 
@@ -188,10 +190,7 @@ class EntityImportQuickConfigContainer
             $itemsToInsert[] = $event->getMappedItem();
         }
 
-        $this->utils->database()->doBulkInsert('tl_entity_import_cache', $itemsToInsert, [
-            'cache_ptable' => 'tl_entity_import_quick_config',
-            'cache_pid' => $dc->id,
-        ]);
+        $this->bulkInsertCacheRows($itemsToInsert, (int) $dc->id);
     }
 
     public function prepareCachedCsvRows($items, $config, $options = [], $context = null, $dc = null): array
@@ -216,6 +215,51 @@ class EntityImportQuickConfigContainer
         }
 
         return $itemData;
+    }
+
+    private function getLocalizedFieldName(string $field, string $table): string
+    {
+        $this->framework->getAdapter(Controller::class)->loadDataContainer($table);
+
+        $label = $GLOBALS['TL_DCA'][$table]['fields'][$field]['label'][0] ?? null;
+
+        return $label ?: $field;
+    }
+
+    private function bulkInsertCacheRows(array $items, int $parentId): void
+    {
+        if (empty($items)) {
+            return;
+        }
+
+        $defaults = [
+            'cache_ptable' => 'tl_entity_import_quick_config',
+            'cache_pid' => $parentId,
+        ];
+
+        foreach ($items as $item) {
+            $this->conn->insert('tl_entity_import_cache', array_merge($defaults, $item));
+        }
+    }
+
+    private function getCurrentQuery(): array
+    {
+        $request = $this->requestStack->getCurrentRequest();
+
+        return $request?->query->all() ?? [];
+    }
+
+    private function buildUrl(array $query): string
+    {
+        $request = $this->requestStack->getCurrentRequest();
+
+        if (null === $request) {
+            return '';
+        }
+
+        $path = $request->getBaseUrl().$request->getPathInfo();
+
+        return $path.($query ? '?'.http_build_query($query) : '');
     }
 
     #[AsCallback('tl_entity_import_quick_config', 'fields.parentEntity.options')]
@@ -263,16 +307,16 @@ class EntityImportQuickConfigContainer
         $fields = [];
 
         foreach (StringUtil::deserialize($importer->fieldMapping, true) as $mapping) {
-            $fields[$mapping['columnName']] = $this->utils->dca()->getLocalizedFieldName($mapping['columnName'], $importer->targetTable);
+            $fields[$mapping['columnName']] = $this->getLocalizedFieldName($mapping['columnName'], $importer->targetTable);
         }
 
         if (Database::getInstance()->fieldExists('pid', $importer->targetTable) && $quickImporter->parentEntity) {
-            $this->utils->dca()->loadDc($importer->targetTable);
+            $this->framework->getAdapter(Controller::class)->loadDataContainer($importer->targetTable);
 
             $dca = &$GLOBALS['TL_DCA'][$importer->targetTable];
 
             if (isset($dca['config']['ptable'])) {
-                $fields = array_merge(['pid' => $this->utils->dca()->getLocalizedFieldName('pid', $importer->targetTable)], $fields);
+                $fields = array_merge(['pid' => $this->getLocalizedFieldName('pid', $importer->targetTable)], $fields);
             }
         }
 
@@ -315,7 +359,7 @@ class EntityImportQuickConfigContainer
             return;
         }
 
-        $this->utils->dca()->loadDc($importer->targetTable);
+        $this->framework->getAdapter(Controller::class)->loadDataContainer($importer->targetTable);
 
         $dca = &$GLOBALS['TL_DCA'][$importer->targetTable];
 
@@ -363,13 +407,19 @@ class EntityImportQuickConfigContainer
             $importerConfig->importProgressResult = '';
             $importerConfig->save();
 
-            throw new RedirectResponseException($this->utils->url()->addQueryStringParameterToUrl('act=edit', $this->utils->url()->removeQueryStringParameterFromUrl(['key'])));
+            $query = $this->getCurrentQuery();
+            unset($query['key']);
+
+            throw new RedirectResponseException($this->buildUrl(array_merge($query, ['act' => 'edit'])));
         }
 
         $importer->setDryRun($dry);
         $result = $importer->run();
         $importer->outputFinalResultMessage($result);
 
-        throw new RedirectResponseException($this->utils->url()->removeQueryStringParameterFromUrl(['key', 'id']));
+        $query = $this->getCurrentQuery();
+        unset($query['key'], $query['id']);
+
+        throw new RedirectResponseException($this->buildUrl($query));
     }
 }

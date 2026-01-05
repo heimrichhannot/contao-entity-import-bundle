@@ -222,13 +222,39 @@ class EntityImportConfigContainer
             $configModel->importProgressResult = '';
             $configModel->save();
 
-            throw new RedirectResponseException($this->utils->url()->addQueryStringParameterToUrl('act=edit', $this->utils->url()->removeQueryStringParameterFromUrl(['key'])));
+            $query = $this->getCurrentQuery();
+            unset($query['key']);
+
+            throw new RedirectResponseException($this->buildUrl(array_merge($query, ['act' => 'edit'])));
         }
         $importer = $this->importerFactory->createInstance($configModel->id);
         $importer->setDryRun($dry);
         $result = $importer->run();
         $importer->outputFinalResultMessage($result);
 
-        throw new RedirectResponseException($this->utils->url()->addQueryStringParameterToUrl('id='.$sourceModel->id, $this->utils->url()->removeQueryStringParameterFromUrl(['key', 'id'])));
+        $query = $this->getCurrentQuery();
+        unset($query['key'], $query['id']);
+
+        throw new RedirectResponseException($this->buildUrl(array_merge($query, ['id' => $sourceModel->id])));
+    }
+
+    private function getCurrentQuery(): array
+    {
+        $request = $this->requestStack->getCurrentRequest();
+
+        return $request?->query->all() ?? [];
+    }
+
+    private function buildUrl(array $query): string
+    {
+        $request = $this->requestStack->getCurrentRequest();
+
+        if (null === $request) {
+            return '';
+        }
+
+        $path = $request->getBaseUrl().$request->getPathInfo();
+
+        return $path.($query ? '?'.http_build_query($query) : '');
     }
 }

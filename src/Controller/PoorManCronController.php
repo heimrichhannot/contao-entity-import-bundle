@@ -10,7 +10,6 @@ namespace HeimrichHannot\EntityImportBundle\Controller;
 
 use HeimrichHannot\EntityImportBundle\Importer\ImporterFactory;
 use HeimrichHannot\EntityImportBundle\Importer\ImporterInterface;
-use HeimrichHannot\UtilsBundle\Model\ModelUtil;
 use HeimrichHannot\UtilsBundle\Util\Utils;
 
 class PoorManCronController

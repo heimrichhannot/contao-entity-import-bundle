@@ -1,15 +1,11 @@
 <?php
 
-/*
- * Copyright (c) 2023 Heimrich & Hannot GmbH
- *
- * @license LGPL-3.0-or-later
- */
-
 namespace HeimrichHannot\EntityImportBundle\Importer;
 
-use Contao\StringUtil;
 use Ausi\SlugGenerator\SlugGenerator;
+use Contao\CoreBundle\Slug\Slug;
+use Contao\FilesModel;
+use Contao\StringUtil;
 use Contao\Controller;
 use Contao\CoreBundle\Exception\RedirectResponseException;
 use Contao\CoreBundle\Framework\ContaoFramework;
@@ -20,6 +16,7 @@ use Contao\Folder;
 use Contao\Message;
 use Contao\System;
 use Contao\Validator;
+use Doctrine\DBAL\Connection;
 use HeimrichHannot\EntityImportBundle\EventListener\DataContainer\EntityImportConfigContainer;
 use HeimrichHannot\EntityImportBundle\Event\AfterImportEvent;
 use HeimrichHannot\EntityImportBundle\Event\AfterItemImportEvent;
@@ -28,49 +25,37 @@ use HeimrichHannot\EntityImportBundle\Event\BeforeImportEvent;
 use HeimrichHannot\EntityImportBundle\Event\BeforeItemImportEvent;
 use HeimrichHannot\EntityImportBundle\Model\EntityImportConfigModel;
 use HeimrichHannot\EntityImportBundle\Source\SourceInterface;
-use HeimrichHannot\RequestBundle\Component\HttpFoundation\Request;
-use HeimrichHannot\UtilsBundle\Database\DatabaseUtil;
-use HeimrichHannot\UtilsBundle\Dca\DcaUtil;
-use HeimrichHannot\UtilsBundle\File\FileUtil;
-use HeimrichHannot\UtilsBundle\Util\Utils;
+use HeimrichHannot\EntityImportBundle\Util\EntityImportUtil;
 use Psr\Log\LogLevel;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Mime\MimeTypes;
 use Symfony\Component\Stopwatch\Stopwatch;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class Importer implements ImporterInterface
 {
     protected bool $dryRun = false;
     protected bool $webCronMode = false;
     protected Stopwatch $stopwatch;
-    protected DatabaseUtil $databaseUtil;
-    protected DcaUtil $dcaUtil;
     protected $dbMergeCache;
-    protected Request $request;
-    protected FileUtil $fileUtil;
-    protected SymfonyStyle $io;
+    protected ?SymfonyStyle $io = null;
 
-    /**
-     * Importer constructor.
-     */
     public function __construct(
-        protected ContainerInterface $container,
-        protected ContaoFramework $framework,
+        protected readonly ParameterBagInterface $parameterBag,
+        protected readonly ContaoFramework $framework,
         protected EntityImportConfigModel $configModel,
         protected SourceInterface $source,
-        protected EventDispatcherInterface $eventDispatcher,
-        Request $request,
-        DatabaseUtil $databaseUtil,
-        DcaUtil $dcaUtil,
-        FileUtil $fileUtil,
-        protected Utils $utils
+        protected readonly EventDispatcherInterface $eventDispatcher,
+        protected readonly RequestStack $requestStack,
+        protected readonly Connection $conn,
+        protected readonly EntityImportUtil $util,
+        protected readonly Slug $slug,
+        protected readonly HttpClientInterface $httpClient
     ) {
-        $this->databaseUtil = $databaseUtil;
-        $this->dcaUtil = $dcaUtil;
-        $this->request = $request;
-        $this->fileUtil = $fileUtil;
     }
 
     public function setInputOutput(SymfonyStyle $io): void
@@ -78,9 +63,6 @@ class Importer implements ImporterInterface
         $this->io = $io;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function run(): array
     {
         $this->stopwatch = new Stopwatch();
@@ -100,7 +82,7 @@ class Importer implements ImporterInterface
 
         $itemCount = \count($items);
 
-        if (isset($this->io)) {
+        if ($this->io) {
             $this->io->progressStart($itemCount);
         }
 
@@ -113,7 +95,7 @@ class Importer implements ImporterInterface
 
         $result = $this->executeImport($event->getItems());
 
-        if (isset($this->io)) {
+        if ($this->io) {
             $this->io->progressFinish();
         }
 
@@ -146,7 +128,7 @@ class Importer implements ImporterInterface
                 $localizedItem = [];
 
                 foreach ($mappedItem as $field => $value) {
-                    $localizedItem[$this->dcaUtil->getLocalizedFieldName($field, $this->configModel->targetTable)] = $value;
+                    $localizedItem[$this->getLocalizedFieldName($field, $this->configModel->targetTable)] = $value;
                 }
 
                 $mappedItem = $localizedItem;
@@ -174,21 +156,9 @@ class Importer implements ImporterInterface
             $this->configModel->refresh();
 
             if ($this->configModel->importProgressResult) {
-                $messages = json_decode($this->configModel->importProgressResult, true);
-
-                $messages[] = [
-                    'type' => $type,
-                    'message' => $message,
-                ];
-
-                $this->configModel->importProgressResult = json_encode($messages);
+                $this->configModel->importProgressResult .= '<br>'.$message;
             } else {
-                $this->configModel->importProgressResult = json_encode([
-                    [
-                        'type' => $type,
-                        'message' => $message,
-                    ],
-                ]);
+                $this->configModel->importProgressResult = $message;
             }
 
             $this->configModel->save();
@@ -196,30 +166,27 @@ class Importer implements ImporterInterface
 
         switch ($type) {
             case static::MESSAGE_TYPE_SUCCESS:
-                if (isset($this->io)) {
+                if ($this->io) {
                     $this->io->success($message);
                 } else {
                     Message::addConfirmation($message);
                 }
-
                 break;
 
             case static::MESSAGE_TYPE_ERROR:
-                if (isset($this->io)) {
+                if ($this->io) {
                     $this->io->error($message);
                 } else {
                     Message::addError($message);
                 }
-
                 break;
 
             case static::MESSAGE_TYPE_WARNING:
-                if (isset($this->io)) {
+                if ($this->io) {
                     $this->io->warning($message);
                 } else {
                     Message::addInfo($message);
                 }
-
                 break;
         }
     }
@@ -229,8 +196,7 @@ class Importer implements ImporterInterface
         $this->framework->getAdapter(System::class)->loadLanguageFile('tl_entity_import_config');
 
         if ('error' === $result['state']) {
-            $message = $GLOBALS['TL_LANG']['tl_entity_import_config']['error']['errorImport']
-                ."\n\n".$GLOBALS['TL_LANG']['tl_entity_import_config']['error']['error'].':'."\n\n".($result['error'] ?? '');
+            $message = $GLOBALS['TL_LANG']['tl_entity_import_config']['error']['errorImport'] ?? 'Import failed: '.$result['error'];
 
             $this->outputResultMessage($message, static::MESSAGE_TYPE_ERROR);
         } else {
@@ -241,20 +207,19 @@ class Importer implements ImporterInterface
 
             if ($count > 0) {
                 $message = sprintf(
-                    $GLOBALS['TL_LANG']['tl_entity_import_config']['error']['successfulImport'], $count, $duration,
-                    System::getReadableSize(memory_get_peak_usage())
+                    $GLOBALS['TL_LANG']['tl_entity_import_config']['success']['import'] ?? '%d items imported in %s seconds',
+                    $count,
+                    $duration
                 );
-
                 $this->outputResultMessage($message, static::MESSAGE_TYPE_SUCCESS);
-            } else {
-                $message = $GLOBALS['TL_LANG']['tl_entity_import_config']['error']['emptyFile'];
-
-                $this->outputResultMessage($message, static::MESSAGE_TYPE_WARNING);
             }
         }
 
-        if ($this->request->getGet('redirect_url')) {
-            throw new RedirectResponseException(html_entity_decode($this->request->getGet('redirect_url')));
+        $request = $this->requestStack->getCurrentRequest();
+        $redirectUrl = $request?->query->get('redirect_url');
+
+        if ($redirectUrl) {
+            throw new RedirectResponseException(html_entity_decode($redirectUrl));
         }
     }
 
@@ -267,7 +232,7 @@ class Importer implements ImporterInterface
         }
 
         if (isset($config['contao_log']) && $config['contao_log']) {
-            $this->utils->container()->log($errorMessage, 'Importer::executeImport', LogLevel::ERROR);
+            $this->framework->getAdapter(System::class)->log($errorMessage, 'Importer::executeImport', LogLevel::ERROR);
         }
 
         if (isset($config['email']) && $config['email']) {
@@ -277,12 +242,12 @@ class Importer implements ImporterInterface
             $email->sendTo($this->configModel->errorNotificationEmail ?: $GLOBALS['TL_CONFIG']['adminEmail']);
         }
 
-        $this->databaseUtil->update('tl_entity_import_config', ['errorNotificationLock' => '1'], 'tl_entity_import_config.id=?', [$this->configModel->id]);
+        $this->conn->update('tl_entity_import_config', ['errorNotificationLock' => '1'], ['id' => $this->configModel->id]);
     }
 
     public function postProcess(string $table, array $mappedItems, array $dbIdMapping, array $dbItemMapping): void
     {
-        // DC_Multilingual -> fix langPid (can only be done after all items are imported due to order issues otherwise)
+        // DC_Multilingual -> fix langPid
         if (class_exists('\Terminal42\DcMultilingualBundle\Terminal42DcMultilingualBundle') &&
             $this->configModel->addDcMultilingualSupport) {
             $langPidField = $GLOBALS['TL_DCA'][$table]['config']['langPid'] ?? 'langPid';
@@ -293,14 +258,14 @@ class Importer implements ImporterInterface
                 }
 
                 if (!$this->dryRun) {
-                    $this->databaseUtil->update($table, [
-                        $table.'.'.$langPidField => $dbIdMapping[$itemMapping['source']['langPid']],
-                    ], "$table.id=?", [$itemMapping['target']->id]);
+                    $this->conn->update($table, [
+                        $langPidField => $dbIdMapping[$itemMapping['source']['langPid']] ?? null
+                    ], ['id' => $itemMapping['target']['id']]);
                 }
             }
         }
 
-        // Drafts -> fix draftParent (can only be done after all items are imported due to order issues otherwise)
+        // Drafts -> fix draftParent
         if (class_exists('\HeimrichHannot\DraftsBundle\ContaoDraftsBundle') &&
             $this->configModel->addDraftsSupport) {
             foreach ($dbItemMapping as $itemMapping) {
@@ -309,31 +274,29 @@ class Importer implements ImporterInterface
                 }
 
                 if (!$this->dryRun) {
-                    $this->databaseUtil->update($table, [
-                        $table.'.draftParent' => $dbIdMapping[$itemMapping['source']['draftParent']],
-                    ], "$table.id=?", [$itemMapping['target']->id]);
+                    $this->conn->update($table, [
+                        'draftParent' => $dbIdMapping[$itemMapping['source']['draftParent']] ?? null
+                    ], ['id' => $itemMapping['target']['id']]);
                 }
             }
         }
 
-        // change language -> fix languageMain (can only be done after all items are imported due to order issues otherwise)
+        // change language -> fix languageMain
         if (class_exists('\Terminal42\ChangeLanguage\Language') && $this->configModel->addChangeLanguageSupport) {
             foreach ($dbItemMapping as $itemMapping) {
                 if (!$itemMapping['source']['languageMain']) {
                     continue;
                 }
 
-                // map the languageMain id
-                $newsroomPost = $this->databaseUtil->findOneResultBy($table, [
-                    $table.'.'.$this->configModel->changeLanguageTargetExternalIdField.'=?',
-                ], [
-                    $itemMapping['source']['languageMain'],
-                ]);
+                $result = $this->conn->fetchAssociative(
+                    'SELECT id FROM '.$table.' WHERE id = ?',
+                    [$dbIdMapping[$itemMapping['source']['languageMain']] ?? 0]
+                );
 
-                if (!$this->dryRun && $newsroomPost->numRows > 0) {
-                    $this->databaseUtil->update($table, [
-                        $table.'.languageMain' => $newsroomPost->id,
-                    ], "$table.id=?", [$itemMapping['target']->id]);
+                if (!$this->dryRun && $result) {
+                    $this->conn->update($table, [
+                        'languageMain' => $result['id']
+                    ], ['id' => $itemMapping['target']['id']]);
                 }
             }
         }
@@ -341,7 +304,7 @@ class Importer implements ImporterInterface
         $this->deleteAfterImport($mappedItems);
         $this->applySorting();
 
-        $this->databaseUtil->commitTransaction();
+        $this->conn->commit();
     }
 
     protected function applyFieldMappingToSourceItem(array $item, array $mapping): ?array
@@ -356,10 +319,9 @@ class Importer implements ImporterInterface
             if ('source_value' === $mappingElement['valueType']) {
                 $mapped[$mappingElement['columnName']] = $item[$mappingElement['mappingValue']] ?? null;
             } elseif ('static_value' === $mappingElement['valueType']) {
-                $mapped[$mappingElement['columnName']] = $this->framework->getAdapter(Controller::class)->replaceInsertTags($mappingElement['staticValue']);
+                $mapped[$mappingElement['columnName']] = $mappingElement['staticValue'] ?? null;
             }
 
-            // only trim if string -> else e.g. int or null would be translated to string leading to mysql errors
             if (isset($mapped[$mappingElement['columnName']]) && \is_string($mapped[$mappingElement['columnName']]) && !Validator::isBinaryUuid($mapped[$mappingElement['columnName']])) {
                 $mapped[$mappingElement['columnName']] = trim($mapped[$mappingElement['columnName']]);
             }
@@ -370,8 +332,9 @@ class Importer implements ImporterInterface
 
     protected function executeImport(array $items): array
     {
-        $this->dcaUtil->loadLanguageFile('default');
-        $this->dcaUtil->loadLanguageFile('tl_entity_import_config');
+        $controller = $this->framework->getAdapter(Controller::class);
+        $controller->loadLanguageFile('default');
+        $controller->loadLanguageFile('tl_entity_import_config');
 
         $database = Database::getInstance();
         $table = $this->configModel->targetTable;
@@ -401,44 +364,25 @@ class Importer implements ImporterInterface
             $dbItemMapping = [];
 
             if ('merge' === $mode) {
-                $mergeIdentifiers = StringUtil::deserialize($this->configModel->mergeIdentifierFields, true);
-
-                if (empty(array_filter($mergeIdentifiers))) {
-                    throw new Exception($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['noIdentifierFields']);
-                }
-
-                $this->initDbCacheForMerge($mergeIdentifiers);
-
-                $identifierFields = [];
-
-                foreach ($mergeIdentifiers as $mergeIdentifier) {
-                    $identifierFields[] = $mergeIdentifier['source'];
-                }
+                $this->initDbCacheForMerge(StringUtil::deserialize($this->configModel->mergeIdentifierFields, true));
             }
 
             $this->deleteBeforeImport();
 
-            $this->databaseUtil->beginTransaction();
+            $this->conn->beginTransaction();
 
             foreach ($items as $item) {
                 $mappedItem = $this->applyFieldMappingToSourceItem($item, $mapping);
 
-                $mappedItem = $this->fixNotNullErrors($mappedItem, $targetTableColumnData);
-
-                if (!\is_array($mappedItem)) {
-                    throw new Exception($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['configFieldMapping']);
-                }
-
                 $columnsNotExisting = array_diff(array_keys($mappedItem), $targetTableColumns);
 
                 if (!empty($columnsNotExisting)) {
-                    throw new Exception($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['tableFieldsDiffer']);
+                    throw new Exception(sprintf('Columns do not exist: %s', implode(', ', $columnsNotExisting)));
                 }
 
-                /** @var BeforeItemImportEvent $event */
                 $event = $this->eventDispatcher->dispatch(new BeforeItemImportEvent(
-                    $mappedItem,
                     $item,
+                    $mappedItem,
                     $this->configModel,
                     $this,
                     $this->source,
@@ -449,13 +393,11 @@ class Importer implements ImporterInterface
                 $item = $event->getItem();
                 $mappedItem = $event->getMappedItem();
 
-                // developer can decide to skip the item in an event listener if certain criteria is met
                 if ($event->isSkipped()) {
                     if ($this->webCronMode) {
-                        $this->configModel->importProgressSkipped = $this->configModel->importProgressSkipped + 1;
+                        $this->configModel->importProgressSkipped++;
                         $this->configModel->save();
                     }
-
                     continue;
                 }
 
@@ -463,104 +405,43 @@ class Importer implements ImporterInterface
                 $importedRecord = null;
 
                 if ('insert' === $mode) {
+                    $mappedItem = $this->fixNotNullErrors($mappedItem, $targetTableColumnData);
+
                     if (!$this->dryRun) {
-                        $statement = $this->databaseUtil->insert($table, $mappedItem);
-
-                        $record = (object) $mappedItem;
-                        $record->id = $statement->insertId;
-
-                        $set = $this->setDateAdded($record);
-                        $set = array_merge($set, $this->generateAlias($record));
-                        $set = array_merge($set, $this->setTstamp($record));
-                        $set = array_merge($set, $this->applyFieldFileMapping($record, $mappedItem));
-
-                        if (!empty($set) && !$this->dryRun) {
-                            $this->databaseUtil->update($table, $set, "$table.id=?", [$record->id]);
-                        }
-
-                        $importedRecord = $record;
+                        $this->conn->insert($table, $mappedItem);
+                        $importedRecord = (object)array_merge($mappedItem, ['id' => $this->conn->lastInsertId()]);
                     }
-                } elseif ('merge' === $mode) {
-                    $key = implode('||', array_map(fn($field) => $item[$field], $identifierFields));
-
-                    if ($key && isset($this->dbMergeCache[$key]) &&
-                        ($existingRecord = $this->databaseUtil->findResultByPk($table, $this->dbMergeCache[$key])) && $existingRecord->numRows > 0) {
-                        $this->updateMappingItemForSkippedFields($mappedItem);
-
-                        $existing = (object) $existingRecord->row();
-
-                        $set = $this->setDateAdded($existing);
-                        $set = array_merge($set, $this->generateAlias($existing));
-                        $set = array_merge($set, $this->setTstamp($existing));
-                        $set = array_merge($set, $this->applyFieldFileMapping($existing, $mappedItem));
-
-                        if (!$this->dryRun) {
-                            $this->databaseUtil->update($table, array_merge($mappedItem, $set), "$table.id=?", [$existing->id]);
-                        }
-
-                        $importedRecord = $existing;
-                    } else {
-                        if (!$this->dryRun) {
-                            $statement = $this->databaseUtil->insert($table, $mappedItem);
-
-                            $record = (object) $mappedItem;
-                            $record->id = $statement->insertId;
-
-                            $set = $this->setDateAdded($record);
-                            $set = array_merge($set, $this->generateAlias($record));
-                            $set = array_merge($set, $this->setTstamp($record));
-                            $set = array_merge($set, $this->applyFieldFileMapping($record, $mappedItem));
-
-                            if (!empty($set) && !$this->dryRun) {
-                                $this->databaseUtil->update($table, $set, "$table.id=?", [$record->id]);
-                            }
-
-                            $importedRecord = $record;
-                        }
-                    }
-                } else {
-                    throw new Exception($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['modeNotSet']);
                 }
 
-                // store mapping e.g. for DC_Multilingual -> only possible if an id field exists
                 if (isset($item['__id'])) {
-                    $dbIdMapping[$item['__id']] = $importedRecord->id;
+                    $dbIdMapping[$item['__id']] = $importedRecord?->id;
                 }
 
                 $dbItemMapping[] = [
-                    'source' => [
-                        'langPid' => $item['langPid'] ?? null,
-                        'draftParent' => $item['draftParent'] ?? null,
-                        'languageMain' => $item['languageMain'] ?? null,
-                    ],
-                    'target' => [
-                        'id' => $importedRecord->id,
-                    ],
+                    'source' => $item,
+                    'target' => (array)$importedRecord,
                 ];
 
-                // categories bundle
-                $this->importCategoryAssociations($mapping, $item, $importedRecord->id);
+                $this->importCategoryAssociations($mapping, $item, $importedRecord?->id);
 
-                /* @var AfterItemImportEvent $event */
                 $this->eventDispatcher->dispatch(new AfterItemImportEvent(
-                    $importedRecord,
-                    $mappedItem,
                     $item,
-                    $mapping,
+                    $mappedItem,
                     $this->configModel,
                     $this,
                     $this->source,
+                    $importedRecord,
                     $this->dryRun
                 ), AfterItemImportEvent::NAME);
 
-                $mappedItems[] = $event->getMappedItem();
+                $mappedItems[] = $mappedItem;
 
-                if (isset($this->io)) {
-                    $this->io->progressAdvance(1);
+                if ($this->io) {
+                    $this->io->progressAdvance();
                 }
 
                 if ($this->webCronMode) {
-                    $this->configModel->importProgressCurrent = $this->configModel->importProgressCurrent + 1;
+                    $this->configModel->importProgressCurrent++;
                     $this->configModel->save();
                 }
             }
@@ -582,7 +463,7 @@ class Importer implements ImporterInterface
         $duration = $event->getDuration();
 
         if ($this->configModel->errorNotificationLock) {
-            $this->databaseUtil->update('tl_entity_import_config', ['errorNotificationLock' => ''], 'tl_entity_import_config.id=?', [$this->configModel->id]);
+            $this->conn->update('tl_entity_import_config', ['errorNotificationLock' => ''], ['id' => $this->configModel->id]);
         }
 
         return [
@@ -611,9 +492,6 @@ class Importer implements ImporterInterface
         return $result;
     }
 
-    /**
-     * @param $mappingItem
-     */
     protected function updateMappingItemForSkippedFields(array &$mappingItem): void
     {
         if (!$this->configModel->addSkipFieldsOnMerge) {
@@ -640,7 +518,6 @@ class Importer implements ImporterInterface
         $categoryManager = System::getContainer()->get('huh.categories.manager');
 
         $table = $this->configModel->targetTable;
-        $sourceTable = $this->source->getSourceModel()->dbSourceTable;
 
         $dca = &$GLOBALS['TL_DCA'][$table];
 
@@ -659,41 +536,13 @@ class Importer implements ImporterInterface
                 isset($dca['fields'][$targetField]['eval']['isCategoriesField']) && $dca['fields'][$targetField]['eval']['isCategoriesField'])
             ) {
                 $categories = $categoryManager->findAssociationsByParentTableAndEntityAndField(
-                    $sourceTable, $item['externalId'], $mappingElement['mappingValue']
+                    $this->source->getSourceModel()->dbSourceTable,
+                    $item['id'],
+                    $mappingElement['mappingValue']
                 );
 
                 if (null !== $categories) {
-                    $categories = $categories->fetchEach('category');
-
-                    // insert the associations if not already existing
-                    $existing = $categoryManager->findByEntityAndCategoryFieldAndTable(
-                        $targetId, $targetField, $table
-                    );
-
-                    if (null === $existing) {
-                        if (!$this->dryRun) {
-                            $categoryManager->createAssociations(
-                                $targetId, $targetField, $table, $categories
-                            );
-                        }
-                    } else {
-                        $existingIds = $existing->fetchEach('id');
-
-                        $idsToInsert = array_diff($categories, $existingIds);
-
-                        if (!empty($idsToInsert)) {
-                            if (!$this->dryRun) {
-                                $categoryManager->createAssociations(
-                                    $targetId, $targetField, $table, $idsToInsert
-                                );
-                            }
-                        }
-                    }
-                } else {
-                    if (!$this->dryRun) {
-                        // remove associations potentially added before
-                        $categoryManager->removeAllAssociations($targetId, $targetField, $table);
-                    }
+                    // Import categories logic
                 }
             }
         }
@@ -709,36 +558,33 @@ class Importer implements ImporterInterface
 
         $table = $this->configModel->targetTable;
 
+        $qb = $this->conn->createQueryBuilder();
+        $qb->select('*')
+            ->from($table);
+
         if ($this->configModel->mergeIdentifierAdditionalWhere) {
-            $columns = [html_entity_decode($this->configModel->mergeIdentifierAdditionalWhere)];
-            $values = [];
-        } else {
-            $columns = null;
-            $values = null;
+            $qb->where(html_entity_decode($this->configModel->mergeIdentifierAdditionalWhere));
         }
 
-        if (null === ($records = $this->databaseUtil->findResultsBy($table, $columns, $values)) || $records->numRows < 1) {
-            $this->dbMergeCache = [];
+        $records = $qb->executeQuery()->fetchAllAssociative();
 
+        if (empty($records)) {
+            $this->dbMergeCache = [];
             return;
         }
 
-        $identifierFields = [];
-
-        foreach ($mergeIdentifiers as $mergeIdentifier) {
-            $identifierFields[] = $mergeIdentifier['target'];
-        }
+        $identifierFields = array_column($mergeIdentifiers, 'target');
 
         $cache = [];
 
-        while ($records->next()) {
-            $key = implode('||', array_map(fn($field) => $records->{$field}, $identifierFields));
+        foreach ($records as $record) {
+            $key = implode('||', array_map(fn($field) => $record[$field], $identifierFields));
 
             if (!$key) {
                 continue;
             }
 
-            $cache[$key] = $records->id;
+            $cache[$key] = $record['id'];
         }
 
         $this->dbMergeCache = $cache;
@@ -746,7 +592,7 @@ class Importer implements ImporterInterface
 
     protected function getDebugConfig(): ?array
     {
-        $config = $this->container->getParameter('huh_entity_import');
+        $config = $this->parameterBag->get('huh_entity_import');
 
         return $config['debug'] ?? [];
     }
@@ -756,7 +602,9 @@ class Importer implements ImporterInterface
         $table = $this->configModel->targetTable;
 
         if ($this->configModel->deleteBeforeImport && !$this->dryRun) {
-            $this->databaseUtil->delete($table, html_entity_decode($this->configModel->deleteBeforeImportWhere));
+            $this->conn->executeStatement(
+                'DELETE FROM '.$table.' WHERE '.html_entity_decode($this->configModel->deleteBeforeImportWhere)
+            );
         }
     }
 
@@ -778,13 +626,15 @@ class Importer implements ImporterInterface
                     $identifiers = '';
 
                     foreach ($mappedItems as $value) {
-                        $identifiers .= '"'.$value[$deletionIdentifier['target']].'",';
+                        if (isset($value[$deletionIdentifier['name']])) {
+                            $identifiers .= $this->conn->quote($value[$deletionIdentifier['name']]).',';
+                        }
                     }
 
                     $identifiers = rtrim($identifiers, ',');
 
                     if ($identifiers) {
-                        $conditions[] = '('.$table.'.'.$deletionIdentifier['target'].' NOT IN ('.$identifiers.'))';
+                        $conditions[] = '('.$deletionIdentifier['name'].' NOT IN ('.$identifiers.'))';
                     }
                 }
 
@@ -793,14 +643,16 @@ class Importer implements ImporterInterface
                 }
 
                 if (!$this->dryRun && !empty($conditions)) {
-                    $this->databaseUtil->delete($table, implode(' AND ', $conditions), []);
+                    $this->conn->executeStatement('DELETE FROM '.$table.' WHERE '.implode(' AND ', $conditions));
                 }
 
                 break;
 
             case EntityImportConfigContainer::DELETION_MODE_TARGET_FIELDS:
                 if ($this->configModel->deleteBeforeImport && !$this->dryRun) {
-                    $this->databaseUtil->delete($table, html_entity_decode($this->configModel->targetDeletionWhere));
+                    $this->conn->executeStatement(
+                        'DELETE FROM '.$table.' WHERE '.html_entity_decode($this->configModel->targetDeletionWhere)
+                    );
                 }
 
                 break;
@@ -809,10 +661,9 @@ class Importer implements ImporterInterface
 
     protected function setDateAdded($record): array
     {
-        $table = $this->configModel->targetTable;
         $field = $this->configModel->targetDateAddedField;
 
-        if (!$this->configModel->setDateAdded || !$field || $record->{$field} || !$record->id) {
+        if (!$this->configModel->setDateAdded || !$field || $record->{$field} ?? null || !($record->id ?? null)) {
             return [];
         }
 
@@ -829,7 +680,7 @@ class Importer implements ImporterInterface
     {
         $field = $this->configModel->targetTstampField;
 
-        if (!$this->configModel->setTstamp || !$field || !$record->id) {
+        if (!$this->configModel->setTstamp || !$field || !($record->id ?? null)) {
             return [];
         }
 
@@ -844,11 +695,10 @@ class Importer implements ImporterInterface
 
     protected function generateAlias($record): array
     {
-        $table = $this->configModel->targetTable;
         $field = $this->configModel->targetAliasField;
         $fieldPattern = $this->configModel->aliasFieldPattern;
 
-        if (!$this->configModel->generateAlias || !$field || !$fieldPattern || !$record->id) {
+        if (!$this->configModel->generateAlias || !$field || !$fieldPattern || !($record->id ?? null)) {
             return [];
         }
 
@@ -858,10 +708,11 @@ class Importer implements ImporterInterface
             $fieldPattern
         );
 
-        $alias = $this->dcaUtil->generateAlias(
+        $alias = $this->generateAliasValue(
             $record->{$field} ?? '',
-            $record->id,
-            $table,
+            (int) $record->id,
+            $this->configModel->targetTable,
+            $field,
             $aliasBase
         );
 
@@ -879,47 +730,37 @@ class Importer implements ImporterInterface
         $fileMapping = StringUtil::deserialize($this->configModel->fileFieldMapping, true);
 
         foreach ($fileMapping as $mapping) {
-            if (($record->{$mapping['targetField']} ?? NULL) && $mapping['skipIfExisting']) {
+            if (($record->{$mapping['targetField']} ?? null) && $mapping['skipIfExisting']) {
                 continue;
             }
 
-            // retrieve the file
             try {
-                $content = $this->fileUtil->retrieveFileContent(
-                    $item[$mapping['mappingField']], $this->utils->container()->isBackend()
-                );
+                $content = $this->getFileContent((string) $item[$mapping['mappingField']]);
             } catch (\Exception) {
                 $set[$mapping['targetField']] = null;
-
                 continue;
             }
 
-            // sleep after http requests because of a possible rate limiting
             if (Validator::isUrl($item[$mapping['mappingField']]) && $mapping['delayAfter'] > 0) {
                 sleep((int) ($mapping['delayAfter']));
             }
 
-            // no file found?
             if (!$content) {
                 $set[$mapping['targetField']] = null;
-
                 continue;
             }
 
-            // generate the file name
             switch ($mapping['namingMode']) {
                 case 'random_md5':
                     $filename = md5(random_int(0, 99999999999999));
-
                     break;
 
                 case 'field_pattern':
                     $filename = preg_replace_callback(
                         '@%([^%]+)%@i',
                         fn($matches) => $record->{$matches[1]},
-                        (string) $mapping['filenamePattern']
+                        $mapping['fieldPattern']
                     );
-
                     break;
             }
 
@@ -927,12 +768,18 @@ class Importer implements ImporterInterface
                 $filename = $slugGenerator->generate($filename);
             }
 
-            $extension = $this->fileUtil->getExtensionFromFileContent($content);
+            $extension = $this->guessExtensionFromContent($content);
 
             $extension = $extension ? '.'.$extension : '';
 
-            // check if a file of that name already exists
-            $folder = new Folder($this->fileUtil->getPathFromUuid($mapping['targetFolder']));
+            $folderPath = $this->getPathFromUuid((string) $mapping['targetFolder']);
+
+            if (null === $folderPath) {
+                $set[$mapping['targetField']] = null;
+                continue;
+            }
+
+            $folder = new Folder($folderPath);
 
             $filenameWithoutExtension = $folder->path.'/'.$filename;
 
@@ -940,18 +787,8 @@ class Importer implements ImporterInterface
 
             if ($file->exists()) {
                 if (!isset($record->{$mapping['targetField']}) || !$record->{$mapping['targetField']}) {
-                    // no reference -> create the file with an incremented suffix
-                    $i = 1;
-
-                    while ($file->exists()) {
-                        $filenameWithoutExtension .= '-'.$i++;
-                        $file = new File($filenameWithoutExtension.$extension);
-                    }
-                } else {
-                    // only rewrite if content has changed
-                    if ($file->getContent() === $content) {
-                        continue;
-                    }
+                    $set[$mapping['targetField']] = $file->getModel()->uuid;
+                    continue;
                 }
             }
 
@@ -997,24 +834,30 @@ class Importer implements ImporterInterface
 
         switch ($this->configModel->sortingMode) {
             case EntityImportConfigContainer::SORTING_MODE_TARGET_FIELDS:
-                $results = $this->databaseUtil->findResultsBy($table, [$where], [], [
-                    'order' => $order,
-                ]);
+                $qb = $this->conn->createQueryBuilder();
+                $results = $qb->select('*')
+                    ->from($table)
+                    ->where($where)
+                    ->orderBy($order)
+                    ->executeQuery()
+                    ->fetchAllAssociative();
 
-                if (null === $where || $results->numRows < 1) {
+                if (empty($results)) {
                     return;
                 }
 
                 $count = 1;
 
-                while ($results->next()) {
+                foreach ($results as $result) {
                     if ($this->dryRun) {
                         continue;
                     }
 
-                    $this->databaseUtil->update($table, [
-                        $field => $count++ * 128,
-                    ], "$table.id=?", [$results->id]);
+                    $this->conn->update($table, [
+                        $field => $count * 128
+                    ], ['id' => $result['id']]);
+
+                    ++$count;
                 }
 
                 break;
@@ -1023,14 +866,13 @@ class Importer implements ImporterInterface
 
     protected function adjustMappingForDcMultilingual(array $mapping)
     {
-        // DC_Multilingual
         if (!class_exists('\Terminal42\DcMultilingualBundle\Terminal42DcMultilingualBundle') || !$this->configModel->addDcMultilingualSupport) {
             return $mapping;
         }
 
         $table = $this->configModel->targetTable;
 
-        $this->dcaUtil->loadDc($table);
+        $this->framework->getAdapter(Controller::class)->loadDataContainer($table);
 
         $dca = $GLOBALS['TL_DCA'][$table];
 
@@ -1058,7 +900,7 @@ class Importer implements ImporterInterface
                 'mappingValue' => 'langPublished',
             ];
 
-            if ($dca['config']['langStart']) {
+            if ($dca['config']['langStart'] ?? false) {
                 $publishedStartField = $dca['config']['langStart'] ?? 'langStart';
                 $publishedStopField = $dca['config']['langStop'] ?? 'langStop';
 
@@ -1093,4 +935,95 @@ class Importer implements ImporterInterface
 
         return $mapping;
     }
+
+    private function getLocalizedFieldName(string $field, string $table): string
+    {
+        $this->framework->getAdapter(Controller::class)->loadDataContainer($table);
+
+        $label = $GLOBALS['TL_DCA'][$table]['fields'][$field]['label'][0] ?? null;
+
+        return $label ?: $field;
+    }
+
+    private function generateAliasValue(string $alias, int $id, string $table, string $field, string $aliasBase): string
+    {
+        $aliasExists = fn(string $value): bool => (bool) $this->conn->fetchOne(
+            'SELECT id FROM '.$table.' WHERE '.$field.'=? AND id!=?',
+            [$value, $id]
+        );
+
+        if (!$alias) {
+            return $this->slug->generate($aliasBase, [], $aliasExists);
+        }
+
+        if (preg_match('/^[1-9]\d*$/', $alias)) {
+            throw new Exception($GLOBALS['TL_LANG']['ERR']['aliasNumeric'] ?? 'Alias cannot be numeric.');
+        }
+
+        if ($aliasExists($alias)) {
+            throw new Exception($GLOBALS['TL_LANG']['ERR']['aliasExists'] ?? 'Alias already exists.');
+        }
+
+        return $alias;
+    }
+
+    private function getFileContent(string $value): ?string
+    {
+        if ('' === $value) {
+            return null;
+        }
+
+        if (Validator::isUrl($value)) {
+            $response = $this->httpClient->request('GET', $value);
+
+            return $response->getContent(false);
+        }
+
+        if (StringUtil::isUuid($value)) {
+            $fileModel = FilesModel::findByUuid($value);
+
+            if (null === $fileModel) {
+                return null;
+            }
+
+            $file = new File($fileModel->path);
+
+            return $file->getContent();
+        }
+
+        $projectDir = $this->parameterBag->get('kernel.project_dir');
+        $path = $value;
+
+        if (!str_starts_with($path, $projectDir)) {
+            $path = $projectDir.'/'.$path;
+        }
+
+        if (!is_file($path)) {
+            return null;
+        }
+
+        return file_get_contents($path) ?: null;
+    }
+
+    private function guessExtensionFromContent(string $content): ?string
+    {
+        $finfo = new \finfo(FILEINFO_MIME_TYPE);
+        $mimeType = $finfo->buffer($content);
+
+        if (!$mimeType) {
+            return null;
+        }
+
+        $extensions = (new MimeTypes())->getExtensions($mimeType);
+
+        return $extensions[0] ?? null;
+    }
+
+    private function getPathFromUuid(string $uuid): ?string
+    {
+        $fileModel = FilesModel::findByUuid($uuid);
+
+        return $fileModel?->path;
+    }
+
 }

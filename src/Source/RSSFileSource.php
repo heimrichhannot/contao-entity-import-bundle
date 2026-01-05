@@ -96,7 +96,7 @@ class RSSFileSource extends AbstractFileSource
 
         foreach ($mapping as $mappingElement) {
             if ('static_value' === $mappingElement['valueType']) {
-                $result[$mappingElement['name']] = $this->stringUtil->replaceInsertTags($mappingElement['staticValue']);
+                $result[$mappingElement['name']] = $this->replaceInsertTags($mappingElement['staticValue']);
             } elseif ('source_value' === $mappingElement['valueType']) {
                 $value = $element[$mappingElement['sourceValue']];
 
@@ -107,7 +107,7 @@ class RSSFileSource extends AbstractFileSource
 
                 $result[$mappingElement['name']] = match ($mappingElement['sourceValue']) {
                     'pubDate' => $this->parseDate($value),
-                    'encoded' => $this->stringUtil->replaceUnicodeEmojisByHtml($value),
+                    'encoded' => $this->normalizeEncodedValue($value),
                     default => $value ?? '',
                 };
             }
@@ -125,5 +125,10 @@ class RSSFileSource extends AbstractFileSource
         }
 
         return 0;
+    }
+
+    protected function normalizeEncodedValue($value): string
+    {
+        return (string) $value;
     }
 }

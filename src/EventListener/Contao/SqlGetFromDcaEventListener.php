@@ -10,19 +10,28 @@ namespace HeimrichHannot\EntityImportBundle\EventListener\Contao;
 
 use Contao\CoreBundle\DependencyInjection\Attribute\AsHook;
 use Contao\CoreBundle\Framework\ContaoFramework;
+use Contao\CoreBundle\Routing\ScopeMatcher;
 use Contao\Database;
 use HeimrichHannot\UtilsBundle\Util\Utils;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 #[AsHook('sqlGetFromDca')]
 class SqlGetFromDcaEventListener
 {
-    public function __construct(protected ContaoFramework $framework, protected Utils $utils)
+    public function __construct(
+        protected ContaoFramework $framework,
+        protected Utils $utils,
+        protected ScopeMatcher $scopeMatcher,
+        protected RequestStack $requestStack
+    )
     {
     }
 
     public function __invoke(array $sqlDcaData)
     {
-        if (!$this->utils->container()->isBackend()) {
+        $request = $this->requestStack->getCurrentRequest();
+
+        if (null === $request || !$this->scopeMatcher->isBackendRequest($request)) {
             return $sqlDcaData;
         }
 

@@ -11,51 +11,40 @@ namespace HeimrichHannot\EntityImportBundle\Importer;
 use Contao\CoreBundle\Framework\ContaoFramework;
 use HeimrichHannot\EntityImportBundle\Source\SourceFactory;
 use HeimrichHannot\EntityImportBundle\Source\SourceInterface;
-use HeimrichHannot\RequestBundle\Component\HttpFoundation\Request;
-use HeimrichHannot\UtilsBundle\Database\DatabaseUtil;
-use HeimrichHannot\UtilsBundle\Dca\DcaUtil;
-use HeimrichHannot\UtilsBundle\File\FileUtil;
-use HeimrichHannot\UtilsBundle\Model\ModelUtil;
+use HeimrichHannot\EntityImportBundle\Util\EntityImportUtil;
+use Contao\CoreBundle\Slug\Slug;
 use HeimrichHannot\UtilsBundle\Util\Utils;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Doctrine\DBAL\Connection;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class ImporterFactory
 {
-    protected DatabaseUtil $databaseUtil;
-    protected ModelUtil $modelUtil;
-    protected DcaUtil $dcaUtil;
-    protected Request $request;
-    protected FileUtil $fileUtil;
-
     public function __construct(
-        protected ContainerInterface $container,
+        protected ParameterBagInterface $parameterBag,
         protected ContaoFramework $framework,
-        DatabaseUtil $databaseUtil,
         protected EventDispatcherInterface $eventDispatcher,
-        Request $request,
-        ModelUtil $modelUtil,
-        DcaUtil $dcaUtil,
+        protected RequestStack $requestStack,
+        protected Connection $conn,
         protected SourceFactory $sourceFactory,
-        FileUtil $fileUtil,
-        protected Utils $utils
+        protected Utils $utils,
+        protected EntityImportUtil $util,
+        protected Slug $slug,
+        protected HttpClientInterface $httpClient
     ) {
-        $this->databaseUtil = $databaseUtil;
-        $this->modelUtil = $modelUtil;
-        $this->dcaUtil = $dcaUtil;
-        $this->request = $request;
-        $this->fileUtil = $fileUtil;
     }
 
     public function createInstance($configModel, array $options = []): ?ImporterInterface
     {
         $sourceModel = $options['sourceModel'] ?? null;
 
-        if (is_numeric($configModel) && null === ($configModel = $this->modelUtil->findModelInstanceByPk('tl_entity_import_config', $configModel))) {
+        if (is_numeric($configModel) && null === ($configModel = $this->utils->model()->findModelInstanceByPk('tl_entity_import_config', $configModel))) {
             return null;
         }
 
-        if (null === $sourceModel && null === ($sourceModel = $this->modelUtil->findModelInstanceByPk('tl_entity_import_source', $configModel->pid))) {
+        if (null === $sourceModel && null === ($sourceModel = $this->utils->model()->findModelInstanceByPk('tl_entity_import_source', $configModel->pid))) {
             return null;
         }
 
@@ -68,16 +57,16 @@ class ImporterFactory
         $source->setDomain($configModel->cronDomain);
 
         return new Importer(
-            $this->container,
+            $this->parameterBag,
             $this->framework,
             $configModel,
             $source,
             $this->eventDispatcher,
-            $this->request,
-            $this->databaseUtil,
-            $this->dcaUtil,
-            $this->fileUtil,
-            $this->utils
+            $this->requestStack,
+            $this->conn,
+            $this->util,
+            $this->slug,
+            $this->httpClient
         );
     }
 }

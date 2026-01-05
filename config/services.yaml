@@ -6,4 +6,20 @@ services:
 
   HeimrichHannot\EntityImportBundle\:
     resource: ../src
-    exclude: ../src/{ContaoManager,DependencyInjection,Event,HeimrichHannotContaoEntityImportBundle.php}
+    exclude:
+      - ../src/ContaoManager
+      - ../src/DependencyInjection
+      - ../src/Event
+      - ../src/Importer/Importer.php
+      - ../src/Importer/ImporterInterface.php
+      - ../src/Model
+      - ../src/Source/AbstractFileSource.php
+      - ../src/Source/AbstractSource.php
+      - ../src/Source/CSVFileSource.php
+      - ../src/Source/DatabaseSource.php
+      - ../src/Source/JSONFileSource.php
+      - ../src/Source/RSSFileSource.php
+      - ../src/Source/SourceInterface.php
+      - ../src/Source/XmlFileSource.php
+      - ../src/Util/CsvReader.php
+      - ../src/HeimrichHannotContaoEntityImportBundle.php
