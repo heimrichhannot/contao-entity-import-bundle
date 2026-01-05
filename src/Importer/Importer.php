@@ -16,6 +16,7 @@ use Contao\Folder;
 use Contao\Message;
 use Contao\System;
 use Contao\Validator;
+use Contao\CoreBundle\InsertTag\InsertTagParser;
 use Doctrine\DBAL\Connection;
 use HeimrichHannot\EntityImportBundle\EventListener\DataContainer\EntityImportConfigContainer;
 use HeimrichHannot\EntityImportBundle\Event\AfterImportEvent;
@@ -54,7 +55,8 @@ class Importer implements ImporterInterface
         protected readonly Connection $conn,
         protected readonly EntityImportUtil $util,
         protected readonly Slug $slug,
-        protected readonly HttpClientInterface $httpClient
+        protected readonly HttpClientInterface $httpClient,
+        protected readonly InsertTagParser $insertTagParser
     ) {
     }
 
@@ -196,7 +198,7 @@ class Importer implements ImporterInterface
         $this->framework->getAdapter(System::class)->loadLanguageFile('tl_entity_import_config');
 
         if ('error' === $result['state']) {
-            $message = $GLOBALS['TL_LANG']['tl_entity_import_config']['error']['errorImport'] ?? 'Import failed: '.$result['error'];
+            $message = $result['error'] ?  'Import failed: '.$result['error'] : $GLOBALS['TL_LANG']['tl_entity_import_config']['error']['errorImport'];
 
             $this->outputResultMessage($message, static::MESSAGE_TYPE_ERROR);
         } else {
@@ -381,8 +383,8 @@ class Importer implements ImporterInterface
                 }
 
                 $event = $this->eventDispatcher->dispatch(new BeforeItemImportEvent(
-                    $item,
                     $mappedItem,
+                    $item,
                     $this->configModel,
                     $this,
                     $this->source,
@@ -425,12 +427,13 @@ class Importer implements ImporterInterface
                 $this->importCategoryAssociations($mapping, $item, $importedRecord?->id);
 
                 $this->eventDispatcher->dispatch(new AfterItemImportEvent(
+                    $importedRecord,
                     $item,
                     $mappedItem,
+                    $mapping,
                     $this->configModel,
                     $this,
                     $this->source,
-                    $importedRecord,
                     $this->dryRun
                 ), AfterItemImportEvent::NAME);
 
@@ -592,6 +595,10 @@ class Importer implements ImporterInterface
 
     protected function getDebugConfig(): ?array
     {
+        if (!$this->parameterBag->has('huh_entity_import')) {
+            return null;
+        }
+
         $config = $this->parameterBag->get('huh_entity_import');
 
         return $config['debug'] ?? [];
@@ -820,8 +827,8 @@ class Importer implements ImporterInterface
     {
         $field = $this->configModel->targetSortingField;
 
-        $where = $this->framework->getAdapter(Controller::class)->replaceInsertTags(
-            html_entity_decode($this->configModel->targetSortingContextWhere), false
+        $where = $this->insertTagParser->replace(
+            html_entity_decode($this->configModel->targetSortingContextWhere)
         );
 
         $order = $this->configModel->targetSortingOrder;

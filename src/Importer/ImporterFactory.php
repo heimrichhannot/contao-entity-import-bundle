@@ -12,6 +12,7 @@ use Contao\CoreBundle\Framework\ContaoFramework;
 use HeimrichHannot\EntityImportBundle\Source\SourceFactory;
 use HeimrichHannot\EntityImportBundle\Source\SourceInterface;
 use HeimrichHannot\EntityImportBundle\Util\EntityImportUtil;
+use Contao\CoreBundle\InsertTag\InsertTagParser;
 use Contao\CoreBundle\Slug\Slug;
 use HeimrichHannot\UtilsBundle\Util\Utils;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -32,7 +33,8 @@ class ImporterFactory
         protected Utils $utils,
         protected EntityImportUtil $util,
         protected Slug $slug,
-        protected HttpClientInterface $httpClient
+        protected HttpClientInterface $httpClient,
+        protected InsertTagParser $insertTagParser
     ) {
     }
 
@@ -66,7 +68,8 @@ class ImporterFactory
             $this->conn,
             $this->util,
             $this->slug,
-            $this->httpClient
+            $this->httpClient,
+            $this->insertTagParser
         );
     }
 }
