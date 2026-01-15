@@ -66,8 +66,13 @@ class SourceFactory
                         $source = new RSSFileSource($this->eventDispatcher, $this->utils, $this->parameterBag, $this->insertTagParser);
 
                         break;
+
+
                 }
 
+                break;
+            case EntityImportSourceContainer::TYPE_YOUTUBE:
+                $source = new YouTubeSource($this->eventDispatcher, $this->utils, $this->parameterBag, $this->insertTagParser);
                 break;
         }
 

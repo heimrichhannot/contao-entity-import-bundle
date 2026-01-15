@@ -20,6 +20,7 @@ $lang['type'][0] = 'Typ';
 $lang['type'][1] = 'Wählen Sie hier den Typ des Imports aus.';
 $lang['type'][EntityImportSourceContainer::TYPE_DATABASE] = 'Datenbank';
 $lang['type'][EntityImportSourceContainer::TYPE_FILE] = 'Datei';
+$lang['type'][EntityImportSourceContainer::TYPE_YOUTUBE] = 'YouTube';
 
 $lang['fileType'][0] = 'Dateityp';
 $lang['fileType'][1] = 'Wählen Sie hier den Typ der Datei aus.';
@@ -108,6 +109,17 @@ $lang['addDcMultilingualSupport'][1] = 'Wählen Sie diese Option, wenn es sich b
 $lang['addChangeLanguageSupport'][0] = 'Unterstützung für terminal42/contao-changelanguage hinzufügen (ACHTUNG: Erklärung lesen!)';
 $lang['addChangeLanguageSupport'][1] = 'Wählen Sie diese Option, um das languageMain-Feld korrekt zu migrieren. ACHTUNG: Der Importer der Entität in der Fallback-Sprache muss vor diesem Importer laufen (Cron-Reihenfolge!). Fügen Sie "languageMain" NICHT der Felderabbildung hinzu.';
 
+$lang['apiKey'][0] = 'API-Key';
+$lang['apiKey'][1] = 'Geben Sie hier den API-Key ein, den Sie vom entsprechenden Dienst erhalten haben.';
+
+$lang['youtubeMode'][0] = 'Modus';
+$lang['youtubeMode'][1] = 'Wählen Sie hier einen Modus aus.';
+$lang['youtubeUsername'][0] = 'YouTube-Benutzername';
+$lang['youtubeUsername'][1] = 'Sie finden den Benutzernamen über die User-URL (Beispiel: https://www.youtube.com/user/<...>).';
+$lang['youtubeChannel'][0] = 'YouTube-Kanal';
+$lang['youtubeChannel'][1] = 'Sie finden den Benutzernamen über die Channel-URL (Beispiel: https://www.youtube.com/channel/<...>).';
+
+
 /*
  * Reference
  */
@@ -120,6 +132,12 @@ $lang['reference'] = [
         'get' => 'GET',
         'post' => 'POST',
     ],
+    'posts' => [
+        'channel' => 'Kanal',
+        'user' => 'User',
+        'page' => 'Seite',
+        'self' => 'Self',
+    ]
 ];
 
 /*

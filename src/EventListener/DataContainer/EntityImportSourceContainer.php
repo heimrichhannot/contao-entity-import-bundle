@@ -23,9 +23,11 @@ class EntityImportSourceContainer
     const TYPE_DATABASE = 'db';
     const TYPE_FILE = 'file';
 
+    const TYPE_YOUTUBE = 'youtube';
     const TYPES = [
         self::TYPE_DATABASE,
         self::TYPE_FILE,
+        self::TYPE_YOUTUBE
     ];
 
     const RETRIEVAL_TYPE_HTTP = 'http';

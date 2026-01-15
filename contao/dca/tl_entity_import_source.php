@@ -4,6 +4,7 @@ use Contao\DC_Table;
 use Contao\DataContainer;
 use HeimrichHannot\EntityImportBundle\EventListener\DataContainer\EntityImportSourceContainer;
 use Contao\Config;
+use HeimrichHannot\EntityImportBundle\Source\YouTubeSource;
 
 /*
  * Copyright (c) 2022 Heimrich & Hannot GmbH
@@ -53,10 +54,12 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
 
     // Palettes
     'palettes' => [
-        '__selector__' => ['type', 'retrievalType', 'fileType'],
+        '__selector__' => ['type', 'retrievalType', 'fileType', 'youtubeMode'],
         'default' => '{title_legend},title,type;',
         EntityImportSourceContainer::TYPE_DATABASE => '{title_legend},title,type;{db_legend},dbDriver,dbHost,dbUser,dbPass,dbDatabase,dbPconnect,dbCharset,dbPort,dbSocket,dbSourceTableExplanation,dbSourceTable,dbSourceTableWhere,addDcMultilingualSupport,addChangeLanguageSupport,fieldMappingCopier,fieldMappingPresets,fieldMapping;',
         EntityImportSourceContainer::TYPE_FILE => '{title_legend},title,type;{file_legend},retrievalType;',
+        EntityImportSourceContainer::TYPE_YOUTUBE  => '{title_legend},title,type;
+    {config_legend},apiKey,youtubeMode,fieldMappingCopier,fieldMappingPresets,fieldMapping;'
     ],
 
     // Subpalettes
@@ -68,6 +71,8 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
         'fileType_json' => 'fileContent,pathToDataArray,fieldMappingCopier,fieldMappingPresets,fieldMapping',
         'fileType_rss' => 'fileContent,pathToDataArray,fieldMappingCopier,fieldMappingPresets,fieldMapping',
         'fileType_xml' => 'fileContent,pathToDataArray,fieldMappingCopier,fieldMappingPresets,fieldMapping',
+        'youtubeMode_'.YouTubeSource::MODE_CHANNEL => 'youtubeChannel',
+        'youtubeMode_'.YouTubeSource::MODE_USER => 'youtubeUsername',
     ],
     // Fields
     'fields' => [
@@ -457,6 +462,37 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
                 'maxlength' => 1,
             ],
             'sql' => "char(1) NOT NULL default ''",
+        ],
+        'apiKey' => [
+            'exclude' => true,
+            'inputType' => 'text',
+            'eval' => ['maxlength' => 255, 'tl_class' => 'w50', 'mandatory' => true],
+            'sql' => "varchar(255) NOT NULL default ''",
+        ],
+        'youtubeMode' => [
+            'exclude' => true,
+            'filter' => true,
+            'inputType' => 'select',
+            'default' => YouTubeSource::MODE_CHANNEL,
+            'options' => [
+                YouTubeSource::MODE_CHANNEL,
+                YouTubeSource::MODE_USER,
+            ],
+            'reference' => &$GLOBALS['TL_LANG']['tl_entity_import_source']['reference']['posts'],
+            'eval' => ['tl_class' => 'w50', 'submitOnChange' => true, 'mandatory' => true],
+            'sql' => "varchar(64) NOT NULL default 'channel'",
+        ],
+        'youtubeUsername' => [
+            'exclude' => true,
+            'inputType' => 'text',
+            'eval' => ['maxlength' => 64, 'tl_class' => 'w50', 'mandatory' => true],
+            'sql' => "varchar(64) NOT NULL default ''",
+        ],
+        'youtubeChannel' => [
+            'exclude' => true,
+            'inputType' => 'text',
+            'eval' => ['maxlength' => 64, 'tl_class' => 'w50', 'mandatory' => true],
+            'sql' => "varchar(64) NOT NULL default ''",
         ],
     ],
 ];
