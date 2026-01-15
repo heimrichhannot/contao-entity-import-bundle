@@ -366,7 +366,19 @@ class Importer implements ImporterInterface
             $dbItemMapping = [];
 
             if ('merge' === $mode) {
+                $mergeIdentifiers = StringUtil::deserialize($this->configModel->mergeIdentifierFields, true);
+
+                if (empty(array_filter($mergeIdentifiers))) {
+                    throw new Exception($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['noIdentifierFields']);
+                }
+
                 $this->initDbCacheForMerge(StringUtil::deserialize($this->configModel->mergeIdentifierFields, true));
+
+                $identifierFields = [];
+
+                foreach ($mergeIdentifiers as $mergeIdentifier) {
+                    $identifierFields[] = $mergeIdentifier['source'];
+                }
             }
 
             $this->deleteBeforeImport();
@@ -407,12 +419,91 @@ class Importer implements ImporterInterface
                 $importedRecord = null;
 
                 if ('insert' === $mode) {
-                    $mappedItem = $this->fixNotNullErrors($mappedItem, $targetTableColumnData);
-
                     if (!$this->dryRun) {
                         $this->conn->insert($table, $mappedItem);
-                        $importedRecord = (object)array_merge($mappedItem, ['id' => $this->conn->lastInsertId()]);
+                        $record = (object) $mappedItem;
+                        $record->id = $this->conn->lastInsertId();
+
+                        $set = $this->setDateAdded($record);
+                        $set = array_merge($set, $this->generateAlias($record));
+                        $set = array_merge($set, $this->setTstamp($record));
+                        $set = array_merge($set, $this->applyFieldFileMapping($record, $mappedItem));
+
+                        if (!empty($set) && !$this->dryRun) {
+                            $this->conn->update($table, $set, ['id' => $record->id]);
+                        }
+
+                        $importedRecord = $record;
                     }
+                } elseif ('merge' === $mode) {
+                    $key = implode('||', array_map(function ($field) use ($item) {
+                        return $item[$field];
+                    }, $identifierFields));
+
+                    if ($key && isset($this->dbMergeCache[$key])) {
+                        $existingId = $this->dbMergeCache[$key];
+
+                        // Fetch the existing row using the DBAL connection
+                        $existingRecord = $this->conn->fetchAssociative(
+                            'SELECT * FROM '.$table.' WHERE id = ?',
+                            [$existingId]
+                        );
+
+                        if ($existingRecord) {
+                            $this->updateMappingItemForSkippedFields($mappedItem);
+
+                            $existing = (object) $existingRecord;
+
+                            $set = $this->setDateAdded($existing);
+                            $set = array_merge($set, $this->generateAlias($existing));
+                            $set = array_merge($set, $this->setTstamp($existing));
+                            $set = array_merge($set, $this->applyFieldFileMapping($existing, $mappedItem));
+
+                            if (!$this->dryRun) {
+                                $this->conn->update($table, array_merge($mappedItem, $set), ['id' => $existing->id]);
+                            }
+
+                            $importedRecord = $existing;
+                        } else {
+                            if (!$this->dryRun) {
+                                $this->conn->insert($table, $mappedItem);
+
+                                $record = (object) $mappedItem;
+                                $record->id = $this->conn->lastInsertId();
+
+                                $set = $this->setDateAdded($record);
+                                $set = array_merge($set, $this->generateAlias($record));
+                                $set = array_merge($set, $this->setTstamp($record));
+                                $set = array_merge($set, $this->applyFieldFileMapping($record, $mappedItem));
+
+                                if (!empty($set) && !$this->dryRun) {
+                                    $this->conn->update($table, $set, ['id' => $existing->id]);
+                                }
+
+                                $importedRecord = $record;
+                            }
+                        }
+                    } else {
+                        if (!$this->dryRun) {
+                            $this->conn->insert($table, $mappedItem);
+
+                            $record = (object) $mappedItem;
+                            $record->id = $this->conn->lastInsertId();
+
+                            $set = $this->setDateAdded($record);
+                            $set = array_merge($set, $this->generateAlias($record));
+                            $set = array_merge($set, $this->setTstamp($record));
+                            $set = array_merge($set, $this->applyFieldFileMapping($record, $mappedItem));
+
+                            if (!empty($set) && !$this->dryRun) {
+                                $this->conn->update($table, $set, ['id' => $record->id]);
+                            }
+
+                            $importedRecord = $record;
+                        }
+                    }
+                } else {
+                    throw new Exception($GLOBALS['TL_LANG']['tl_entity_import_config']['error']['modeNotSet']);
                 }
 
                 if (isset($item['__id'])) {
