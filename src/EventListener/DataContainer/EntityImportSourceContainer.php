@@ -19,6 +19,8 @@ use HeimrichHannot\EntityImportBundle\Source\RSSFileSource;
 use HeimrichHannot\EntityImportBundle\Source\SourceFactory;
 use HeimrichHannot\EntityImportBundle\Util\EntityImportUtil;
 use HeimrichHannot\UtilsBundle\Util\Utils;
+use League\OAuth2\Client\Provider\Facebook;
+use Symfony\Component\Routing\RouterInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class EntityImportSourceContainer
@@ -64,7 +66,8 @@ class EntityImportSourceContainer
         private readonly Utils $utils,
         private readonly Connection $conn,
         private readonly EntityImportUtil $util,
-        private readonly EventDispatcherInterface $eventDispatcher
+        private readonly EventDispatcherInterface $eventDispatcher,
+        private readonly RouterInterface $router
     ) {
         $this->activeBundles = System::getContainer()->getParameter('kernel.bundles');
     }
@@ -260,28 +263,25 @@ class EntityImportSourceContainer
             return '#';
         }
 
-        // facebook insists on HTTPS being active for all redirect URLs
         $redirectUri = Environment::get('url').$this->router->generate('contao_newsroom_facebook_redirect_callback', [
                 'importSource' => $dc->id,
             ]);
 
-        if ($this->stringUtil->startsWith($redirectUri, 'http://')) {
-            $redirectUri = 'https://'.$this->stringUtil->removeLeadingString('http://', $redirectUri);
+        if (str_starts_with($redirectUri, 'http://')) {
+            $redirectUri = 'https://'.substr($redirectUri, 7);
         }
 
-        if (!$this->stringUtil->startsWith($redirectUri, 'http') && !$this->stringUtil->startsWith($redirectUri, 'https')) {
+        if (!str_starts_with($redirectUri, 'http://') && !str_starts_with($redirectUri, 'https://')) {
             $redirectUri = Environment::get('url').'/'.$redirectUri;
         }
 
         try {
-            $facebook = new Facebook(
-                [
-                    'clientId' => $sourceModel->appId,
-                    'clientSecret' => $sourceModel->appSecret,
-                    'graphApiVersion' => 'v2.12',
-                    'redirectUri' => $redirectUri,
-                ]
-            );
+            $facebook = new Facebook([
+                'clientId' => $sourceModel->appId,
+                'clientSecret' => $sourceModel->appSecret,
+                'graphApiVersion' => 'v2.12',
+                'redirectUri' => $redirectUri,
+            ]);
         } catch (\Exception $e) {
             Message::addError(sprintf($GLOBALS['TL_LANG']['MSC']['newsroom']['serviceConnectionError'], $e->getMessage()));
 
@@ -292,4 +292,5 @@ class EntityImportSourceContainer
             'scope' => 'page' === $sourceModel->facebookMode ? ['email', 'pages_read_engagement', 'pages_show_list'] : ['email', 'user_posts'],
         ]);
     }
+
 }

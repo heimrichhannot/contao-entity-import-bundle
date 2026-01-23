@@ -526,7 +526,6 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'sql' => "varchar(255) NOT NULL default ''",
         ],
         'metaAccessTokenButton' => [
-            'label' => &$GLOBALS['TL_LANG']['tl_entity_import_source']['metaAccessTokenButton'],
             'exclude' => true,
             'inputType' => 'entityImportHyperlink',
             'eval' => [

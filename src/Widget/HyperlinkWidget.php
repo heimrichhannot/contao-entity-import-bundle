@@ -2,11 +2,13 @@
 
 namespace HeimrichHannot\EntityImportBundle\Widget;
 
+use Contao\System;
 use Contao\Widget;
 
 class HyperlinkWidget extends Widget
 {
     protected $blnSubmitInput = false;
+    protected $strTemplate = 'be_widget';
 
     public function generate(): string
     {
@@ -17,7 +19,10 @@ class HyperlinkWidget extends Widget
                 $url = $this->arrConfiguration['url'];
             } elseif (is_array($this->arrConfiguration['url'])) {
                 $callback = $this->arrConfiguration['url'];
-                $url = $callback[0]::{$callback[1]}($this->objDca, $this);
+
+                // Hole Service aus dem Container statt statischem Import
+                $service = System::getContainer()->get($callback[0]);
+                $url = $service->{$callback[1]}($this->objDca, $this);
             } elseif (is_callable($this->arrConfiguration['url'])) {
                 $url = ($this->arrConfiguration['url'])($this->objDca, $this);
             }

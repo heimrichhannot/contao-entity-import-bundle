@@ -127,6 +127,8 @@ $lang['instagramUsername'][1] = 'Tragen Sie hier den Namen des Instagram-Account
 $lang['instagramUserID'][0] = 'Instagram-UserId';
 $lang['instagramUserID'][1] = 'Tragen Sie hier die ID des Instagram-Accounts ein, auf den Sie zugreifen möchten.';
 
+$lang['request'] = 'Anfordern';
+
 /*
  * Reference
  */
