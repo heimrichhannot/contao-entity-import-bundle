@@ -856,9 +856,18 @@ class Importer implements ImporterInterface
                 case 'field_pattern':
                     $filename = preg_replace_callback(
                         '@%([^%]+)%@i',
-                        fn($matches) => $record->{$matches[1]},
+                        function($matches) use ($record, $item) {
+                            $fieldName = $matches[1];
+                            return $record->{$fieldName} ?? $item[$fieldName] ?? '';
+                        },
                         $mapping['fieldPattern']
                     );
+
+                    $filename = trim($filename);
+
+                    if (empty($filename)) {
+                        $filename = 'file_' . ($record->id ?? time());
+                    }
                     break;
             }
 
