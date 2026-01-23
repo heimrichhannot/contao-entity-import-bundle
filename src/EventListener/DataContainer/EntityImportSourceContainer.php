@@ -5,11 +5,14 @@ namespace HeimrichHannot\EntityImportBundle\EventListener\DataContainer;
 use Contao\CoreBundle\DependencyInjection\Attribute\AsCallback;
 use Contao\Database;
 use Contao\DataContainer;
+use Contao\Environment;
 use Contao\Message;
 use Contao\Model;
 use Contao\System;
+use Contao\Widget;
 use Doctrine\DBAL\Connection;
 use HeimrichHannot\EntityImportBundle\Event\AddSourceFieldMappingPresetsEvent;
+use HeimrichHannot\EntityImportBundle\Model\EntityImportSourceModel;
 use HeimrichHannot\EntityImportBundle\Source\AbstractFileSource;
 use HeimrichHannot\EntityImportBundle\Source\CSVFileSource;
 use HeimrichHannot\EntityImportBundle\Source\RSSFileSource;
@@ -24,10 +27,12 @@ class EntityImportSourceContainer
     const TYPE_FILE = 'file';
 
     const TYPE_YOUTUBE = 'youtube';
+    const TYPE_INSTAGRAM = 'instagram';
     const TYPES = [
         self::TYPE_DATABASE,
         self::TYPE_FILE,
-        self::TYPE_YOUTUBE
+        self::TYPE_YOUTUBE,
+        self::TYPE_INSTAGRAM
     ];
 
     const RETRIEVAL_TYPE_HTTP = 'http';
@@ -247,5 +252,44 @@ class EntityImportSourceContainer
         }
 
         return $options;
+    }
+
+    public function getMetaAccessTokenGenerationUrl(DataContainer $dc, Widget $widget)
+    {
+        if (null === ($sourceModel = EntityImportSourceModel::findByPk($dc->id)) || !$sourceModel->appId || !$sourceModel->appSecret) {
+            return '#';
+        }
+
+        // facebook insists on HTTPS being active for all redirect URLs
+        $redirectUri = Environment::get('url').$this->router->generate('contao_newsroom_facebook_redirect_callback', [
+                'importSource' => $dc->id,
+            ]);
+
+        if ($this->stringUtil->startsWith($redirectUri, 'http://')) {
+            $redirectUri = 'https://'.$this->stringUtil->removeLeadingString('http://', $redirectUri);
+        }
+
+        if (!$this->stringUtil->startsWith($redirectUri, 'http') && !$this->stringUtil->startsWith($redirectUri, 'https')) {
+            $redirectUri = Environment::get('url').'/'.$redirectUri;
+        }
+
+        try {
+            $facebook = new Facebook(
+                [
+                    'clientId' => $sourceModel->appId,
+                    'clientSecret' => $sourceModel->appSecret,
+                    'graphApiVersion' => 'v2.12',
+                    'redirectUri' => $redirectUri,
+                ]
+            );
+        } catch (\Exception $e) {
+            Message::addError(sprintf($GLOBALS['TL_LANG']['MSC']['newsroom']['serviceConnectionError'], $e->getMessage()));
+
+            return '#';
+        }
+
+        return $facebook->getAuthorizationUrl([
+            'scope' => 'page' === $sourceModel->facebookMode ? ['email', 'pages_read_engagement', 'pages_show_list'] : ['email', 'user_posts'],
+        ]);
     }
 }

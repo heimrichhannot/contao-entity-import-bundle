@@ -6,8 +6,8 @@ use HeimrichHannot\EntityImportBundle\Model\EntityImportSourceModel;
 use HeimrichHannot\EntityImportBundle\Model\EntityImportConfigModel;
 use HeimrichHannot\EntityImportBundle\Model\EntityImportQuickConfigModel;
 use HeimrichHannot\EntityImportBundle\Model\EntityImportCacheModel;
-use HeimrichHannot\EntityImportBundle\EventListener\Contao\SqlGetFromDcaEventListener;
 use Contao\System;
+use HeimrichHannot\EntityImportBundle\Widget\HyperlinkWidget;
 use Symfony\Component\HttpFoundation\Request;
 
 /*
@@ -40,6 +40,7 @@ $GLOBALS['TL_MODELS']['tl_entity_import_cache'] = EntityImportCacheModel::class;
  * Backend widgets
  */
 $GLOBALS['BE_FFL']['entityImportProgress'] = 'HeimrichHannot\EntityImportBundle\Widget\ImportProgress';
+$GLOBALS['BE_FFL']['entityImportHyperlink'] = HyperlinkWidget::class;
 
 if (System::getContainer()->get('contao.routing.scope_matcher')->isBackendRequest(System::getContainer()->get('request_stack')->getCurrentRequest() ?? Request::create(''))) {
     $GLOBALS['TL_CSS']['be_entityimportbundle'] = 'bundles/heimrichhannotcontaoentityimport/assets/contao-entity-import-bundle-be.css|static';

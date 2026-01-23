@@ -21,6 +21,7 @@ $lang['type'][1] = 'Wählen Sie hier den Typ des Imports aus.';
 $lang['type'][EntityImportSourceContainer::TYPE_DATABASE] = 'Datenbank';
 $lang['type'][EntityImportSourceContainer::TYPE_FILE] = 'Datei';
 $lang['type'][EntityImportSourceContainer::TYPE_YOUTUBE] = 'YouTube';
+$lang['type'][EntityImportSourceContainer::TYPE_INSTAGRAM] = 'Instagram';
 
 $lang['fileType'][0] = 'Dateityp';
 $lang['fileType'][1] = 'Wählen Sie hier den Typ der Datei aus.';
@@ -119,6 +120,12 @@ $lang['youtubeUsername'][1] = 'Sie finden den Benutzernamen über die User-URL (
 $lang['youtubeChannel'][0] = 'YouTube-Kanal';
 $lang['youtubeChannel'][1] = 'Sie finden den Benutzernamen über die Channel-URL (Beispiel: https://www.youtube.com/channel/<...>).';
 
+$lang['instagramAccessToken'][0] = 'Access-Token';
+$lang['instagramAccessToken'][1] = 'In diesem Feld wird das Instagram-Access-Token gespeichert.';
+$lang['instagramUsername'][0] = 'Instagram-Account';
+$lang['instagramUsername'][1] = 'Tragen Sie hier den Namen des Instagram-Accounts ein, auf den Sie zugreifen möchten.';
+$lang['instagramUserID'][0] = 'Instagram-UserId';
+$lang['instagramUserID'][1] = 'Tragen Sie hier die ID des Instagram-Accounts ein, auf den Sie zugreifen möchten.';
 
 /*
  * Reference

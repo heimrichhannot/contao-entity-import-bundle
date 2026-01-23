@@ -58,6 +58,8 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
         'default' => '{title_legend},title,type;',
         EntityImportSourceContainer::TYPE_DATABASE => '{title_legend},title,type;{db_legend},dbDriver,dbHost,dbUser,dbPass,dbDatabase,dbPconnect,dbCharset,dbPort,dbSocket,dbSourceTableExplanation,dbSourceTable,dbSourceTableWhere,addDcMultilingualSupport,addChangeLanguageSupport,fieldMappingCopier,fieldMappingPresets,fieldMapping;',
         EntityImportSourceContainer::TYPE_FILE => '{title_legend},title,type;{file_legend},retrievalType;',
+        EntityImportSourceContainer::TYPE_INSTAGRAM => '{title_legend},title,type;
+    {config_legend},appId,appSecret,accessTokenRemindEmails,metaAccessTokenButton,metaApiVersion,instagramAccessToken,accessTokenExpiration,instagramUserID,fieldMappingCopier,fieldMappingPresets,fieldMapping;',
         EntityImportSourceContainer::TYPE_YOUTUBE  => '{title_legend},title,type;
     {config_legend},apiKey,youtubeMode,fieldMappingCopier,fieldMappingPresets,fieldMapping;'
     ],
@@ -469,6 +471,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'eval' => ['maxlength' => 255, 'tl_class' => 'w50', 'mandatory' => true],
             'sql' => "varchar(255) NOT NULL default ''",
         ],
+        // youtube
         'youtubeMode' => [
             'exclude' => true,
             'filter' => true,
@@ -493,6 +496,64 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'inputType' => 'text',
             'eval' => ['maxlength' => 64, 'tl_class' => 'w50', 'mandatory' => true],
             'sql' => "varchar(64) NOT NULL default ''",
+        ],
+        //Instagram
+        'instagramAccessToken' => [
+            'exclude' => true,
+            'inputType' => 'text',
+            'eval' => ['maxlength' => 255, 'tl_class' => 'w50'],
+            'sql' => "varchar(255) NOT NULL default ''",
+        ],
+        'instagramUserID' => [
+            'exclude' => true,
+            'inputType' => 'text',
+            'eval' => ['maxlength' => 255, 'tl_class' => 'w50', 'readonly' => true],
+            'sql' => "varchar(255) NOT NULL default ''",
+        ],
+        // meta
+        'appId' => [
+            'label' => &$GLOBALS['TL_LANG']['tl_entity_import_source']['appId'],
+            'exclude' => true,
+            'inputType' => 'text',
+            'eval' => ['maxlength' => 255, 'tl_class' => 'w50', 'mandatory' => true],
+            'sql' => "varchar(255) NOT NULL default ''",
+        ],
+        'appSecret' => [
+            'label' => &$GLOBALS['TL_LANG']['tl_entity_import_source']['appSecret'],
+            'exclude' => true,
+            'inputType' => 'text',
+            'eval' => ['maxlength' => 255, 'tl_class' => 'w50', 'mandatory' => true],
+            'sql' => "varchar(255) NOT NULL default ''",
+        ],
+        'metaAccessTokenButton' => [
+            'label' => &$GLOBALS['TL_LANG']['tl_entity_import_source']['metaAccessTokenButton'],
+            'exclude' => true,
+            'inputType' => 'entityImportHyperlink',
+            'eval' => [
+                'tl_class' => 'long clr',
+                'linkClass' => 'tl_submit',
+                'target' => '_blank',
+                'text' => &$GLOBALS['TL_LANG']['tl_entity_import_source']['request'],
+                'url' => [EntityImportSourceContainer::class, 'getMetaAccessTokenGenerationUrl'],
+            ],
+        ],
+        'metaApiVersion' => [
+            'exclude' => true,
+            'inputType' => 'text',
+            'eval' => ['maxlength' => 16, 'tl_class' => 'w50', 'mandatory' => true],
+            'sql' => "varchar(16) NOT NULL default ''",
+        ],
+        'accessTokenExpiration' => [
+            'exclude' => true,
+            'inputType' => 'text',
+            'eval' => ['rgxp' => 'datim', 'datepicker' => true, 'tl_class' => 'w50'],
+            'sql' => "varchar(10) NOT NULL default ''",
+        ],
+        'accessTokenRemindEmails' => [
+            'exclude' => true,
+            'inputType' => 'text',
+            'eval' => ['maxlength' => 255, 'tl_class' => 'w50', 'mandatory' => true],
+            'sql' => "varchar(255) NOT NULL default ''",
         ],
     ],
 ];
