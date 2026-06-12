@@ -8,6 +8,7 @@
 
 namespace HeimrichHannot\EntityImportBundle\Source;
 
+use Contao\StringUtil;
 use HeimrichHannot\EntityImportBundle\EventListener\DataContainer\EntityImportSourceContainer;
 use HeimrichHannot\EntityImportBundle\Event\SourceFactoryCreateSourceEvent;
 use HeimrichHannot\UtilsBundle\Util\Utils;
@@ -90,7 +91,7 @@ class SourceFactory
             throw new \Exception('No file source class found for file type '.$sourceModel->fileType);
         }
 
-        $source->setFieldMapping(\Contao\StringUtil::deserialize($sourceModel->fieldMapping, true));
+        $source->setFieldMapping(StringUtil::deserialize($sourceModel->fieldMapping, true));
         $source->setSourceModel($sourceModel);
 
         return $source;

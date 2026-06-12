@@ -69,6 +69,7 @@ class ExecuteImportCommand extends Command
         } finally {
             $lock->release();
         }
+        return Command::SUCCESS;
     }
 
     private function import(): void

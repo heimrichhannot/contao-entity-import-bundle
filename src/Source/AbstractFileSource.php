@@ -8,6 +8,7 @@
 
 namespace HeimrichHannot\EntityImportBundle\Source;
 
+use Contao\StringUtil;
 use Ausi\SlugGenerator\SlugGenerator;
 use HeimrichHannot\EntityImportBundle\EventListener\DataContainer\EntityImportSourceContainer;
 use HeimrichHannot\EntityImportBundle\Event\AfterFileSourceGetContentEvent;
@@ -66,7 +67,7 @@ abstract class AbstractFileSource extends AbstractSource
                 $auth = [];
 
                 if (null !== $this->sourceModel->httpAuth) {
-                    $httpAuth = \Contao\StringUtil::deserialize($this->sourceModel->httpAuth, true);
+                    $httpAuth = StringUtil::deserialize($this->sourceModel->httpAuth, true);
                     $auth = ['auth' => [$httpAuth['username'], $httpAuth['password']]];
                 }
 

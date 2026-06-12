@@ -436,9 +436,7 @@ class Importer implements ImporterInterface
                         $importedRecord = $record;
                     }
                 } elseif ('merge' === $mode) {
-                    $key = implode('||', array_map(function ($field) use ($item) {
-                        return $item[$field];
-                    }, $identifierFields));
+                    $key = implode('||', array_map(fn($field) => $item[$field], $identifierFields));
 
                     if ($key && isset($this->dbMergeCache[$key])) {
                         $existingId = $this->dbMergeCache[$key];
@@ -860,7 +858,7 @@ class Importer implements ImporterInterface
                             $fieldName = $matches[1];
                             return $record->{$fieldName} ?? $item[$fieldName] ?? '';
                         },
-                        $mapping['fieldPattern']
+                        (string) $mapping['fieldPattern']
                     );
 
                     $filename = trim($filename);

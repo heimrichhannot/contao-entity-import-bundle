@@ -32,10 +32,10 @@ class HyperlinkWidget extends Widget
         $linkClass = $this->arrConfiguration['linkClass'] ?? '';
         $target = $this->arrConfiguration['target'] ?? '';
 
-        $html = '<a href="' . htmlspecialchars($url) . '"';
+        $html = '<a href="' . htmlspecialchars((string) $url) . '"';
 
         if ($target) {
-            $html .= ' target="' . htmlspecialchars($target) . '"';
+            $html .= ' target="' . htmlspecialchars((string) $target) . '"';
         }
 
         if ($linkClass) {

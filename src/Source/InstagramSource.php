@@ -2,13 +2,13 @@
 
 namespace HeimrichHannot\EntityImportBundle\Source;
 
+use Contao\StringUtil;
 use Ausi\SlugGenerator\SlugGenerator;
 use Contao\Message;
 use Contao\CoreBundle\InsertTag\InsertTagParser;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use HeimrichHannot\UtilsBundle\Util\Utils;
-use LitEmoji\LitEmoji;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
@@ -53,7 +53,7 @@ class InstagramSource extends AbstractSource
     public function getMappedData(array $options = []): array
     {
         $sourceModel = $this->sourceModel;
-        $mapping = \Contao\StringUtil::deserialize($sourceModel->fieldMapping, true);
+        $mapping = StringUtil::deserialize($sourceModel->fieldMapping, true);
 
         $data = [];
 
@@ -152,7 +152,7 @@ class InstagramSource extends AbstractSource
                         break;
 
                     default:
-                        $result[$mappingElement['name']] = null === $value ? '' : $value;
+                        $result[$mappingElement['name']] = $value ?? '';
                         break;
                 }
             }

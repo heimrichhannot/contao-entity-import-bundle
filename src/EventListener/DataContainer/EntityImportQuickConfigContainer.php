@@ -16,7 +16,6 @@ use HeimrichHannot\EntityImportBundle\Event\BeforeImportEvent;
 use HeimrichHannot\EntityImportBundle\Event\BeforeItemImportEvent;
 use HeimrichHannot\EntityImportBundle\Importer\ImporterFactory;
 use HeimrichHannot\EntityImportBundle\Source\SourceFactory;
-use HeimrichHannot\EntityImportBundle\Source\SourceInterface;
 use HeimrichHannot\ListWidgetBundle\Widget\ListWidget;
 use HeimrichHannot\UtilsBundle\Util\Utils;
 use Symfony\Component\HttpFoundation\RequestStack;

@@ -5,7 +5,6 @@ namespace HeimrichHannot\EntityImportBundle\EventListener;
 
 use Contao\CoreBundle\DependencyInjection\Attribute\AsCallback;
 use Contao\DataContainer;
-use Contao\System;
 use HeimrichHannot\EntityImportBundle\Widget\ImportProgressWidget;
 use HeimrichHannot\UtilsBundle\Util\Utils;
 

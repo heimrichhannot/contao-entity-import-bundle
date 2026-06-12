@@ -25,16 +25,10 @@ abstract class AbstractSource implements SourceInterface
     protected Model $sourceModel;
     protected CacheInterface $filesystemCache;
     protected string $domain;
-    protected Utils $utils;
-    protected ParameterBagInterface $parameterBag;
-    protected InsertTagParser $insertTagParser;
 
-    public function __construct(Utils $utils, ParameterBagInterface $parameterBag, InsertTagParser $insertTagParser)
+    public function __construct(protected Utils $utils, protected ParameterBagInterface $parameterBag, protected InsertTagParser $insertTagParser)
     {
         $this->domain = '';
-        $this->utils = $utils;
-        $this->parameterBag = $parameterBag;
-        $this->insertTagParser = $insertTagParser;
     }
 
     public function getMapping(): array

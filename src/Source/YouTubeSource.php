@@ -2,6 +2,7 @@
 
 namespace HeimrichHannot\EntityImportBundle\Source;
 
+use Contao\StringUtil;
 use Ausi\SlugGenerator\SlugGenerator;
 use Contao\Message;
 use Contao\CoreBundle\InsertTag\InsertTagParser;
@@ -35,7 +36,7 @@ class YouTubeSource extends AbstractSource
     public function getMappedData(array $options = []): array
     {
         $sourceModel = $this->sourceModel;
-        $mapping = \Contao\StringUtil::deserialize($sourceModel->fieldMapping, true);
+        $mapping = StringUtil::deserialize($sourceModel->fieldMapping, true);
 
         $data = [];
 
@@ -112,7 +113,7 @@ class YouTubeSource extends AbstractSource
                     $content = $result['result'];
                 }
 
-                $responseData = json_decode($content, true);
+                $responseData = json_decode((string) $content, true);
 
                 if (!\is_array($responseData['items']) || !isset($responseData['items'][0]['id'])) {
                     Message::addError($GLOBALS['TL_LANG']['MSC']['newsroom']['youTubeChannelIdCouldNotBeRetrieved']);
@@ -149,7 +150,7 @@ class YouTubeSource extends AbstractSource
             $content = $result['result'];
         }
 
-        $responseData = json_decode($content, true);
+        $responseData = json_decode((string) $content, true);
 
         if (!\is_array($responseData) || empty($responseData)) {
             Message::addError($GLOBALS['TL_LANG']['MSC']['newsroom']['serviceNoPostsFound']);
@@ -190,8 +191,8 @@ class YouTubeSource extends AbstractSource
                         break;
 
                     case 'description':
-                        $clean = preg_replace('/[\x00-\x1F\x7F]/u', '', $value);
-                        $result[$mappingElement['name']] = mb_encode_numericentity($clean, [0x80, 0x10FFFF, 0, 0xFFFF], 'UTF-8');
+                        $clean = preg_replace('/[\x00-\x1F\x7F]/u', '', (string) $value);
+                        $result[$mappingElement['name']] = mb_encode_numericentity((string) $clean, [0x80, 0x10FFFF, 0, 0xFFFF], 'UTF-8');
                         break;
 
                     case 'image_url':
@@ -203,7 +204,7 @@ class YouTubeSource extends AbstractSource
                         break;
 
                     default:
-                        $result[$mappingElement['name']] = null === $value ? '' : $value;
+                        $result[$mappingElement['name']] = $value ?? '';
                         break;
                 }
             }

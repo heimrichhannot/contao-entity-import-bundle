@@ -21,7 +21,6 @@ use Contao\StringUtil;
 use Doctrine\DBAL\Connection;
 use HeimrichHannot\EntityImportBundle\Event\AddConfigFieldMappingPresetsEvent;
 use HeimrichHannot\EntityImportBundle\Importer\ImporterFactory;
-use HeimrichHannot\RequestBundle\Component\HttpFoundation\Request;
 use HeimrichHannot\UtilsBundle\Util\Utils;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
