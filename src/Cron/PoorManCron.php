@@ -9,6 +9,7 @@
 namespace HeimrichHannot\EntityImportBundle\Cron;
 
 use Contao\CoreBundle\DependencyInjection\Attribute\AsCronJob;
+use Contao\CoreBundle\Framework\ContaoFramework;
 use HeimrichHannot\EntityImportBundle\Importer\ImporterFactory;
 use HeimrichHannot\EntityImportBundle\Importer\ImporterInterface;
 use HeimrichHannot\UtilsBundle\Util\Utils;
@@ -16,7 +17,11 @@ use HeimrichHannot\UtilsBundle\Util\Utils;
 class PoorManCron
 {
 
-    public function __construct(protected ImporterFactory $importerFactory, protected readonly Utils $utils)
+    public function __construct(
+        private readonly ContaoFramework $framework,
+        protected ImporterFactory $importerFactory,
+        protected readonly Utils $utils
+    )
     {
     }
 
@@ -72,6 +77,8 @@ class PoorManCron
 
     protected function getConfigIds(string $interval): array
     {
+        $this->framework->initialize();
+
         $models = $this->utils->model()->findModelInstancesBy('tl_entity_import_config',
             ['tl_entity_import_config.useCron=?', 'tl_entity_import_config.cronInterval=?', 'tl_entity_import_config.usePoorMansCron=?'], [true, $interval, true]);
 
