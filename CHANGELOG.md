@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.25.1] - 2026-06-24
+- Fixed: removed contao 3 leftover
+
 ## [0.25.0] - 2026-06-12
 - Changed: refactored for contao 5
 
