@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+- Added: Instagram sources can use the Instagram API with Instagram Login (`instagramApi`): the access token alone, media from graph.instagram.com
+- Added: a daily cron refreshes Instagram-Login access tokens that expire within 30 days
+- Changed: Instagram sources skip posts that are not shared to the profile's feed (`is_shared_to_feed`)
+- Fixed: file field mapping can use a source field that is not a target column (e.g. an image URL for `singleSRC`)
+- Fixed: undefined `$existing` when merging an item whose record vanished from the merge cache
+
 ## [0.25.2] - 2026-06-24
 - Fixed: removed more contao 3 leftovers
 

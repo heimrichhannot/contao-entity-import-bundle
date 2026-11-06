@@ -54,18 +54,19 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
 
     // Palettes
     'palettes' => [
-        '__selector__' => ['type', 'retrievalType', 'fileType', 'youtubeMode'],
+        '__selector__' => ['type', 'retrievalType', 'fileType', 'youtubeMode', 'instagramApi'],
         'default' => '{title_legend},title,type;',
         EntityImportSourceContainer::TYPE_DATABASE => '{title_legend},title,type;{db_legend},dbDriver,dbHost,dbUser,dbPass,dbDatabase,dbPconnect,dbCharset,dbPort,dbSocket,dbSourceTableExplanation,dbSourceTable,dbSourceTableWhere,addDcMultilingualSupport,addChangeLanguageSupport,fieldMappingCopier,fieldMappingPresets,fieldMapping;',
         EntityImportSourceContainer::TYPE_FILE => '{title_legend},title,type;{file_legend},retrievalType;',
         EntityImportSourceContainer::TYPE_INSTAGRAM => '{title_legend},title,type;
-    {config_legend},appId,appSecret,accessTokenRemindEmails,metaAccessTokenButton,metaApiVersion,instagramAccessToken,accessTokenExpiration,instagramUserID,fieldMappingCopier,fieldMappingPresets,fieldMapping;',
+    {config_legend},instagramApi,metaApiVersion,instagramAccessToken,accessTokenExpiration,fieldMappingCopier,fieldMappingPresets,fieldMapping;',
         EntityImportSourceContainer::TYPE_YOUTUBE  => '{title_legend},title,type;
     {config_legend},apiKey,youtubeMode,fieldMappingCopier,fieldMappingPresets,fieldMapping;'
     ],
 
     // Subpalettes
     'subpalettes' => [
+        'instagramApi_facebook' => 'appId,appSecret,accessTokenRemindEmails,metaAccessTokenButton,instagramUserID',
         'retrievalType_http' => 'sourceUrl,httpMethod,httpAuth,fileType',
         'retrievalType_contao_file_system' => 'fileSRC,fileType',
         'retrievalType_absolute_path' => 'absolutePath',
@@ -493,6 +494,14 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'sql' => "varchar(64) NOT NULL default ''",
         ],
         //Instagram
+        'instagramApi' => [
+            'exclude' => true,
+            'inputType' => 'select',
+            'options' => ['facebook', 'instagram'],
+            'reference' => &$GLOBALS['TL_LANG']['tl_entity_import_source']['reference']['instagramApi'],
+            'eval' => ['tl_class' => 'w50', 'submitOnChange' => true],
+            'sql' => "varchar(16) NOT NULL default 'facebook'",
+        ],
         'instagramAccessToken' => [
             'exclude' => true,
             'inputType' => 'text',

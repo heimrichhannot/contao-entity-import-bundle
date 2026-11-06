@@ -14,7 +14,12 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class InstagramSource extends AbstractSource
 {
-    const MEDIA_URL = 'https://graph.facebook.com/%s/%s/media?access_token=%s&fields=caption,id,media_type,media_url,permalink,thumbnail_url,timestamp,username&limit=100';
+    const MEDIA_URL = 'https://graph.facebook.com/%s/%s/media?access_token=%s&fields=caption,id,is_shared_to_feed,media_type,media_url,permalink,thumbnail_url,timestamp,username&limit=100';
+
+    /**
+     * Instagram API with Instagram Login: the token belongs to the account, so no app or user ID is needed.
+     */
+    const INSTAGRAM_LOGIN_MEDIA_URL = 'https://graph.instagram.com/%s/me/media?access_token=%s&fields=caption,id,is_shared_to_feed,media_type,media_url,permalink,thumbnail_url,timestamp,username&limit=100';
 
     public function __construct(
         protected EventDispatcherInterface $eventDispatcher,
@@ -27,7 +32,7 @@ class InstagramSource extends AbstractSource
 
     public function getPostFieldsAsOptions()
     {
-        if (!$this->sourceModel->appId || !$this->sourceModel->instagramAccessToken || !$this->sourceModel->instagramUserID) {
+        if (!$this->hasCredentials()) {
             return [];
         }
 
@@ -61,6 +66,11 @@ class InstagramSource extends AbstractSource
 
         if (\is_array($posts) && !empty($posts)) {
             foreach ($posts as $post) {
+                // Reels that are not shown in the profile's feed
+                if (false === ($post['is_shared_to_feed'] ?? null)) {
+                    continue;
+                }
+
                 $data[] = $this->getMappedItemData($post, $mapping);
             }
         }
@@ -72,6 +82,7 @@ class InstagramSource extends AbstractSource
     {
         $slug = new SlugGenerator();
         $cacheKey = $slug->generate(md5($this->sourceModel->appId . '-' . $this->sourceModel->instagramAccessToken));
+        $mediaUrl = $this->getMediaUrl();
 
         $result = $this->getValueFromRemoteCache($cacheKey);
 
@@ -79,12 +90,7 @@ class InstagramSource extends AbstractSource
             $client = new Client();
 
             try {
-                $response = $client->request('get', sprintf(
-                    static::MEDIA_URL,
-                    $this->sourceModel->metaApiVersion,
-                    $this->sourceModel->instagramUserID,
-                    $this->sourceModel->instagramAccessToken
-                ));
+                $response = $client->request('get', $mediaUrl);
             } catch (RequestException $e) {
                 Message::addError($e->getMessage());
                 return [];
@@ -94,16 +100,7 @@ class InstagramSource extends AbstractSource
 
             if (isset($responseData['data']) && \is_array($responseData['data'])) {
                 $result = $responseData['data'];
-                $this->storeValueToRemoteCache(
-                    sprintf(
-                        static::MEDIA_URL,
-                        $this->sourceModel->metaApiVersion,
-                        $this->sourceModel->instagramUserID,
-                        $this->sourceModel->instagramAccessToken
-                    ),
-                    $cacheKey,
-                    'get'
-                );
+                $this->storeValueToRemoteCache($mediaUrl, $cacheKey, 'get');
             } else {
                 return [];
             }
@@ -159,6 +156,34 @@ class InstagramSource extends AbstractSource
         }
 
         return $result;
+    }
+
+    protected function isInstagramLogin(): bool
+    {
+        return 'instagram' === $this->sourceModel->instagramApi;
+    }
+
+    protected function hasCredentials(): bool
+    {
+        if ($this->isInstagramLogin()) {
+            return (bool) $this->sourceModel->instagramAccessToken;
+        }
+
+        return $this->sourceModel->appId && $this->sourceModel->instagramAccessToken && $this->sourceModel->instagramUserID;
+    }
+
+    protected function getMediaUrl(): string
+    {
+        if ($this->isInstagramLogin()) {
+            return sprintf(static::INSTAGRAM_LOGIN_MEDIA_URL, $this->sourceModel->metaApiVersion, $this->sourceModel->instagramAccessToken);
+        }
+
+        return sprintf(
+            static::MEDIA_URL,
+            $this->sourceModel->metaApiVersion,
+            $this->sourceModel->instagramUserID,
+            $this->sourceModel->instagramAccessToken
+        );
     }
 
     protected function parseDate($date)

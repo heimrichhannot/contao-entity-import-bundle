@@ -86,7 +86,14 @@ $lang['httpAuth']['password'][1] = 'Enter your password here.';
 /**
  * Reference
  */
+$lang['instagramApi'][0] = 'Instagram API';
+$lang['instagramApi'][1] = 'Choose the API of the access token: Instagram API with Facebook Login (app ID, app secret and Instagram user ID) or Instagram API with Instagram Login (access token only; it is refreshed automatically before it expires).';
+
 $lang['reference'] = [
+    'instagramApi' => [
+        'facebook' => 'Instagram API with Facebook Login',
+        'instagram' => 'Instagram API with Instagram Login',
+    ],
     'valueType'  => [
         'source_value' => 'dynamic',
         'static_value' => 'static',

@@ -427,7 +427,7 @@ class Importer implements ImporterInterface
                         $set = $this->setDateAdded($record);
                         $set = array_merge($set, $this->generateAlias($record));
                         $set = array_merge($set, $this->setTstamp($record));
-                        $set = array_merge($set, $this->applyFieldFileMapping($record, $mappedItem));
+                        $set = array_merge($set, $this->applyFieldFileMapping($record, $mappedItem + $item));
 
                         if (!empty($set) && !$this->dryRun) {
                             $this->conn->update($table, $set, ['id' => $record->id]);
@@ -455,7 +455,7 @@ class Importer implements ImporterInterface
                             $set = $this->setDateAdded($existing);
                             $set = array_merge($set, $this->generateAlias($existing));
                             $set = array_merge($set, $this->setTstamp($existing));
-                            $set = array_merge($set, $this->applyFieldFileMapping($existing, $mappedItem));
+                            $set = array_merge($set, $this->applyFieldFileMapping($existing, $mappedItem + $item));
 
                             if (!$this->dryRun) {
                                 $this->conn->update($table, array_merge($mappedItem, $set), ['id' => $existing->id]);
@@ -472,10 +472,10 @@ class Importer implements ImporterInterface
                                 $set = $this->setDateAdded($record);
                                 $set = array_merge($set, $this->generateAlias($record));
                                 $set = array_merge($set, $this->setTstamp($record));
-                                $set = array_merge($set, $this->applyFieldFileMapping($record, $mappedItem));
+                                $set = array_merge($set, $this->applyFieldFileMapping($record, $mappedItem + $item));
 
                                 if (!empty($set) && !$this->dryRun) {
-                                    $this->conn->update($table, $set, ['id' => $existing->id]);
+                                    $this->conn->update($table, $set, ['id' => $record->id]);
                                 }
 
                                 $importedRecord = $record;
@@ -491,7 +491,7 @@ class Importer implements ImporterInterface
                             $set = $this->setDateAdded($record);
                             $set = array_merge($set, $this->generateAlias($record));
                             $set = array_merge($set, $this->setTstamp($record));
-                            $set = array_merge($set, $this->applyFieldFileMapping($record, $mappedItem));
+                            $set = array_merge($set, $this->applyFieldFileMapping($record, $mappedItem + $item));
 
                             if (!empty($set) && !$this->dryRun) {
                                 $this->conn->update($table, $set, ['id' => $record->id]);

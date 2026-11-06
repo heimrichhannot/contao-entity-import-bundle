@@ -120,6 +120,8 @@ $lang['youtubeUsername'][1] = 'Sie finden den Benutzernamen über die User-URL (
 $lang['youtubeChannel'][0] = 'YouTube-Kanal';
 $lang['youtubeChannel'][1] = 'Sie finden den Benutzernamen über die Channel-URL (Beispiel: https://www.youtube.com/channel/<...>).';
 
+$lang['instagramApi'][0] = 'Instagram-API';
+$lang['instagramApi'][1] = 'Wählen Sie die API des Access-Tokens: Instagram-API mit Facebook-Login (App-ID, App-Secret und Instagram-UserId) oder Instagram-API mit Instagram-Login (nur Access-Token; es wird automatisch verlängert, bevor es abläuft).';
 $lang['instagramAccessToken'][0] = 'Access-Token';
 $lang['instagramAccessToken'][1] = 'In diesem Feld wird das Instagram-Access-Token gespeichert.';
 $lang['instagramUsername'][0] = 'Instagram-Account';
@@ -133,6 +135,10 @@ $lang['request'] = 'Anfordern';
  * Reference
  */
 $lang['reference'] = [
+    'instagramApi' => [
+        'facebook' => 'Instagram-API mit Facebook-Login',
+        'instagram' => 'Instagram-API mit Instagram-Login',
+    ],
     'valueType' => [
         'source_value' => 'dynamisch',
         'static_value' => 'statisch',
