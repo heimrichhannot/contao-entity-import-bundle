@@ -278,9 +278,22 @@ class EntityImportQuickConfigContainer
             return [];
         }
 
-        return System::getContainer()->get('huh.utils.choice.model_instance')->getCachedChoices([
-            'dataContainer' => $dca['config']['ptable'],
-        ]);
+        // The parent records labelled by their table's first list label field (utils v2's model instance choice before)
+        $ptable = $dca['config']['ptable'];
+        Controller::loadDataContainer($ptable);
+        $labelField = $GLOBALS['TL_DCA'][$ptable]['list']['label']['fields'][0] ?? 'id';
+
+        if (!preg_match('/^\w+$/', $ptable) || !preg_match('/^\w+$/', $labelField)) {
+            return [];
+        }
+
+        $choices = [];
+
+        foreach ($this->conn->fetchAllKeyValue("SELECT id, $labelField FROM $ptable ORDER BY $labelField") as $id => $label) {
+            $choices[$id] = \sprintf('%s [ID %s]', $label, $id);
+        }
+
+        return $choices;
     }
 
     public function import(): void

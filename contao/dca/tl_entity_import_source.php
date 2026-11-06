@@ -18,9 +18,6 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
         'dataContainer' => DC_Table::class,
         'ctable' => ['tl_entity_import_config'],
         'enableVersioning' => true,
-        'oncopy_callback' => [
-            ['huh.utils.dca', 'setDateAddedOnCopy'],
-        ],
         'sql' => [
             'keys' => [
                 'id' => 'primary',
@@ -584,3 +581,6 @@ if (class_exists('\Terminal42\ChangeLanguage\Language')) {
         'sql' => "char(1) NOT NULL default ''",
     ];
 }
+
+// utils v3 sets dateAdded on create (the huh.utils.dca callbacks are utils v2)
+\HeimrichHannot\UtilsBundle\Dca\DateAddedField::register('tl_entity_import_source');

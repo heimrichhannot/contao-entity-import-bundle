@@ -21,11 +21,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_quick_config'] = [
             [EntityImportQuickConfigContainer::class, 'modifyDca'],
         ],
         'onsubmit_callback' => [
-            ['huh.utils.dca', 'setDateAdded'],
             [EntityImportQuickConfigContainer::class, 'cacheCsvRows'],
-        ],
-        'oncopy_callback' => [
-            ['huh.utils.dca', 'setDateAddedOnCopy'],
         ],
         'sql' => [
             'keys' => [
@@ -179,3 +175,6 @@ $GLOBALS['TL_DCA']['tl_entity_import_quick_config'] = [
         ],
     ],
 ];
+
+// utils v3 sets dateAdded on create (the huh.utils.dca callbacks are utils v2)
+\HeimrichHannot\UtilsBundle\Dca\DateAddedField::register('tl_entity_import_quick_config');
