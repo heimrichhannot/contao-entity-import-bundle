@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 - Added: Instagram sources can use the Instagram API with Instagram Login (`instagramApi`): the access token alone, media from graph.instagram.com
 - Added: a daily cron refreshes Instagram-Login access tokens that expire within 30 days
 - Changed: Instagram sources skip posts that are not shared to the profile's feed (`is_shared_to_feed`)
+- Fixed: Instagram post times were read in the server's time zone instead of UTC (an hour early in Germany)
 - Fixed: file field mapping can use a source field that is not a target column (e.g. an image URL for `singleSRC`)
 - Fixed: the file name pattern of a file field mapping was read from the wrong key (`fieldPattern` instead of `filenamePattern`), so every file was named `file_<id>`
 - Fixed: undefined `$existing` when merging an item whose record vanished from the merge cache

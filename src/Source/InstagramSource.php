@@ -188,7 +188,8 @@ class InstagramSource extends AbstractSource
 
     protected function parseDate($date)
     {
-        $dateTime = \DateTime::createFromFormat('Y-m-d\TH:i:s\+0000', $date);
+        // The API answers in UTC ("2026-11-05T16:43:33+0000"); read the offset instead of the server's time zone
+        $dateTime = \DateTime::createFromFormat('Y-m-d\TH:i:sO', (string) $date);
 
         if (false !== $dateTime) {
             return $dateTime->getTimestamp();
