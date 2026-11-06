@@ -858,7 +858,7 @@ class Importer implements ImporterInterface
                             $fieldName = $matches[1];
                             return $record->{$fieldName} ?? $item[$fieldName] ?? '';
                         },
-                        (string) $mapping['fieldPattern']
+                        (string) ($mapping['filenamePattern'] ?? $mapping['fieldPattern'] ?? '')
                     );
 
                     $filename = trim($filename);
