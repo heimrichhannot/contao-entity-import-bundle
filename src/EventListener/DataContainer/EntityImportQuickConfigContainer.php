@@ -55,7 +55,7 @@ class EntityImportQuickConfigContainer
     #[AsCallback('tl_entity_import_quick_config', 'list.operations.dryRun.button')]
     public function getDryRunOperation($row, $href, $label, $title, $icon, $attributes): string
     {
-        if (null !== ($config = $this->utils->model()->findModelInstanceByPk('tl_entity_import_config', $row['importerConfig']))) {
+        if (null !== ($config = $this->utils->model()->findModelInstanceByPk('tl_entity_import_config', (int) ($row['importerConfig'] ?? 0)))) {
             if ($config->useCronInWebContext) {
                 return '';
             }
@@ -67,7 +67,7 @@ class EntityImportQuickConfigContainer
     #[AsCallback('tl_entity_import_quick_config', 'config.onload')]
     public function modifyDca(DataContainer $dc): void
     {
-        if (null === ($quickImporter = $this->utils->model()->findModelInstanceByPk('tl_entity_import_quick_config', $dc->id)) || !$quickImporter->importerConfig) {
+        if (null === ($quickImporter = $this->utils->model()->findModelInstanceByPk('tl_entity_import_quick_config', (int) $dc->id)) || !$quickImporter->importerConfig) {
             return;
         }
 
@@ -136,7 +136,7 @@ class EntityImportQuickConfigContainer
             ['tl_entity_import_quick_config', $dc->id]
         );
 
-        if (null === ($quickImporter = $this->utils->model()->findModelInstanceByPk('tl_entity_import_quick_config', $dc->id)) ||
+        if (null === ($quickImporter = $this->utils->model()->findModelInstanceByPk('tl_entity_import_quick_config', (int) $dc->id)) ||
             !$quickImporter->importerConfig || !$quickImporter->fileSRC) {
             return;
         }
@@ -264,7 +264,7 @@ class EntityImportQuickConfigContainer
     #[AsCallback('tl_entity_import_quick_config', 'fields.parentEntity.options')]
     public function getParentEntitiesAsOptions(DataContainer $dc): array
     {
-        if (null === ($quickImporter = $this->utils->model()->findModelInstanceByPk('tl_entity_import_quick_config', $dc->id)) || !$quickImporter->importerConfig) {
+        if (null === ($quickImporter = $this->utils->model()->findModelInstanceByPk('tl_entity_import_quick_config', (int) $dc->id)) || !$quickImporter->importerConfig) {
             return [];
         }
 
@@ -308,7 +308,7 @@ class EntityImportQuickConfigContainer
 
     public function getHeaderFieldsForPreview($config, $widget, DataContainer $dc): array
     {
-        if (null === ($quickImporter = $this->utils->model()->findModelInstanceByPk('tl_entity_import_quick_config', $dc->id)) || !$quickImporter->importerConfig) {
+        if (null === ($quickImporter = $this->utils->model()->findModelInstanceByPk('tl_entity_import_quick_config', (int) $dc->id)) || !$quickImporter->importerConfig) {
             return [];
         }
 
@@ -337,7 +337,7 @@ class EntityImportQuickConfigContainer
 
     public function getItemsForPreview($config, $widget, $dc): array
     {
-        if (null === ($quickImporter = $this->utils->model()->findModelInstanceByPk('tl_entity_import_quick_config', $dc->id)) || !$quickImporter->importerConfig || !$quickImporter->fileSRC) {
+        if (null === ($quickImporter = $this->utils->model()->findModelInstanceByPk('tl_entity_import_quick_config', (int) $dc->id)) || !$quickImporter->importerConfig || !$quickImporter->fileSRC) {
             return [];
         }
 

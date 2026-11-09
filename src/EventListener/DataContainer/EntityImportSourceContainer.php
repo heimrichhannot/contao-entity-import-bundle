@@ -90,7 +90,7 @@ class EntityImportSourceContainer
     #[AsCallback('tl_entity_import_source', 'config.load')]
     public function initPalette(?DataContainer $dc): void
     {
-        if (null === ($sourceModel = $this->utils->model()->findModelInstanceByPk($dc->table, $dc->id))) {
+        if (null === ($sourceModel = $this->utils->model()->findModelInstanceByPk($dc->table, (int) $dc->id))) {
             return;
         }
 
@@ -196,7 +196,7 @@ class EntityImportSourceContainer
     #[AsCallback('tl_entity_import_source', 'fields.fileContent.load')]
     public function onLoadFileContent(?string $value, ?DataContainer $dc)
     {
-        if (null === ($sourceModel = $this->utils->model()->findModelInstanceByPk('tl_entity_import_source', $dc->id))) {
+        if (null === ($sourceModel = $this->utils->model()->findModelInstanceByPk('tl_entity_import_source', (int) $dc->id))) {
             return '';
         }
 
@@ -242,7 +242,7 @@ class EntityImportSourceContainer
     #[AsCallback('tl_entity_import_source', 'fields.dbSourceTable.options')]
     public function getAllTargetTables(?DataContainer $dc): array
     {
-        if (null === ($source = $this->utils->model()->findModelInstanceByPk('tl_entity_import_source', $dc->id))) {
+        if (null === ($source = $this->utils->model()->findModelInstanceByPk('tl_entity_import_source', (int) $dc->id))) {
             return [];
         }
 

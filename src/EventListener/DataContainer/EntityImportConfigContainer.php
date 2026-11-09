@@ -91,7 +91,7 @@ class EntityImportConfigContainer
     {
         $dca = &$GLOBALS['TL_DCA'][$dc->table];
 
-        if (null === ($configModel = $this->utils->model()->findModelInstanceByPk($dc->table, $dc->id)) || !$configModel->targetTable) {
+        if (null === ($configModel = $this->utils->model()->findModelInstanceByPk($dc->table, (int) $dc->id)) || !$configModel->targetTable) {
             $dca['palettes']['default'] = '{general_legend},title,targetTable;';
 
             return;
@@ -131,7 +131,7 @@ class EntityImportConfigContainer
     {
         $options = [];
 
-        if (null === ($configModel = $this->utils->model()->findModelInstanceByPk('tl_entity_import_config', $dc->id))) {
+        if (null === ($configModel = $this->utils->model()->findModelInstanceByPk('tl_entity_import_config', (int) $dc->id))) {
             return $options;
         }
 
@@ -165,7 +165,12 @@ class EntityImportConfigContainer
     {
         $options = [];
 
-        if (null === ($configModel = $this->utils->model()->findModelInstanceByPk('tl_entity_import_config', $dc->id)) || !$configModel->targetTable) {
+        if (null === ($configModel = $this->utils->model()->findModelInstanceByPk('tl_entity_import_config', (int) $dc->id)) || !$configModel->targetTable) {
+            return $options;
+        }
+
+        // A configuration can outlive its target table (e.g. a removed bundle's table)
+        if (!Database::getInstance()->tableExists($configModel->targetTable)) {
             return $options;
         }
 

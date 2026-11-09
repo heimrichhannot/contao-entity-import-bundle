@@ -62,6 +62,11 @@ class SqlGetFromDcaEventListener
         ];
 
         foreach ($importers->fetchEach('targetTable') as $targetTable) {
+            // A configuration can outlive its target table (e.g. a removed bundle's table)
+            if (!$targetTable || !$db->tableExists($targetTable)) {
+                continue;
+            }
+
             $fields = $db->listFields($targetTable);
 
             foreach ($fields as $field) {
