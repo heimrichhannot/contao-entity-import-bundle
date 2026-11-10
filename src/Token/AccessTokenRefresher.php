@@ -12,7 +12,6 @@ use Doctrine\DBAL\Connection;
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\GuzzleException;
-use GuzzleHttp\Exception\RequestException;
 use HeimrichHannot\EntityImportBundle\EventListener\DataContainer\EntityImportSourceContainer;
 use HeimrichHannot\EntityImportBundle\Exception\AccessTokenException;
 
@@ -94,10 +93,8 @@ class AccessTokenRefresher
     {
         try {
             $response = ($this->client ?? new Client())->request($method, $url, $options);
-        } catch (RequestException $e) {
-            throw new AccessTokenException(self::apiError($e), 0, $e);
         } catch (GuzzleException $e) {
-            throw new AccessTokenException('The API could not be reached.', 0, $e);
+            throw AccessTokenException::fromGuzzle($e);
         }
 
         $data = json_decode((string) $response->getBody(), true);
@@ -112,23 +109,5 @@ class AccessTokenRefresher
     private function expiresAt(array $data): string
     {
         return isset($data['expires_in']) ? (string) (time() + (int) $data['expires_in']) : '';
-    }
-
-    /**
-     * The error message of the API's answer (Graph API: error.message, OAuth 2: error_description), never Guzzle's
-     * exception message, which contains the request URL and with it the token.
-     */
-    public static function apiError(RequestException $e): string
-    {
-        $response = $e->getResponse();
-
-        if (null === $response) {
-            return 'The API could not be reached.';
-        }
-
-        $data = json_decode((string) $response->getBody(), true);
-        $message = $data['error']['message'] ?? $data['error_description'] ?? $data['message'] ?? null;
-
-        return sprintf('HTTP %s%s', $response->getStatusCode(), \is_string($message) ? ': '.$message : '');
     }
 }

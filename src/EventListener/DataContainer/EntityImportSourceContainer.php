@@ -7,7 +7,6 @@ use Contao\CoreBundle\DependencyInjection\Attribute\AsCallback;
 use Contao\Database;
 use Contao\Date;
 use Contao\DataContainer;
-use Contao\Environment;
 use Contao\Message;
 use Contao\Model;
 use Contao\StringUtil;
@@ -16,17 +15,17 @@ use Contao\Widget;
 use Doctrine\DBAL\Connection;
 use HeimrichHannot\EntityImportBundle\Event\AddSourceFieldMappingPresetsEvent;
 use HeimrichHannot\EntityImportBundle\Exception\AccessTokenException;
+use HeimrichHannot\EntityImportBundle\Meta\MetaLogin;
 use HeimrichHannot\EntityImportBundle\Model\EntityImportSourceModel;
 use HeimrichHannot\EntityImportBundle\Source\AbstractFileSource;
 use HeimrichHannot\EntityImportBundle\Source\CSVFileSource;
+use HeimrichHannot\EntityImportBundle\Source\FacebookSource;
 use HeimrichHannot\EntityImportBundle\Source\RSSFileSource;
 use HeimrichHannot\EntityImportBundle\Source\SourceFactory;
 use HeimrichHannot\EntityImportBundle\Token\AccessTokenRefresher;
 use HeimrichHannot\EntityImportBundle\Util\EntityImportUtil;
 use HeimrichHannot\UtilsBundle\Util\Utils;
-use League\OAuth2\Client\Provider\Facebook;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\Routing\RouterInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class EntityImportSourceContainer
@@ -36,11 +35,13 @@ class EntityImportSourceContainer
 
     const TYPE_YOUTUBE = 'youtube';
     const TYPE_INSTAGRAM = 'instagram';
+    const TYPE_FACEBOOK = 'facebook';
     const TYPES = [
         self::TYPE_DATABASE,
         self::TYPE_FILE,
         self::TYPE_YOUTUBE,
-        self::TYPE_INSTAGRAM
+        self::TYPE_INSTAGRAM,
+        self::TYPE_FACEBOOK,
     ];
 
     const RETRIEVAL_TYPE_HTTP = 'http';
@@ -73,9 +74,9 @@ class EntityImportSourceContainer
         private readonly Connection $conn,
         private readonly EntityImportUtil $util,
         private readonly EventDispatcherInterface $eventDispatcher,
-        private readonly RouterInterface $router,
         private readonly RequestStack $requestStack,
         private readonly AccessTokenRefresher $accessTokenRefresher,
+        private readonly MetaLogin $metaLogin,
     ) {
         $this->activeBundles = System::getContainer()->getParameter('kernel.bundles');
     }
@@ -143,6 +144,14 @@ class EntityImportSourceContainer
                 if (!$this->accessTokenRefresher->supports($sourceModel->row())) {
                     $dca['palettes'][static::TYPE_INSTAGRAM] = str_replace(',refreshAccessToken', '', $dca['palettes'][static::TYPE_INSTAGRAM]);
                 }
+
+                $this->addRedirectUriToMetaLoginHelp((int) $sourceModel->id);
+
+                break;
+
+            case static::TYPE_FACEBOOK:
+                $this->util->transformFieldMappingSourceValueToSelect(FacebookSource::getFieldOptions());
+                $this->addRedirectUriToMetaLoginHelp((int) $sourceModel->id);
 
                 break;
 
@@ -305,40 +314,31 @@ class EntityImportSourceContainer
         return $options;
     }
 
-    public function getMetaAccessTokenGenerationUrl(DataContainer $dc, Widget $widget)
+    /**
+     * The URL of the "request access token" link (HyperlinkWidget) of Facebook and Instagram (Facebook Login) sources.
+     */
+    public function getMetaAccessTokenGenerationUrl(DataContainer $dc, Widget $widget): string
     {
-        if (null === ($sourceModel = EntityImportSourceModel::findByPk($dc->id)) || !$sourceModel->appId || !$sourceModel->appSecret) {
+        $source = $this->conn->fetchAssociative('SELECT * FROM tl_entity_import_source WHERE id = ?', [(int) $dc->id]);
+
+        if (false === $source) {
             return '#';
-        }
-
-        $redirectUri = Environment::get('url').$this->router->generate('contao_newsroom_facebook_redirect_callback', [
-                'importSource' => $dc->id,
-            ]);
-
-        if (str_starts_with($redirectUri, 'http://')) {
-            $redirectUri = 'https://'.substr($redirectUri, 7);
-        }
-
-        if (!str_starts_with($redirectUri, 'http://') && !str_starts_with($redirectUri, 'https://')) {
-            $redirectUri = Environment::get('url').'/'.$redirectUri;
         }
 
         try {
-            $facebook = new Facebook([
-                'clientId' => $sourceModel->appId,
-                'clientSecret' => $sourceModel->appSecret,
-                'graphApiVersion' => 'v2.12',
-                'redirectUri' => $redirectUri,
-            ]);
-        } catch (\Exception $e) {
-            Message::addError(sprintf($GLOBALS['TL_LANG']['MSC']['newsroom']['serviceConnectionError'], $e->getMessage()));
+            return $this->metaLogin->getAuthorizationUrl($source) ?? '#';
+        } catch (AccessTokenException $e) {
+            Message::addError(sprintf($GLOBALS['TL_LANG']['MSC']['entityImport']['accessTokenRequestError'], StringUtil::specialchars($e->getMessage())));
 
             return '#';
         }
-
-        return $facebook->getAuthorizationUrl([
-            'scope' => 'page' === $sourceModel->facebookMode ? ['email', 'pages_read_engagement', 'pages_show_list'] : ['email', 'user_posts'],
-        ]);
     }
 
+    private function addRedirectUriToMetaLoginHelp(int $sourceId): void
+    {
+        $field = &$GLOBALS['TL_DCA']['tl_entity_import_source']['fields']['metaAccessTokenButton'];
+        $label = $GLOBALS['TL_LANG']['tl_entity_import_source']['metaAccessTokenButton'] ?? ['', '%s'];
+
+        $field['label'] = [$label[0], sprintf($label[1], $this->metaLogin->getRedirectUri($sourceId))];
+    }
 }

@@ -49,6 +49,9 @@ $lang['retrievalType'][EntityImportSourceContainer::RETRIEVAL_TYPE_CONTAO_FILE_S
 $lang['retrievalType'][EntityImportSourceContainer::RETRIEVAL_TYPE_ABSOLUTE_PATH]      = 'Absolute path';
 $lang['type'][EntityImportSourceContainer::TYPE_DATABASE]                              = 'Database';
 $lang['type'][EntityImportSourceContainer::TYPE_FILE]                                  = 'File';
+$lang['type'][EntityImportSourceContainer::TYPE_YOUTUBE]                               = 'YouTube';
+$lang['type'][EntityImportSourceContainer::TYPE_INSTAGRAM]                             = 'Instagram';
+$lang['type'][EntityImportSourceContainer::TYPE_FACEBOOK]                              = 'Facebook page';
 
 $lang['sourceUrl'][0]            = 'Url';
 $lang['sourceUrl'][1]            = 'Enter the URL to the file here.';
@@ -89,6 +92,28 @@ $lang['httpAuth']['password'][1] = 'Enter your password here.';
 $lang['instagramApi'][0] = 'Instagram API';
 $lang['instagramApi'][1] = 'Choose the API of the access token: Instagram API with Facebook Login (app ID, app secret and Instagram user ID) or Instagram API with Instagram Login (access token only; it is refreshed automatically before it expires).';
 
+$lang['instagramAccessToken'][0] = 'Access token';
+$lang['instagramAccessToken'][1] = 'The Instagram access token is stored in this field.';
+$lang['instagramUserID'][0] = 'Instagram user ID';
+$lang['instagramUserID'][1] = 'The ID of the Instagram business account. Leave it empty if only one of your Facebook pages is connected to an Instagram account: requesting the access token fills it in.';
+$lang['accessTokenExpiration'][0] = 'Access token expires';
+$lang['accessTokenExpiration'][1] = 'When the access token expires.';
+
+$lang['appId'][0] = 'App ID';
+$lang['appId'][1] = 'The ID of the Meta app (developers.facebook.com, App settings > Basic).';
+$lang['appSecret'][0] = 'App secret';
+$lang['appSecret'][1] = 'The app secret of the Meta app.';
+$lang['metaApiVersion'][0] = 'Graph API version';
+$lang['metaApiVersion'][1] = 'The version of the Graph API, e.g. "v24.0".';
+$lang['metaAccessTokenButton'][0] = 'Request access token';
+$lang['metaAccessTokenButton'][1] = 'Save app ID, app secret and Graph API version first. Then log in with a Facebook account that manages the page. In the Meta app, enter this URL as a valid OAuth redirect URI under "Facebook Login > Settings": %s';
+$lang['facebookPageId'][0] = 'Facebook page ID';
+$lang['facebookPageId'][1] = 'The ID of the page (About > Page transparency). Leave it empty if you manage one page only: requesting the access token fills it in.';
+$lang['facebookAccessToken'][0] = 'Page access token';
+$lang['facebookAccessToken'][1] = 'Stored when you request it; it does not expire. It stops working if the account that logged in loses its role on the page, changes its password or removes the app.';
+
+$lang['request'] = 'Request';
+
 $lang['refreshAccessToken'][0] = 'Refresh access token now';
 $lang['refreshAccessToken'][1] = 'Saves the source and exchanges the access token for a new one with the full lifetime right away. Instagram allows this once the token is at least 24 hours old. A daily cron job refreshes it 30 days before it expires anyway.';
 
@@ -111,6 +136,7 @@ $lang['reference'] = [
  * Legends
  */
 $lang['title_legend']    = 'Title';
+$lang['config_legend']   = 'Configuration';
 $lang['db_legend']       = 'Database settings';
 $lang['external_legend'] = 'External source';
 $lang['file_legend']     = 'File';

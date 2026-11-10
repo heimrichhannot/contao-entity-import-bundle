@@ -15,6 +15,7 @@ use Contao\TestCase\ContaoTestCase;
 use Doctrine\DBAL\Connection;
 use HeimrichHannot\EntityImportBundle\EventListener\DataContainer\EntityImportSourceContainer;
 use HeimrichHannot\EntityImportBundle\Exception\AccessTokenException;
+use HeimrichHannot\EntityImportBundle\Meta\MetaLogin;
 use HeimrichHannot\EntityImportBundle\Source\SourceFactory;
 use HeimrichHannot\EntityImportBundle\Token\AccessTokenRefresher;
 use HeimrichHannot\EntityImportBundle\Util\EntityImportUtil;
@@ -25,7 +26,6 @@ use Symfony\Component\HttpFoundation\RequestMatcher\AttributesRequestMatcher;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
-use Symfony\Component\Routing\RouterInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class RefreshAccessTokenCallbackTest extends ContaoTestCase
@@ -125,9 +125,9 @@ class RefreshAccessTokenCallbackTest extends ContaoTestCase
             $this->createStub(Connection::class),
             $this->createStub(EntityImportUtil::class),
             $this->createStub(EventDispatcherInterface::class),
-            $this->createStub(RouterInterface::class),
             $this->requestStack,
             $refresher,
+            $this->createStub(MetaLogin::class),
         );
     }
 }

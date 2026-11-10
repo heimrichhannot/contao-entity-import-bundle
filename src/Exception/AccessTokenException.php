@@ -9,9 +9,8 @@
 namespace HeimrichHannot\EntityImportBundle\Exception;
 
 /**
- * An access token could not be requested or refreshed. The message is safe to show in the back end: it never
- * contains the token (Guzzle's own messages do, since the token is part of the request URL).
+ * An access token could not be requested or refreshed.
  */
-class AccessTokenException extends \RuntimeException
+class AccessTokenException extends ApiException
 {
 }

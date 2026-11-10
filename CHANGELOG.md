@@ -6,6 +6,10 @@ All notable changes to this project will be documented in this file.
 - Added: Instagram sources can use the Instagram API with Instagram Login (`instagramApi`): the access token alone, media from graph.instagram.com
 - Added: a daily cron refreshes Instagram-Login access tokens that expire within 30 days
 - Added: "Refresh access token now" checkbox on Instagram-Login sources: saves the source and refreshes its token right away
+- Added: Facebook page source (`facebook`): the page's posts from the Graph API, read with a non-expiring page access token that "Request access token" (Facebook Login) stores
+- Fixed: "Request access token" of Instagram sources with Facebook Login: the redirect callback still used contao-newsroom-bundle's classes and template; it now stores the token of the page connected to the Instagram account (which does not expire), checks the OAuth state and returns to the import source
+- Changed: Instagram (Facebook Login) user ID is editable, so a user with several Instagram accounts can pick one; tokens are stored with up to 512 characters
+- Removed: the unused, mandatory `accessTokenRemindEmails` field
 - Changed: token refresh errors no longer write the request URL, and with it the access token, to the system log
 - Changed: Instagram sources skip posts that are not shared to the profile's feed (`is_shared_to_feed`)
 - Fixed: Instagram post times were read in the server's time zone instead of UTC (an hour early in Germany)

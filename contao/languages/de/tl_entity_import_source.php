@@ -22,6 +22,7 @@ $lang['type'][EntityImportSourceContainer::TYPE_DATABASE] = 'Datenbank';
 $lang['type'][EntityImportSourceContainer::TYPE_FILE] = 'Datei';
 $lang['type'][EntityImportSourceContainer::TYPE_YOUTUBE] = 'YouTube';
 $lang['type'][EntityImportSourceContainer::TYPE_INSTAGRAM] = 'Instagram';
+$lang['type'][EntityImportSourceContainer::TYPE_FACEBOOK] = 'Facebook-Seite';
 
 $lang['fileType'][0] = 'Dateityp';
 $lang['fileType'][1] = 'Wählen Sie hier den Typ der Datei aus.';
@@ -126,8 +127,23 @@ $lang['instagramAccessToken'][0] = 'Access-Token';
 $lang['instagramAccessToken'][1] = 'In diesem Feld wird das Instagram-Access-Token gespeichert.';
 $lang['instagramUsername'][0] = 'Instagram-Account';
 $lang['instagramUsername'][1] = 'Tragen Sie hier den Namen des Instagram-Accounts ein, auf den Sie zugreifen möchten.';
+$lang['accessTokenExpiration'][0] = 'Access-Token läuft ab';
+$lang['accessTokenExpiration'][1] = 'Wann das Access-Token abläuft.';
 $lang['instagramUserID'][0] = 'Instagram-UserId';
-$lang['instagramUserID'][1] = 'Tragen Sie hier die ID des Instagram-Accounts ein, auf den Sie zugreifen möchten.';
+$lang['instagramUserID'][1] = 'Die ID des Instagram-Business-Accounts. Leer lassen, wenn nur eine Ihrer Facebook-Seiten mit einem Instagram-Account verbunden ist: Das Anfordern des Access-Tokens trägt sie dann ein.';
+
+$lang['appId'][0] = 'App-ID';
+$lang['appId'][1] = 'Die ID der Meta-App (developers.facebook.com, App-Einstellungen > Allgemeines).';
+$lang['appSecret'][0] = 'App-Secret';
+$lang['appSecret'][1] = 'Der App-Geheimcode der Meta-App.';
+$lang['metaApiVersion'][0] = 'Graph-API-Version';
+$lang['metaApiVersion'][1] = 'Die Version der Graph-API, z. B. "v24.0".';
+$lang['metaAccessTokenButton'][0] = 'Access-Token anfordern';
+$lang['metaAccessTokenButton'][1] = 'Speichern Sie zuerst App-ID, App-Secret und Graph-API-Version. Melden Sie sich dann mit einem Facebook-Konto an, das die Seite verwaltet. Tragen Sie in der Meta-App unter "Facebook Login > Einstellungen" diese URL als gültige OAuth-Redirect-URI ein: %s';
+$lang['facebookPageId'][0] = 'Facebook-Seiten-ID';
+$lang['facebookPageId'][1] = 'Die ID der Seite (Seiteninfo > Seitentransparenz). Leer lassen, wenn Sie nur eine Seite verwalten: Das Anfordern des Access-Tokens trägt sie dann ein.';
+$lang['facebookAccessToken'][0] = 'Seiten-Access-Token';
+$lang['facebookAccessToken'][1] = 'Wird beim Anfordern gespeichert und läuft nicht ab. Es wird ungültig, wenn das anmeldende Konto seine Rolle auf der Seite verliert, sein Passwort ändert oder die App entfernt.';
 
 $lang['refreshAccessToken'][0] = 'Access-Token jetzt verlängern';
 $lang['refreshAccessToken'][1] = 'Speichert die Quelle und tauscht das Access-Token sofort gegen ein neues mit voller Laufzeit. Instagram erlaubt das, sobald das Token mindestens 24 Stunden alt ist. Ein täglicher Cronjob verlängert es ohnehin 30 Tage vor Ablauf.';

@@ -15,6 +15,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
+use HeimrichHannot\EntityImportBundle\Exception\ApiException;
 use HeimrichHannot\UtilsBundle\Util\Utils;
 use Contao\CoreBundle\InsertTag\InsertTagParser;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
@@ -135,6 +136,33 @@ abstract class AbstractSource implements SourceInterface
             'statusCode' => $response->getStatusCode(),
             'result' => $response->getBody()->getContents(),
         ];
+    }
+
+    /**
+     * GETs a JSON answer from a platform's API. Successful answers are cached for the filesystem cache's lifetime
+     * (5 minutes), so the field mapping preview and the import do not ask twice.
+     *
+     * @throws ApiException
+     */
+    protected function getJson(string $url, array $query = [], array $headers = []): array
+    {
+        $cacheKey = 'entity-import-api.'.md5($url.'?'.http_build_query($query).'#'.serialize($headers));
+
+        return $this->getFilesystemCache()->get($cacheKey, function () use ($url, $query, $headers): array {
+            try {
+                $response = $this->getHttpClient()->request('GET', $url, ['query' => $query, 'headers' => $headers]);
+            } catch (GuzzleException $e) {
+                throw ApiException::fromGuzzle($e);
+            }
+
+            $data = json_decode((string) $response->getBody(), true);
+
+            if (!\is_array($data)) {
+                throw new ApiException('The API answered with invalid JSON.');
+            }
+
+            return $data;
+        });
     }
 
     protected function getValueFromRemoteCache(string $cacheKey): string

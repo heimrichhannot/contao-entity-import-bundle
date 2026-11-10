@@ -78,6 +78,9 @@ class SourceFactory
             case EntityImportSourceContainer::TYPE_INSTAGRAM:
                 $source = new InstagramSource($this->eventDispatcher, $this->utils, $this->parameterBag, $this->insertTagParser);
                 break;
+            case EntityImportSourceContainer::TYPE_FACEBOOK:
+                $source = new FacebookSource($this->eventDispatcher, $this->utils, $this->parameterBag, $this->insertTagParser);
+                break;
         }
 
         $event = $this->eventDispatcher->dispatch(new SourceFactoryCreateSourceEvent(

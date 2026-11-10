@@ -57,13 +57,15 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
         EntityImportSourceContainer::TYPE_FILE => '{title_legend},title,type;{file_legend},retrievalType;',
         EntityImportSourceContainer::TYPE_INSTAGRAM => '{title_legend},title,type;
     {config_legend},instagramApi,metaApiVersion,instagramAccessToken,accessTokenExpiration,refreshAccessToken,fieldMappingCopier,fieldMappingPresets,fieldMapping;',
+        EntityImportSourceContainer::TYPE_FACEBOOK => '{title_legend},title,type;
+    {config_legend},appId,appSecret,metaApiVersion,facebookPageId,metaAccessTokenButton,facebookAccessToken,fieldMappingCopier,fieldMappingPresets,fieldMapping;',
         EntityImportSourceContainer::TYPE_YOUTUBE  => '{title_legend},title,type;
     {config_legend},apiKey,youtubeMode,fieldMappingCopier,fieldMappingPresets,fieldMapping;'
     ],
 
     // Subpalettes
     'subpalettes' => [
-        'instagramApi_facebook' => 'appId,appSecret,accessTokenRemindEmails,metaAccessTokenButton,instagramUserID',
+        'instagramApi_facebook' => 'appId,appSecret,instagramUserID,metaAccessTokenButton',
         'retrievalType_http' => 'sourceUrl,httpMethod,httpAuth,fileType',
         'retrievalType_contao_file_system' => 'fileSRC,fileType',
         'retrievalType_absolute_path' => 'absolutePath',
@@ -502,14 +504,27 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
         'instagramAccessToken' => [
             'exclude' => true,
             'inputType' => 'text',
-            'eval' => ['maxlength' => 255, 'tl_class' => 'w50'],
-            'sql' => "varchar(255) NOT NULL default ''",
+            'eval' => ['maxlength' => 512, 'tl_class' => 'w50', 'decodeEntities' => true],
+            'sql' => "varchar(512) NOT NULL default ''",
         ],
         'instagramUserID' => [
             'exclude' => true,
             'inputType' => 'text',
-            'eval' => ['maxlength' => 255, 'tl_class' => 'w50', 'readonly' => true],
+            'eval' => ['maxlength' => 255, 'tl_class' => 'w50'],
             'sql' => "varchar(255) NOT NULL default ''",
+        ],
+        // Facebook
+        'facebookPageId' => [
+            'exclude' => true,
+            'inputType' => 'text',
+            'eval' => ['maxlength' => 64, 'tl_class' => 'w50', 'rgxp' => 'digit'],
+            'sql' => "varchar(64) NOT NULL default ''",
+        ],
+        'facebookAccessToken' => [
+            'exclude' => true,
+            'inputType' => 'text',
+            'eval' => ['maxlength' => 512, 'tl_class' => 'w50', 'decodeEntities' => true],
+            'sql' => "varchar(512) NOT NULL default ''",
         ],
         // meta
         'appId' => [
@@ -530,9 +545,8 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'exclude' => true,
             'inputType' => 'entityImportHyperlink',
             'eval' => [
-                'tl_class' => 'long clr',
+                'tl_class' => 'clr',
                 'linkClass' => 'tl_submit',
-                'target' => '_blank',
                 'text' => &$GLOBALS['TL_LANG']['tl_entity_import_source']['request'],
                 'url' => [EntityImportSourceContainer::class, 'getMetaAccessTokenGenerationUrl'],
             ],
@@ -554,12 +568,6 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'exclude' => true,
             'inputType' => 'checkbox',
             'eval' => ['doNotSaveEmpty' => true, 'submitOnChange' => true, 'tl_class' => 'w50 m12'],
-        ],
-        'accessTokenRemindEmails' => [
-            'exclude' => true,
-            'inputType' => 'text',
-            'eval' => ['maxlength' => 255, 'tl_class' => 'w50', 'mandatory' => true],
-            'sql' => "varchar(255) NOT NULL default ''",
         ],
     ],
 ];
