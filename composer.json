@@ -34,13 +34,18 @@
     "league/oauth2-facebook": "^2.0"
   },
   "require-dev": {
-    "contao/test-case": "^5.3",
+    "contao/test-case": "^5.7",
     "rector/rector": "^2.2",
     "contao/contao-rector": "dev-main"
   },
   "autoload": {
     "psr-4": {
       "HeimrichHannot\\EntityImportBundle\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "HeimrichHannot\\EntityImportBundle\\Tests\\": "tests/"
     }
   },
   "config": {

@@ -2,24 +2,30 @@
 
 namespace HeimrichHannot\EntityImportBundle\EventListener\DataContainer;
 
+use Contao\Config;
 use Contao\CoreBundle\DependencyInjection\Attribute\AsCallback;
 use Contao\Database;
+use Contao\Date;
 use Contao\DataContainer;
 use Contao\Environment;
 use Contao\Message;
 use Contao\Model;
+use Contao\StringUtil;
 use Contao\System;
 use Contao\Widget;
 use Doctrine\DBAL\Connection;
 use HeimrichHannot\EntityImportBundle\Event\AddSourceFieldMappingPresetsEvent;
+use HeimrichHannot\EntityImportBundle\Exception\AccessTokenException;
 use HeimrichHannot\EntityImportBundle\Model\EntityImportSourceModel;
 use HeimrichHannot\EntityImportBundle\Source\AbstractFileSource;
 use HeimrichHannot\EntityImportBundle\Source\CSVFileSource;
 use HeimrichHannot\EntityImportBundle\Source\RSSFileSource;
 use HeimrichHannot\EntityImportBundle\Source\SourceFactory;
+use HeimrichHannot\EntityImportBundle\Token\AccessTokenRefresher;
 use HeimrichHannot\EntityImportBundle\Util\EntityImportUtil;
 use HeimrichHannot\UtilsBundle\Util\Utils;
 use League\OAuth2\Client\Provider\Facebook;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
@@ -67,7 +73,9 @@ class EntityImportSourceContainer
         private readonly Connection $conn,
         private readonly EntityImportUtil $util,
         private readonly EventDispatcherInterface $eventDispatcher,
-        private readonly RouterInterface $router
+        private readonly RouterInterface $router,
+        private readonly RequestStack $requestStack,
+        private readonly AccessTokenRefresher $accessTokenRefresher,
     ) {
         $this->activeBundles = System::getContainer()->getParameter('kernel.bundles');
     }
@@ -87,6 +95,39 @@ class EntityImportSourceContainer
         ], ['id' => $dc->id]);
     }
 
+    /**
+     * The "refresh access token" checkbox is an action, not a value: it is never stored.
+     */
+    #[AsCallback('tl_entity_import_source', 'fields.refreshAccessToken.save')]
+    public function onSaveRefreshAccessToken(): mixed
+    {
+        return null;
+    }
+
+    /**
+     * Ticking "refresh access token" submits the form; refresh the saved token then (like the "request access
+     * token" checkbox of pdir/social-feed-bundle).
+     */
+    #[AsCallback('tl_entity_import_source', 'config.onsubmit')]
+    public function refreshAccessToken(?DataContainer $dc): void
+    {
+        if (null === $dc || !$this->requestStack->getCurrentRequest()?->request->get('refreshAccessToken')) {
+            return;
+        }
+
+        try {
+            $expires = $this->accessTokenRefresher->refresh((int) $dc->id);
+        } catch (AccessTokenException $e) {
+            Message::addError(sprintf($GLOBALS['TL_LANG']['MSC']['entityImport']['accessTokenRefreshError'], StringUtil::specialchars($e->getMessage())));
+
+            return;
+        }
+
+        Message::addConfirmation($expires
+            ? sprintf($GLOBALS['TL_LANG']['MSC']['entityImport']['accessTokenRefreshedUntil'], Date::parse(Config::get('datimFormat'), $expires))
+            : $GLOBALS['TL_LANG']['MSC']['entityImport']['accessTokenRefreshed']);
+    }
+
     #[AsCallback('tl_entity_import_source', 'config.load')]
     public function initPalette(?DataContainer $dc): void
     {
@@ -98,6 +139,13 @@ class EntityImportSourceContainer
 
         // database
         switch ($sourceModel->type) {
+            case static::TYPE_INSTAGRAM:
+                if (!$this->accessTokenRefresher->supports($sourceModel->row())) {
+                    $dca['palettes'][static::TYPE_INSTAGRAM] = str_replace(',refreshAccessToken', '', $dca['palettes'][static::TYPE_INSTAGRAM]);
+                }
+
+                break;
+
             case static::TYPE_DATABASE:
                 if (!$sourceModel->dbSourceTable) {
                     $dca['palettes'][static::TYPE_DATABASE] = str_replace('fieldMappingCopier', '', $dca['palettes'][static::TYPE_DATABASE]);

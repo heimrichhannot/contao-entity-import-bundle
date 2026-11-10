@@ -129,6 +129,9 @@ $lang['instagramUsername'][1] = 'Tragen Sie hier den Namen des Instagram-Account
 $lang['instagramUserID'][0] = 'Instagram-UserId';
 $lang['instagramUserID'][1] = 'Tragen Sie hier die ID des Instagram-Accounts ein, auf den Sie zugreifen möchten.';
 
+$lang['refreshAccessToken'][0] = 'Access-Token jetzt verlängern';
+$lang['refreshAccessToken'][1] = 'Speichert die Quelle und tauscht das Access-Token sofort gegen ein neues mit voller Laufzeit. Instagram erlaubt das, sobald das Token mindestens 24 Stunden alt ist. Ein täglicher Cronjob verlängert es ohnehin 30 Tage vor Ablauf.';
+
 $lang['request'] = 'Anfordern';
 
 /*

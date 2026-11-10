@@ -56,7 +56,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
         EntityImportSourceContainer::TYPE_DATABASE => '{title_legend},title,type;{db_legend},dbDriver,dbHost,dbUser,dbPass,dbDatabase,dbPconnect,dbCharset,dbPort,dbSocket,dbSourceTableExplanation,dbSourceTable,dbSourceTableWhere,addDcMultilingualSupport,addChangeLanguageSupport,fieldMappingCopier,fieldMappingPresets,fieldMapping;',
         EntityImportSourceContainer::TYPE_FILE => '{title_legend},title,type;{file_legend},retrievalType;',
         EntityImportSourceContainer::TYPE_INSTAGRAM => '{title_legend},title,type;
-    {config_legend},instagramApi,metaApiVersion,instagramAccessToken,accessTokenExpiration,fieldMappingCopier,fieldMappingPresets,fieldMapping;',
+    {config_legend},instagramApi,metaApiVersion,instagramAccessToken,accessTokenExpiration,refreshAccessToken,fieldMappingCopier,fieldMappingPresets,fieldMapping;',
         EntityImportSourceContainer::TYPE_YOUTUBE  => '{title_legend},title,type;
     {config_legend},apiKey,youtubeMode,fieldMappingCopier,fieldMappingPresets,fieldMapping;'
     ],
@@ -548,6 +548,12 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'inputType' => 'text',
             'eval' => ['rgxp' => 'datim', 'datepicker' => true, 'tl_class' => 'w50'],
             'sql' => "varchar(10) NOT NULL default ''",
+        ],
+        // ticking it saves the record and refreshes the access token (EntityImportSourceContainer::refreshAccessToken)
+        'refreshAccessToken' => [
+            'exclude' => true,
+            'inputType' => 'checkbox',
+            'eval' => ['doNotSaveEmpty' => true, 'submitOnChange' => true, 'tl_class' => 'w50 m12'],
         ],
         'accessTokenRemindEmails' => [
             'exclude' => true,

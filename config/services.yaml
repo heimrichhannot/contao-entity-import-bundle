@@ -10,6 +10,7 @@ services:
       - ../src/ContaoManager
       - ../src/DependencyInjection
       - ../src/Event
+      - ../src/Exception
       - ../src/Importer/Importer.php
       - ../src/Importer/ImporterInterface.php
       - ../src/Model

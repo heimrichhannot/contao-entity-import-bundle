@@ -12,6 +12,8 @@ use Contao\StringUtil;
 use Contao\Environment;
 use Contao\Model;
 use GuzzleHttp\Client;
+use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
 use HeimrichHannot\UtilsBundle\Util\Utils;
 use Contao\CoreBundle\InsertTag\InsertTagParser;
@@ -25,6 +27,7 @@ abstract class AbstractSource implements SourceInterface
     protected Model $sourceModel;
     protected CacheInterface $filesystemCache;
     protected string $domain;
+    protected ?ClientInterface $httpClient = null;
 
     public function __construct(protected Utils $utils, protected ParameterBagInterface $parameterBag, protected InsertTagParser $insertTagParser)
     {
@@ -64,6 +67,21 @@ abstract class AbstractSource implements SourceInterface
         return $this->filesystemCache;
     }
 
+    public function setFilesystemCache(CacheInterface $filesystemCache): void
+    {
+        $this->filesystemCache = $filesystemCache;
+    }
+
+    public function setHttpClient(ClientInterface $httpClient): void
+    {
+        $this->httpClient = $httpClient;
+    }
+
+    protected function getHttpClient(): ClientInterface
+    {
+        return $this->httpClient ??= new Client();
+    }
+
     /**
      * @return string
      */
@@ -97,15 +115,20 @@ abstract class AbstractSource implements SourceInterface
 
     protected function getContentFromUrl(string $method, string $url, array $auth = []): array
     {
-        $client = new Client();
-
         try {
-            $response = $client->request($method, StringUtil::decodeEntities($url), $auth);
+            $response = $this->getHttpClient()->request($method, StringUtil::decodeEntities($url), $auth);
         } catch (RequestException $e) {
+            if (null === $e->getResponse()) {
+                return ['statusCode' => 0, 'result' => $e->getHandlerContext()['error'] ?? 'connection error'];
+            }
+
             return [
                 'statusCode' => $e->getResponse()->getStatusCode(),
                 'result' => $e->getResponse()->getBody()->getContents(),
             ];
+        } catch (GuzzleException) {
+            // the message would contain the URL, which may hold an access token
+            return ['statusCode' => 0, 'result' => 'connection error'];
         }
 
         return [

@@ -8,3 +8,5 @@ composer.json~
 composer.phar
 node_modules
 yarn.lock
+.phpunit.cache
+.phpunit.result.cache

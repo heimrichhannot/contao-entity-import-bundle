@@ -89,6 +89,9 @@ $lang['httpAuth']['password'][1] = 'Enter your password here.';
 $lang['instagramApi'][0] = 'Instagram API';
 $lang['instagramApi'][1] = 'Choose the API of the access token: Instagram API with Facebook Login (app ID, app secret and Instagram user ID) or Instagram API with Instagram Login (access token only; it is refreshed automatically before it expires).';
 
+$lang['refreshAccessToken'][0] = 'Refresh access token now';
+$lang['refreshAccessToken'][1] = 'Saves the source and exchanges the access token for a new one with the full lifetime right away. Instagram allows this once the token is at least 24 hours old. A daily cron job refreshes it 30 days before it expires anyway.';
+
 $lang['reference'] = [
     'instagramApi' => [
         'facebook' => 'Instagram API with Facebook Login',
