@@ -135,7 +135,7 @@ class EntityImportSourceContainer
             : $GLOBALS['TL_LANG']['MSC']['entityImport']['accessTokenRefreshed']);
     }
 
-    #[AsCallback('tl_entity_import_source', 'config.load')]
+    #[AsCallback('tl_entity_import_source', 'config.onload')]
     public function initPalette(?DataContainer $dc): void
     {
         if (null === ($sourceModel = $this->utils->model()->findModelInstanceByPk($dc->table, (int) $dc->id))) {
