@@ -9,6 +9,8 @@ This bundle offers a generic importer to migrate data from various sources to co
 - import data from either file content or database into arbitrary contao database entities (`tl_*`)
 - support for various data types (json, csv, ...)
 - support for various source types (contao file system, http, absolute path)
+- social media sources: Instagram, Facebook pages, YouTube channels and LinkedIn company pages, with access token
+  login and refresh in the back end
 - executable from contao backend, as cronjob and symfony command
 - automatic field manipulation (sorting, alias, dateAdded, tstamp)
 - merge and insert mode
@@ -45,6 +47,94 @@ huh_entity_import:
     contao_log: true # log errors while importing to contao system log
     email: false # report errors while importing via email to the admin email defined in the contao settings
 ```
+
+## Social media sources
+
+Besides databases and files, an import source can read the posts of a social media account. Each source type has a
+fixed set of source fields; the field mapping offers them in a select (Instagram: type the field name).
+
+| Type | Platform API | Credentials | Token lifetime |
+|---|---|---|---|
+| `instagram` (Instagram Login) | Instagram API with Instagram Login (graph.instagram.com) | access token | 60 days, refreshed automatically |
+| `instagram` (Facebook Login) | Instagram API with Facebook Login (graph.facebook.com) | Meta app, page token via login | does not expire |
+| `facebook` | Graph API `/{page-id}/posts` | Meta app, page token via login | does not expire |
+| `youtube` | YouTube Data API v3 | API key | – |
+| `linkedin` | Posts API of LinkedIn's Community Management API | LinkedIn app, token via login | 60 days, refreshed for a year |
+
+Answers of the APIs are cached for 5 minutes. Errors show up as back end messages with the API's error message
+(never with the request URL, which may contain the token).
+
+### Access tokens
+
+- **Request access token** (Facebook, Instagram with Facebook Login, LinkedIn): save the app credentials first, then
+  click the button. You log in with the platform, grant the app access and return to the import source with the token
+  stored. The help text below the button shows the redirect URL to enter in the app's settings. The redirect URLs are
+  the ones contao-newsroom-bundle used (`/contao-newsroom/facebook/{id}/redirect_callback`,
+  `/contao-newsroom/auth/linkedin`), so apps set up for it keep working.
+- **Refresh access token now** (Instagram with Instagram Login, LinkedIn with a refresh token): tick the checkbox and
+  the source is saved and its token exchanged for a new one with the full lifetime right away.
+- A **daily cron job** (`AccessTokenRefreshCron`) refreshes those tokens 30 days before they expire (or when the expiry
+  is unknown). Failures go to the Contao system log. For LinkedIn it also logs an error every day during the last 30
+  days of the refresh token, since only a new login helps then.
+
+### Instagram
+
+- **Instagram API with Instagram Login**: for Instagram professional (business or creator) accounts. Generate a token
+  for the account in the Meta app's dashboard (Instagram > API setup with Instagram login) and paste it. Graph API version: e.g. `v24.0`. Instagram allows a refresh once a token is at
+  least 24 hours old.
+- **Instagram API with Facebook Login**: for Instagram professional accounts connected to a Facebook page. Enter the
+  Meta app's ID and secret and the Graph API version, request the access token and log in with an account that manages
+  the page. The token of the page connected to the Instagram account is stored; if several of your pages have one,
+  enter the Instagram user ID first (the error message lists them).
+- Source fields: `id`, `caption`, `media_type`, `media_url` (the thumbnail for videos), `thumbnail_url`, `permalink`,
+  `timestamp` (Unix time), `username`. Posts not shown in the profile's feed are skipped.
+
+### Facebook pages
+
+1. Create a Meta app (developers.facebook.com) that uses Facebook Login and may ask for the permissions
+   `pages_show_list` and `pages_read_engagement` (the login passes them as `scope`). Add the redirect URL shown below
+   the "Request access token" button as "Valid OAuth Redirect URI".
+1. As long as the account that logs in has a role on the app (administrator, developer or tester), standard access to
+   these permissions suffices and no App Review is needed.
+1. Enter app ID, app secret, Graph API version (e.g. `v24.0`) and, if you manage more than one page, the page ID; save
+   and request the access token.
+
+The page token does not expire, but stops working if the account that logged in loses its role on the page, changes
+its password or removes the app; request a new one then.
+
+Source fields: `id`, `message`, `full_picture`, `permalink_url`, `created_time` (Unix time), `status_type`.
+
+### YouTube
+
+Create an API key for the YouTube Data API v3 in the Google Cloud console. Find the channel by its ID (`UC…`), its
+handle (`@name`) or, for old channels, its user name. The source reads the latest 50 public videos from the channel's
+uploads playlist: 2 of the 10,000 daily quota units per import.
+
+Source fields: `id`, `title`, `description` (characters beyond ASCII as numeric entities), `publishedAt` (Unix time),
+`channelId`, `channelTitle`, `image_url` (the largest thumbnail), `url`.
+
+### LinkedIn company pages
+
+Reading an organization's posts needs LinkedIn's **Community Management API**, which LinkedIn grants after reviewing
+the app and verifying the company (developer.linkedin.com > your app > Products). Without it the login fails with an
+unauthorized scope.
+
+1. In the app's "Auth" tab, add the redirect URL shown below the "Request access token" button.
+1. Enter client ID and secret, the organization ID (the number in the page's admin URL), the API version (`YYYYMM`;
+   LinkedIn supports each version for at least a year) and the number of posts; save and request the access token
+   with an account that administers the page.
+1. Access tokens last 60 days. Apps with programmatic refresh tokens also get a refresh token that lasts a year from
+   the login, and the token is refreshed automatically until then.
+
+Source fields: `id` (the post URN), `url`, `commentary` (plain text: mentions as names, hashtags as `#tag`),
+`publishedAt` (Unix time), `image_url` (image or video thumbnail; only requested if mapped), `article_url`,
+`article_title`. Drafts and sponsored posts that are not shown in the feed are skipped.
+
+To store images, map `image_url` (or `media_url`, `full_picture`) to a file field in the importer's file field mapping.
+
+### Platforms not supported
+
+X (Twitter), which contao-newsroom-bundle supported, is not: reading timelines needs paid API access.
 
 ## Technical instructions
 
@@ -201,3 +291,14 @@ Name | Description
 `BeforeItemImportEvent` | Configure the item data before importing; call `setSkipped(true)` in order to skip the import
 `SourceFactoryCreateSourceEvent` | Implement custom logic for new custom file sources
 `BeforeFileImportEvent` | Implement a custom logic for setting the folder and/or file path when importing files
+
+## Development
+
+Run the tests:
+
+```bash
+composer install
+vendor/bin/phpunit
+```
+
+The tests of the social media sources run against a mocked HTTP client; they need no credentials.
