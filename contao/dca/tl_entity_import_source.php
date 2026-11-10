@@ -74,6 +74,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
         'fileType_rss' => 'fileContent,pathToDataArray,fieldMappingCopier,fieldMappingPresets,fieldMapping',
         'fileType_xml' => 'fileContent,pathToDataArray,fieldMappingCopier,fieldMappingPresets,fieldMapping',
         'youtubeMode_'.YouTubeSource::MODE_CHANNEL => 'youtubeChannel',
+        'youtubeMode_'.YouTubeSource::MODE_HANDLE => 'youtubeHandle',
         'youtubeMode_'.YouTubeSource::MODE_USER => 'youtubeUsername',
     ],
     // Fields
@@ -472,10 +473,7 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'filter' => true,
             'inputType' => 'select',
             'default' => YouTubeSource::MODE_CHANNEL,
-            'options' => [
-                YouTubeSource::MODE_CHANNEL,
-                YouTubeSource::MODE_USER,
-            ],
+            'options' => YouTubeSource::MODES,
             'reference' => &$GLOBALS['TL_LANG']['tl_entity_import_source']['reference']['posts'],
             'eval' => ['tl_class' => 'w50', 'submitOnChange' => true, 'mandatory' => true],
             'sql' => "varchar(64) NOT NULL default 'channel'",
@@ -485,6 +483,12 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'inputType' => 'text',
             'eval' => ['maxlength' => 64, 'tl_class' => 'w50', 'mandatory' => true],
             'sql' => "varchar(64) NOT NULL default ''",
+        ],
+        'youtubeHandle' => [
+            'exclude' => true,
+            'inputType' => 'text',
+            'eval' => ['maxlength' => 100, 'tl_class' => 'w50', 'mandatory' => true],
+            'sql' => "varchar(100) NOT NULL default ''",
         ],
         'youtubeChannel' => [
             'exclude' => true,

@@ -9,6 +9,10 @@ All notable changes to this project will be documented in this file.
 - Added: Facebook page source (`facebook`): the page's posts from the Graph API, read with a non-expiring page access token that "Request access token" (Facebook Login) stores
 - Fixed: "Request access token" of Instagram sources with Facebook Login: the redirect callback still used contao-newsroom-bundle's classes and template; it now stores the token of the page connected to the Instagram account (which does not expire), checks the OAuth state and returns to the import source
 - Changed: Instagram (Facebook Login) user ID is editable, so a user with several Instagram accounts can pick one; tokens are stored with up to 512 characters
+- Added: YouTube sources can find the channel by its handle (`@name`)
+- Changed: YouTube sources read the channel's uploads playlist instead of searching (1 instead of 100 of the 10,000 daily quota units per import), skip private and deleted videos, take the full description and the video's publication date, and take `image_url` from the API's largest thumbnail instead of probing five image URLs per video
+- Changed: YouTube field mappings pick the source field from a list (`id`, `title`, `description`, `publishedAt`, `channelId`, `channelTitle`, `image_url`, `url`; `liveBroadcastContent` is gone)
+- Fixed: YouTube sources used contao-newsroom-bundle's language keys, so their error messages were empty; descriptions keep their line breaks and emoji (the numeric entities cut off characters beyond U+FFFF)
 - Removed: the unused, mandatory `accessTokenRemindEmails` field
 - Changed: token refresh errors no longer write the request URL, and with it the access token, to the system log
 - Changed: Instagram sources skip posts that are not shared to the profile's feed (`is_shared_to_feed`)

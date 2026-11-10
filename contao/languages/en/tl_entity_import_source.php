@@ -92,6 +92,17 @@ $lang['httpAuth']['password'][1] = 'Enter your password here.';
 $lang['instagramApi'][0] = 'Instagram API';
 $lang['instagramApi'][1] = 'Choose the API of the access token: Instagram API with Facebook Login (app ID, app secret and Instagram user ID) or Instagram API with Instagram Login (access token only; it is refreshed automatically before it expires).';
 
+$lang['apiKey'][0] = 'API key';
+$lang['apiKey'][1] = 'Enter the API key you got from the service.';
+$lang['youtubeMode'][0] = 'Find the channel by';
+$lang['youtubeMode'][1] = 'How to find the YouTube channel.';
+$lang['youtubeChannel'][0] = 'YouTube channel ID';
+$lang['youtubeChannel'][1] = 'The ID from the channel URL (https://www.youtube.com/channel/<...>), starting with "UC".';
+$lang['youtubeHandle'][0] = 'YouTube handle';
+$lang['youtubeHandle'][1] = 'The handle of the channel, e.g. "@bahnland" (https://www.youtube.com/@<...>).';
+$lang['youtubeUsername'][0] = 'YouTube user name';
+$lang['youtubeUsername'][1] = 'The legacy user name from the user URL (https://www.youtube.com/user/<...>). Newer channels have none; use the handle then.';
+
 $lang['instagramAccessToken'][0] = 'Access token';
 $lang['instagramAccessToken'][1] = 'The Instagram access token is stored in this field.';
 $lang['instagramUserID'][0] = 'Instagram user ID';
@@ -121,6 +132,11 @@ $lang['reference'] = [
     'instagramApi' => [
         'facebook' => 'Instagram API with Facebook Login',
         'instagram' => 'Instagram API with Instagram Login',
+    ],
+    'posts' => [
+        'channel' => 'Channel ID',
+        'handle' => 'Handle (@name)',
+        'user' => 'User name (legacy)',
     ],
     'valueType'  => [
         'source_value' => 'dynamic',

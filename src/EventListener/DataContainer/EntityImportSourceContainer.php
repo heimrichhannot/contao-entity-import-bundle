@@ -22,6 +22,7 @@ use HeimrichHannot\EntityImportBundle\Source\CSVFileSource;
 use HeimrichHannot\EntityImportBundle\Source\FacebookSource;
 use HeimrichHannot\EntityImportBundle\Source\RSSFileSource;
 use HeimrichHannot\EntityImportBundle\Source\SourceFactory;
+use HeimrichHannot\EntityImportBundle\Source\YouTubeSource;
 use HeimrichHannot\EntityImportBundle\Token\AccessTokenRefresher;
 use HeimrichHannot\EntityImportBundle\Util\EntityImportUtil;
 use HeimrichHannot\UtilsBundle\Util\Utils;
@@ -146,6 +147,11 @@ class EntityImportSourceContainer
                 }
 
                 $this->addRedirectUriToMetaLoginHelp((int) $sourceModel->id);
+
+                break;
+
+            case static::TYPE_YOUTUBE:
+                $this->util->transformFieldMappingSourceValueToSelect(YouTubeSource::getFieldOptions());
 
                 break;
 

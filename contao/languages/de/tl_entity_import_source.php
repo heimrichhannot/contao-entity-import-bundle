@@ -114,12 +114,14 @@ $lang['addChangeLanguageSupport'][1] = 'Wählen Sie diese Option, um das languag
 $lang['apiKey'][0] = 'API-Key';
 $lang['apiKey'][1] = 'Geben Sie hier den API-Key ein, den Sie vom entsprechenden Dienst erhalten haben.';
 
-$lang['youtubeMode'][0] = 'Modus';
-$lang['youtubeMode'][1] = 'Wählen Sie hier einen Modus aus.';
+$lang['youtubeMode'][0] = 'Kanal finden über';
+$lang['youtubeMode'][1] = 'Wie der YouTube-Kanal gefunden wird.';
 $lang['youtubeUsername'][0] = 'YouTube-Benutzername';
-$lang['youtubeUsername'][1] = 'Sie finden den Benutzernamen über die User-URL (Beispiel: https://www.youtube.com/user/<...>).';
-$lang['youtubeChannel'][0] = 'YouTube-Kanal';
-$lang['youtubeChannel'][1] = 'Sie finden den Benutzernamen über die Channel-URL (Beispiel: https://www.youtube.com/channel/<...>).';
+$lang['youtubeUsername'][1] = 'Der alte Benutzername aus der User-URL (https://www.youtube.com/user/<...>). Neuere Kanäle haben keinen; nutzen Sie dann das Handle.';
+$lang['youtubeHandle'][0] = 'YouTube-Handle';
+$lang['youtubeHandle'][1] = 'Das Handle des Kanals, z. B. "@bahnland" (https://www.youtube.com/@<...>).';
+$lang['youtubeChannel'][0] = 'YouTube-Kanal-ID';
+$lang['youtubeChannel'][1] = 'Die ID aus der Channel-URL (https://www.youtube.com/channel/<...>), beginnt mit "UC".';
 
 $lang['instagramApi'][0] = 'Instagram-API';
 $lang['instagramApi'][1] = 'Wählen Sie die API des Access-Tokens: Instagram-API mit Facebook-Login (App-ID, App-Secret und Instagram-UserId) oder Instagram-API mit Instagram-Login (nur Access-Token; es wird automatisch verlängert, bevor es abläuft).';
@@ -167,8 +169,9 @@ $lang['reference'] = [
         'post' => 'POST',
     ],
     'posts' => [
-        'channel' => 'Kanal',
-        'user' => 'User',
+        'channel' => 'Kanal-ID',
+        'handle' => 'Handle (@name)',
+        'user' => 'Benutzername (alt)',
         'page' => 'Seite',
         'self' => 'Self',
     ]
