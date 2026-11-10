@@ -56,4 +56,24 @@ class AccessTokenRefreshCronTest extends TestCase
 
         $this->assertSame([1, 3, 5], $refreshed);
     }
+
+    public function testWarnsWhenTheLinkedInRefreshTokenRunsOut(): void
+    {
+        $expires = time() + 10 * 86400;
+
+        $connection = $this->createStub(Connection::class);
+        $connection->method('fetchAllAssociative')->willReturn([
+            ['id' => 9, 'type' => 'linkedin', 'accessTokenExpiration' => (string) (time() + 50 * 86400), 'linkedinRefreshTokenExpires' => (string) $expires],
+            ['id' => 10, 'type' => 'linkedin', 'accessTokenExpiration' => '', 'linkedinRefreshTokenExpires' => (string) (time() + 300 * 86400)],
+        ]);
+
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger
+            ->expects($this->once())
+            ->method('error')
+            ->with(sprintf('Entity import source ID 9: the LinkedIn refresh token is valid until %s only; please request a new access token in the import source.', date('Y-m-d', $expires)))
+        ;
+
+        (new AccessTokenRefreshCron($connection, $this->createStub(AccessTokenRefresher::class), $logger))();
+    }
 }

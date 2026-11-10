@@ -23,6 +23,7 @@ $lang['type'][EntityImportSourceContainer::TYPE_FILE] = 'Datei';
 $lang['type'][EntityImportSourceContainer::TYPE_YOUTUBE] = 'YouTube';
 $lang['type'][EntityImportSourceContainer::TYPE_INSTAGRAM] = 'Instagram';
 $lang['type'][EntityImportSourceContainer::TYPE_FACEBOOK] = 'Facebook-Seite';
+$lang['type'][EntityImportSourceContainer::TYPE_LINKEDIN] = 'LinkedIn-Unternehmensseite';
 
 $lang['fileType'][0] = 'Dateityp';
 $lang['fileType'][1] = 'Wählen Sie hier den Typ der Datei aus.';
@@ -134,10 +135,10 @@ $lang['accessTokenExpiration'][1] = 'Wann das Access-Token abläuft.';
 $lang['instagramUserID'][0] = 'Instagram-UserId';
 $lang['instagramUserID'][1] = 'Die ID des Instagram-Business-Accounts. Leer lassen, wenn nur eine Ihrer Facebook-Seiten mit einem Instagram-Account verbunden ist: Das Anfordern des Access-Tokens trägt sie dann ein.';
 
-$lang['appId'][0] = 'App-ID';
-$lang['appId'][1] = 'Die ID der Meta-App (developers.facebook.com, App-Einstellungen > Allgemeines).';
-$lang['appSecret'][0] = 'App-Secret';
-$lang['appSecret'][1] = 'Der App-Geheimcode der Meta-App.';
+$lang['appId'][0] = 'App-ID / Client-ID';
+$lang['appId'][1] = 'Die ID der App: Meta-App (developers.facebook.com, App-Einstellungen > Allgemeines) oder LinkedIn-App (Reiter "Auth", Client ID).';
+$lang['appSecret'][0] = 'App-Secret / Client-Secret';
+$lang['appSecret'][1] = 'Der App-Geheimcode der Meta-App oder das Client Secret der LinkedIn-App.';
 $lang['metaApiVersion'][0] = 'Graph-API-Version';
 $lang['metaApiVersion'][1] = 'Die Version der Graph-API, z. B. "v24.0".';
 $lang['metaAccessTokenButton'][0] = 'Access-Token anfordern';
@@ -148,7 +149,20 @@ $lang['facebookAccessToken'][0] = 'Seiten-Access-Token';
 $lang['facebookAccessToken'][1] = 'Wird beim Anfordern gespeichert und läuft nicht ab. Es wird ungültig, wenn das anmeldende Konto seine Rolle auf der Seite verliert, sein Passwort ändert oder die App entfernt.';
 
 $lang['refreshAccessToken'][0] = 'Access-Token jetzt verlängern';
-$lang['refreshAccessToken'][1] = 'Speichert die Quelle und tauscht das Access-Token sofort gegen ein neues mit voller Laufzeit. Instagram erlaubt das, sobald das Token mindestens 24 Stunden alt ist. Ein täglicher Cronjob verlängert es ohnehin 30 Tage vor Ablauf.';
+$lang['refreshAccessToken'][1] = 'Speichert die Quelle und tauscht das Access-Token sofort gegen ein neues mit voller Laufzeit (Instagram erlaubt das, sobald das Token mindestens 24 Stunden alt ist). Ein täglicher Cronjob verlängert es ohnehin 30 Tage vor Ablauf.';
+
+$lang['appPageId'][0] = 'LinkedIn-Organisations-ID';
+$lang['appPageId'][1] = 'Die Zahl in der Admin-URL der Unternehmensseite (https://www.linkedin.com/company/<ID>/admin/).';
+$lang['linkedInVersion'][0] = 'LinkedIn-API-Version';
+$lang['linkedInVersion'][1] = 'Die Version der LinkedIn-API als JJJJMM, z. B. "202610". LinkedIn unterstützt eine Version mindestens ein Jahr lang.';
+$lang['numberPosts'][0] = 'Anzahl Beiträge';
+$lang['numberPosts'][1] = 'Wie viele der neuesten Beiträge importiert werden (1 bis 100).';
+$lang['linkedinAccessTokenButton'][0] = 'Access-Token anfordern';
+$lang['linkedinAccessTokenButton'][1] = 'Speichern Sie zuerst Client-ID und -Secret. Melden Sie sich dann mit einem LinkedIn-Konto an, das die Unternehmensseite verwaltet. Die App braucht die Community Management API (Scope r_organization_social) und diese URL unter "Authorized redirect URLs for your app": %s';
+$lang['linkedinAccessToken'][0] = 'Access-Token';
+$lang['linkedinAccessToken'][1] = 'Wird beim Anfordern gespeichert (60 Tage gültig). Sie können auch ein Token aus dem Token-Generator von LinkedIn einfügen.';
+$lang['linkedinRefreshTokenExpires'][0] = 'Refresh-Token läuft ab';
+$lang['linkedinRefreshTokenExpires'][1] = 'Bis dahin wird das Access-Token automatisch verlängert, danach muss es neu angefordert werden.';
 
 $lang['request'] = 'Anfordern';
 

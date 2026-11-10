@@ -108,4 +108,44 @@ class AccessTokenRefresherTest extends TestCase
 
         (new AccessTokenRefresher($connection, $this->mockHttpClient([])))->refresh(7);
     }
+
+    public function testRefreshesTheLinkedInTokenWithTheRefreshToken(): void
+    {
+        $source = [
+            'id' => 9,
+            'type' => 'linkedin',
+            'appId' => '78abc',
+            'appSecret' => 'test-client-secret',
+            'linkedinRefreshToken' => 'AQX-refresh',
+            'linkedinRefreshTokenExpires' => (string) (time() + 200 * 86400),
+        ];
+
+        $refresher = new AccessTokenRefresher($this->createStub(Connection::class));
+        $this->assertTrue($refresher->supports($source));
+        $this->assertFalse($refresher->supports(['linkedinRefreshToken' => ''] + $source));
+        $this->assertFalse($refresher->supports(['linkedinRefreshTokenExpires' => (string) (time() - 1)] + $source));
+
+        $connection = $this->createMock(Connection::class);
+        $connection->method('fetchAssociative')->willReturn($source);
+        $connection
+            ->expects($this->once())
+            ->method('update')
+            ->with('tl_entity_import_source', $this->callback(function (array $set): bool {
+                $this->assertSame('AQV-new', $set['linkedinAccessToken']);
+                $this->assertSame('AQX-refresh', $set['linkedinRefreshToken']);
+                $this->assertEqualsWithDelta(time() + 199 * 86400, (int) $set['linkedinRefreshTokenExpires'], 5);
+
+                return true;
+            }), ['id' => 9])
+        ;
+
+        $client = $this->mockHttpClient([
+            new Response(200, [], json_encode(['access_token' => 'AQV-new', 'expires_in' => 5184000, 'refresh_token' => 'AQX-refresh', 'refresh_token_expires_in' => 199 * 86400])),
+        ]);
+
+        $this->assertEqualsWithDelta(time() + 5184000, (new AccessTokenRefresher($connection, $client))->refresh(9), 5);
+
+        parse_str((string) $this->history[0]['request']->getBody(), $body);
+        $this->assertSame(['grant_type' => 'refresh_token', 'refresh_token' => 'AQX-refresh', 'client_id' => '78abc', 'client_secret' => 'test-client-secret'], $body);
+    }
 }

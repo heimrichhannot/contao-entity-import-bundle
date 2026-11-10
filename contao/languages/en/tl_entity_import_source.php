@@ -52,6 +52,7 @@ $lang['type'][EntityImportSourceContainer::TYPE_FILE]                           
 $lang['type'][EntityImportSourceContainer::TYPE_YOUTUBE]                               = 'YouTube';
 $lang['type'][EntityImportSourceContainer::TYPE_INSTAGRAM]                             = 'Instagram';
 $lang['type'][EntityImportSourceContainer::TYPE_FACEBOOK]                              = 'Facebook page';
+$lang['type'][EntityImportSourceContainer::TYPE_LINKEDIN]                              = 'LinkedIn company page';
 
 $lang['sourceUrl'][0]            = 'Url';
 $lang['sourceUrl'][1]            = 'Enter the URL to the file here.';
@@ -110,10 +111,10 @@ $lang['instagramUserID'][1] = 'The ID of the Instagram business account. Leave i
 $lang['accessTokenExpiration'][0] = 'Access token expires';
 $lang['accessTokenExpiration'][1] = 'When the access token expires.';
 
-$lang['appId'][0] = 'App ID';
-$lang['appId'][1] = 'The ID of the Meta app (developers.facebook.com, App settings > Basic).';
-$lang['appSecret'][0] = 'App secret';
-$lang['appSecret'][1] = 'The app secret of the Meta app.';
+$lang['appId'][0] = 'App ID / client ID';
+$lang['appId'][1] = 'The ID of the app: Meta app (developers.facebook.com, App settings > Basic) or LinkedIn app (Auth tab, client ID).';
+$lang['appSecret'][0] = 'App secret / client secret';
+$lang['appSecret'][1] = 'The app secret of the Meta app or the client secret of the LinkedIn app.';
 $lang['metaApiVersion'][0] = 'Graph API version';
 $lang['metaApiVersion'][1] = 'The version of the Graph API, e.g. "v24.0".';
 $lang['metaAccessTokenButton'][0] = 'Request access token';
@@ -123,10 +124,23 @@ $lang['facebookPageId'][1] = 'The ID of the page (About > Page transparency). Le
 $lang['facebookAccessToken'][0] = 'Page access token';
 $lang['facebookAccessToken'][1] = 'Stored when you request it; it does not expire. It stops working if the account that logged in loses its role on the page, changes its password or removes the app.';
 
+$lang['appPageId'][0] = 'LinkedIn organization ID';
+$lang['appPageId'][1] = 'The number in the admin URL of the company page (https://www.linkedin.com/company/<ID>/admin/).';
+$lang['linkedInVersion'][0] = 'LinkedIn API version';
+$lang['linkedInVersion'][1] = 'The version of the LinkedIn API as YYYYMM, e.g. "202610". LinkedIn supports a version for at least a year.';
+$lang['numberPosts'][0] = 'Number of posts';
+$lang['numberPosts'][1] = 'How many of the latest posts to import (1 to 100).';
+$lang['linkedinAccessTokenButton'][0] = 'Request access token';
+$lang['linkedinAccessTokenButton'][1] = 'Save client ID and secret first. Then log in with a LinkedIn account that administers the company page. The app needs the Community Management API (scope r_organization_social), and this URL under "Authorized redirect URLs for your app": %s';
+$lang['linkedinAccessToken'][0] = 'Access token';
+$lang['linkedinAccessToken'][1] = 'Stored when you request it (valid for 60 days). You can also paste a token from LinkedIn\'s token generator.';
+$lang['linkedinRefreshTokenExpires'][0] = 'Refresh token expires';
+$lang['linkedinRefreshTokenExpires'][1] = 'Until then the access token is refreshed automatically; after that, request a new one.';
+
 $lang['request'] = 'Request';
 
 $lang['refreshAccessToken'][0] = 'Refresh access token now';
-$lang['refreshAccessToken'][1] = 'Saves the source and exchanges the access token for a new one with the full lifetime right away. Instagram allows this once the token is at least 24 hours old. A daily cron job refreshes it 30 days before it expires anyway.';
+$lang['refreshAccessToken'][1] = 'Saves the source and exchanges the access token for a new one with the full lifetime right away (Instagram allows this once the token is at least 24 hours old). A daily cron job refreshes it 30 days before it expires anyway.';
 
 $lang['reference'] = [
     'instagramApi' => [

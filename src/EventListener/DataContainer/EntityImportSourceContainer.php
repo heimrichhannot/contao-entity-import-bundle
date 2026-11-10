@@ -15,11 +15,13 @@ use Contao\Widget;
 use Doctrine\DBAL\Connection;
 use HeimrichHannot\EntityImportBundle\Event\AddSourceFieldMappingPresetsEvent;
 use HeimrichHannot\EntityImportBundle\Exception\AccessTokenException;
+use HeimrichHannot\EntityImportBundle\LinkedIn\LinkedInLogin;
 use HeimrichHannot\EntityImportBundle\Meta\MetaLogin;
 use HeimrichHannot\EntityImportBundle\Model\EntityImportSourceModel;
 use HeimrichHannot\EntityImportBundle\Source\AbstractFileSource;
 use HeimrichHannot\EntityImportBundle\Source\CSVFileSource;
 use HeimrichHannot\EntityImportBundle\Source\FacebookSource;
+use HeimrichHannot\EntityImportBundle\Source\LinkedInSource;
 use HeimrichHannot\EntityImportBundle\Source\RSSFileSource;
 use HeimrichHannot\EntityImportBundle\Source\SourceFactory;
 use HeimrichHannot\EntityImportBundle\Source\YouTubeSource;
@@ -37,12 +39,14 @@ class EntityImportSourceContainer
     const TYPE_YOUTUBE = 'youtube';
     const TYPE_INSTAGRAM = 'instagram';
     const TYPE_FACEBOOK = 'facebook';
+    const TYPE_LINKEDIN = 'linkedin';
     const TYPES = [
         self::TYPE_DATABASE,
         self::TYPE_FILE,
         self::TYPE_YOUTUBE,
         self::TYPE_INSTAGRAM,
         self::TYPE_FACEBOOK,
+        self::TYPE_LINKEDIN,
     ];
 
     const RETRIEVAL_TYPE_HTTP = 'http';
@@ -78,6 +82,7 @@ class EntityImportSourceContainer
         private readonly RequestStack $requestStack,
         private readonly AccessTokenRefresher $accessTokenRefresher,
         private readonly MetaLogin $metaLogin,
+        private readonly LinkedInLogin $linkedInLogin,
     ) {
         $this->activeBundles = System::getContainer()->getParameter('kernel.bundles');
     }
@@ -158,6 +163,19 @@ class EntityImportSourceContainer
             case static::TYPE_FACEBOOK:
                 $this->util->transformFieldMappingSourceValueToSelect(FacebookSource::getFieldOptions());
                 $this->addRedirectUriToMetaLoginHelp((int) $sourceModel->id);
+
+                break;
+
+            case static::TYPE_LINKEDIN:
+                $this->util->transformFieldMappingSourceValueToSelect(LinkedInSource::getFieldOptions());
+
+                if (!$this->accessTokenRefresher->supports($sourceModel->row())) {
+                    $dca['palettes'][static::TYPE_LINKEDIN] = str_replace(',refreshAccessToken', '', $dca['palettes'][static::TYPE_LINKEDIN]);
+                }
+
+                $field = &$dca['fields']['linkedinAccessTokenButton'];
+                $label = $GLOBALS['TL_LANG']['tl_entity_import_source']['linkedinAccessTokenButton'] ?? ['', '%s'];
+                $field['label'] = [$label[0], sprintf($label[1], $this->linkedInLogin->getRedirectUri())];
 
                 break;
 
@@ -338,6 +356,16 @@ class EntityImportSourceContainer
 
             return '#';
         }
+    }
+
+    /**
+     * The URL of the "request access token" link (HyperlinkWidget) of LinkedIn sources.
+     */
+    public function getLinkedInAccessTokenGenerationUrl(DataContainer $dc, Widget $widget): string
+    {
+        $source = $this->conn->fetchAssociative('SELECT * FROM tl_entity_import_source WHERE id = ?', [(int) $dc->id]);
+
+        return (false !== $source ? $this->linkedInLogin->getAuthorizationUrl($source) : null) ?? '#';
     }
 
     private function addRedirectUriToMetaLoginHelp(int $sourceId): void

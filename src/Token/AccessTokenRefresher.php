@@ -14,12 +14,15 @@ use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\GuzzleException;
 use HeimrichHannot\EntityImportBundle\EventListener\DataContainer\EntityImportSourceContainer;
 use HeimrichHannot\EntityImportBundle\Exception\AccessTokenException;
+use HeimrichHannot\EntityImportBundle\LinkedIn\LinkedInLogin;
 
 /**
  * Refreshes the access token of an import source and stores the new token and its expiry.
  *
  * - Instagram API with Instagram Login: a long-lived token (60 days) is exchanged for a new one once it is at least
  *   24 hours old (graph.instagram.com/refresh_access_token).
+ * - LinkedIn: apps with programmatic refresh tokens exchange the refresh token (valid for a year from the login) for
+ *   a new access token (60 days).
  */
 class AccessTokenRefresher
 {
@@ -39,6 +42,8 @@ class AccessTokenRefresher
         return match ($source['type'] ?? '') {
             EntityImportSourceContainer::TYPE_INSTAGRAM => 'instagram' === ($source['instagramApi'] ?? '')
                 && '' !== (string) ($source['instagramAccessToken'] ?? ''),
+            EntityImportSourceContainer::TYPE_LINKEDIN => '' !== (string) ($source['linkedinRefreshToken'] ?? '')
+                && !self::linkedInRefreshTokenExpired($source),
             default => false,
         };
     }
@@ -60,11 +65,27 @@ class AccessTokenRefresher
 
         $set = match ($source['type']) {
             EntityImportSourceContainer::TYPE_INSTAGRAM => $this->refreshInstagram($source),
+            EntityImportSourceContainer::TYPE_LINKEDIN => LinkedInLogin::tokenFields(LinkedInLogin::requestToken($this->client ?? new Client(), [
+                'grant_type' => 'refresh_token',
+                'refresh_token' => $source['linkedinRefreshToken'],
+                'client_id' => $source['appId'],
+                'client_secret' => $source['appSecret'],
+            ]), false),
         };
 
         $this->connection->update('tl_entity_import_source', ['tstamp' => time()] + $set, ['id' => $sourceId]);
 
         return (int) $set['accessTokenExpiration'];
+    }
+
+    /**
+     * Whether the LinkedIn refresh token has expired (or expires within the given seconds), so only a new login helps.
+     */
+    public static function linkedInRefreshTokenExpired(array $source, int $within = 0): bool
+    {
+        $expires = (int) ($source['linkedinRefreshTokenExpires'] ?? 0);
+
+        return $expires > 0 && $expires <= time() + $within;
     }
 
     private function refreshInstagram(array $source): array

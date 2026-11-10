@@ -59,6 +59,8 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
     {config_legend},instagramApi,metaApiVersion,instagramAccessToken,accessTokenExpiration,refreshAccessToken,fieldMappingCopier,fieldMappingPresets,fieldMapping;',
         EntityImportSourceContainer::TYPE_FACEBOOK => '{title_legend},title,type;
     {config_legend},appId,appSecret,metaApiVersion,facebookPageId,metaAccessTokenButton,facebookAccessToken,fieldMappingCopier,fieldMappingPresets,fieldMapping;',
+        EntityImportSourceContainer::TYPE_LINKEDIN => '{title_legend},title,type;
+    {config_legend},appId,appSecret,appPageId,linkedInVersion,numberPosts,linkedinAccessTokenButton,linkedinAccessToken,accessTokenExpiration,linkedinRefreshTokenExpires,refreshAccessToken,fieldMappingCopier,fieldMappingPresets,fieldMapping;',
         EntityImportSourceContainer::TYPE_YOUTUBE  => '{title_legend},title,type;
     {config_legend},apiKey,youtubeMode,fieldMappingCopier,fieldMappingPresets,fieldMapping;'
     ],
@@ -560,6 +562,50 @@ $GLOBALS['TL_DCA']['tl_entity_import_source'] = [
             'inputType' => 'text',
             'eval' => ['maxlength' => 16, 'tl_class' => 'w50', 'mandatory' => true],
             'sql' => "varchar(16) NOT NULL default ''",
+        ],
+        // LinkedIn (the column names are contao-newsroom-bundle's)
+        'appPageId' => [
+            'exclude' => true,
+            'inputType' => 'text',
+            'eval' => ['maxlength' => 255, 'tl_class' => 'w50', 'mandatory' => true, 'rgxp' => 'digit'],
+            'sql' => "varchar(255) NOT NULL default ''",
+        ],
+        'linkedInVersion' => [
+            'exclude' => true,
+            'inputType' => 'text',
+            'eval' => ['maxlength' => 16, 'tl_class' => 'w50', 'mandatory' => true, 'rgxp' => 'digit', 'minlength' => 6],
+            'sql' => "varchar(16) NOT NULL default ''",
+        ],
+        'numberPosts' => [
+            'exclude' => true,
+            'inputType' => 'text',
+            'eval' => ['rgxp' => 'natural', 'minval' => 1, 'maxval' => 100, 'tl_class' => 'w50'],
+            'sql' => "int(10) unsigned NOT NULL default '20'",
+        ],
+        'linkedinAccessTokenButton' => [
+            'exclude' => true,
+            'inputType' => 'entityImportHyperlink',
+            'eval' => [
+                'tl_class' => 'clr',
+                'linkClass' => 'tl_submit',
+                'text' => &$GLOBALS['TL_LANG']['tl_entity_import_source']['request'],
+                'url' => [EntityImportSourceContainer::class, 'getLinkedInAccessTokenGenerationUrl'],
+            ],
+        ],
+        'linkedinAccessToken' => [
+            'exclude' => true,
+            'inputType' => 'text',
+            'eval' => ['tl_class' => 'clr w50', 'decodeEntities' => true],
+            'sql' => 'text NULL',
+        ],
+        'linkedinRefreshToken' => [
+            'sql' => 'text NULL',
+        ],
+        'linkedinRefreshTokenExpires' => [
+            'exclude' => true,
+            'inputType' => 'text',
+            'eval' => ['rgxp' => 'datim', 'tl_class' => 'w50', 'readonly' => true],
+            'sql' => "varchar(255) NOT NULL default ''",
         ],
         'accessTokenExpiration' => [
             'exclude' => true,

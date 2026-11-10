@@ -10,6 +10,7 @@ namespace HeimrichHannot\EntityImportBundle\Cron;
 
 use Contao\CoreBundle\DependencyInjection\Attribute\AsCronJob;
 use Doctrine\DBAL\Connection;
+use HeimrichHannot\EntityImportBundle\EventListener\DataContainer\EntityImportSourceContainer;
 use HeimrichHannot\EntityImportBundle\Exception\AccessTokenException;
 use HeimrichHannot\EntityImportBundle\Token\AccessTokenRefresher;
 use Psr\Log\LoggerInterface;
@@ -35,6 +36,10 @@ class AccessTokenRefreshCron
     public function __invoke(): void
     {
         foreach ($this->connection->fetchAllAssociative('SELECT * FROM tl_entity_import_source') as $source) {
+            if (EntityImportSourceContainer::TYPE_LINKEDIN === ($source['type'] ?? '') && AccessTokenRefresher::linkedInRefreshTokenExpired($source, self::REFRESH_BEFORE)) {
+                $this->contaoErrorLogger->error(sprintf('Entity import source ID %s: the LinkedIn refresh token is valid until %s only; please request a new access token in the import source.', $source['id'], date('Y-m-d', (int) $source['linkedinRefreshTokenExpires'])));
+            }
+
             if (!$this->refresher->supports($source) || (int) $source['accessTokenExpiration'] > time() + self::REFRESH_BEFORE) {
                 continue;
             }

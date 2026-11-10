@@ -5,10 +5,11 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 - Added: Instagram sources can use the Instagram API with Instagram Login (`instagramApi`): the access token alone, media from graph.instagram.com
 - Added: a daily cron refreshes Instagram-Login access tokens that expire within 30 days
-- Added: "Refresh access token now" checkbox on Instagram-Login sources: saves the source and refreshes its token right away
+- Added: "Refresh access token now" checkbox on Instagram-Login and LinkedIn sources: saves the source and refreshes its token right away
 - Added: Facebook page source (`facebook`): the page's posts from the Graph API, read with a non-expiring page access token that "Request access token" (Facebook Login) stores
 - Fixed: "Request access token" of Instagram sources with Facebook Login: the redirect callback still used contao-newsroom-bundle's classes and template; it now stores the token of the page connected to the Instagram account (which does not expire), checks the OAuth state and returns to the import source
 - Changed: Instagram (Facebook Login) user ID is editable, so a user with several Instagram accounts can pick one; tokens are stored with up to 512 characters
+- Added: LinkedIn company page source (`linkedin`, Community Management API): published feed posts with text (little text format as plain text), date, image or video thumbnail, link; "Request access token" (Sign In with LinkedIn), refresh tokens are used by the refresh checkbox and the daily cron, which also warns 30 days before the refresh token runs out. Column names and redirect URL follow contao-newsroom-bundle
 - Added: YouTube sources can find the channel by its handle (`@name`)
 - Changed: YouTube sources read the channel's uploads playlist instead of searching (1 instead of 100 of the 10,000 daily quota units per import), skip private and deleted videos, take the full description and the video's publication date, and take `image_url` from the API's largest thumbnail instead of probing five image URLs per video
 - Changed: YouTube field mappings pick the source field from a list (`id`, `title`, `description`, `publishedAt`, `channelId`, `channelTitle`, `image_url`, `url`; `liveBroadcastContent` is gone)

@@ -15,6 +15,7 @@ use Contao\TestCase\ContaoTestCase;
 use Doctrine\DBAL\Connection;
 use HeimrichHannot\EntityImportBundle\EventListener\DataContainer\EntityImportSourceContainer;
 use HeimrichHannot\EntityImportBundle\Exception\AccessTokenException;
+use HeimrichHannot\EntityImportBundle\LinkedIn\LinkedInLogin;
 use HeimrichHannot\EntityImportBundle\Meta\MetaLogin;
 use HeimrichHannot\EntityImportBundle\Source\SourceFactory;
 use HeimrichHannot\EntityImportBundle\Token\AccessTokenRefresher;
@@ -128,6 +129,7 @@ class RefreshAccessTokenCallbackTest extends ContaoTestCase
             $this->requestStack,
             $refresher,
             $this->createStub(MetaLogin::class),
+            $this->createStub(LinkedInLogin::class),
         );
     }
 }
